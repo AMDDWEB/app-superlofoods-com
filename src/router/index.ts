@@ -22,17 +22,17 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'home',
         name: 'Home',
-        component: () => import('@/views/HomePage.vue')
+        component: () => import('@/views/Home.vue')
       },
       {
         path: 'locations',
         name: 'Locations',
-        component: () => import('@/views/LocationsArchive.vue')
+        component: () => import('@/views/Locations.vue')
       },
       {
         path: 'recipes',
         name: 'Recipes',
-        component: () => import('@/views/RecipesArchive.vue')
+        component: () => import('@/views/Recipes.vue')
       },
       {
         path: 'preferences',
@@ -44,7 +44,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/recipes/:id',
     name: 'RecipeSingle',
-    component: () => import('@/views/RecipesSingle.vue'),
+    component: () => import('@/views/RecipeDetails.vue'),
     props: (route) => ({ id: route.params.id }),
     beforeEnter: (to, from, next) => {
       if (!to.params.id) {
@@ -56,8 +56,8 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/locations/:id',
-    name: 'LocationSingle',
-    component: () => import('@/views/LocationsSingle.vue'),
+    name: 'LocationDetails',
+    component: () => import('@/views/LocationDetails.vue'),
     props: (route) => ({ id: route.params.id }),
     beforeEnter: (to, from, next) => {
       if (!to.params.id) {

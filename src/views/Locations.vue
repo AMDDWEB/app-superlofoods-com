@@ -69,7 +69,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import LocationsApi from '../ApiCalls/LocationsApi';
+import apiLocations from '../axios/apiLocations';
 import { IonPage, IonHeader, IonToolbar, IonContent, IonList, IonItem, IonLabel, IonBadge, IonIcon, IonImg, IonSpinner, IonRefresher, IonRefresherContent } from '@ionic/vue';
 
 const loading = ref(true);
@@ -82,7 +82,7 @@ const fetchLocations = async (isRefreshing = false) => {
     loading.value = true;
   }
   try {
-    const newLocations = await LocationsApi.getLocations();
+    const newLocations = await apiLocations.getLocations();
     locations.value = Array.isArray(newLocations) ? newLocations : [];
     console.log('Fetched locations:', locations.value);
   } catch (error) {

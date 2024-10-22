@@ -1,4 +1,4 @@
-// src/ApiCalls/LocationsApi.js
+// src/axios/apiLocations.js
 
 import axios from 'axios';
 
