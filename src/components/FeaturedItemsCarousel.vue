@@ -41,7 +41,7 @@
 import { ref, onMounted } from 'vue';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import 'swiper/css';
-import FeaturedItemsApi from '../ApiCalls/FeaturedItemsApi';
+import apiFeaturedItems from '../axios/apiFeaturedItems';
 
 const featuredItems = ref([]);
 const loading = ref(true);
@@ -49,7 +49,7 @@ const loading = ref(true);
 const fetchFeaturedItems = async () => {
   loading.value = true;
   try {
-    const response = await FeaturedItemsApi.getFeaturedItems();
+    const response = await apiFeaturedItems.getFeaturedItems();
     if (Array.isArray(response)) {
       featuredItems.value = response;
       console.log('Featured Items:', featuredItems.value);

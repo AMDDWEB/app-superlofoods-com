@@ -48,7 +48,7 @@ import { ref, onMounted } from 'vue';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import 'swiper/css';
 import { useRouter } from 'vue-router';
-import RecipesApi from '../ApiCalls/RecipesApi';
+import apiRecipes from '../axios/apiRecipes';
 
 const loading = ref(true);
 const recipes = ref([]);
@@ -56,7 +56,7 @@ const router = useRouter();
 
 const fetchRecipes = async () => {
   try {
-    recipes.value = await RecipesApi.getRecipes();
+    recipes.value = await apiRecipes.getRecipes();
     console.log('Fetched Recipes:', recipes.value);
   } catch (error) {
     console.error('Error fetching recipes:', error);

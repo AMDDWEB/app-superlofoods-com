@@ -35,7 +35,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { IonModal, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonToggle, IonButtons, IonButton } from '@ionic/vue';
-import LocationsApi from '../ApiCalls/LocationsApi';
+import apiLocations from '../axios/apiLocations';
 
 // Props and emits
 const props = defineProps(['isOpen']);
@@ -60,7 +60,7 @@ watch(() => props.isOpen, async (newValue) => {
 // Fetch locations from API
 async function fetchLocations() {
   try {
-    locations.value = await LocationsApi.getLocations();
+    locations.value = await apiLocations.getLocations();
     loadSelectedLocation();
   } catch (error) {
     console.error('Error fetching locations:', error);

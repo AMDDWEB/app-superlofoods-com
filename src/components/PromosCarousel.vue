@@ -28,7 +28,7 @@ import { ref, onMounted } from 'vue';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Autoplay, Pagination } from 'swiper/modules';
 import 'swiper/css';
-import PromosApi from '../ApiCalls/PromosApi';
+import apiPromos from '../axios/apiPromos';
 
 const promos = ref([]);
 const modules = [Autoplay, Pagination];
@@ -46,7 +46,7 @@ const onSwiper = (swiperInstance) => {
 
 const fetchPromos = async () => {
   try {
-    const response = await PromosApi.getPromos();
+    const response = await apiPromos.getPromos();
     if (Array.isArray(response)) {
       promos.value = response;
     } else {
