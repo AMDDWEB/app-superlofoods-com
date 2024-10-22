@@ -48,7 +48,7 @@ const routes: Array<RouteRecordRaw> = [
     props: (route) => ({ id: route.params.id }),
     beforeEnter: (to, from, next) => {
       if (!to.params.id) {
-        next({ name: 'Recipes' });
+        next({ name: 'recipes' });
       } else {
         next();
       }
@@ -61,7 +61,7 @@ const routes: Array<RouteRecordRaw> = [
     props: (route) => ({ id: route.params.id }),
     beforeEnter: (to, from, next) => {
       if (!to.params.id) {
-        next({ name: 'Locations' });
+        next({ name: 'locations' });
       } else {
         next();
       }

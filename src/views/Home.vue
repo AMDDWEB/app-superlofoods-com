@@ -215,7 +215,7 @@ async function handleRewardsClick() {
 async function handleMyStoreClick() {
   if (selectedLocation.value) {
     // Navigate to the LocationSingle page using the location's ID
-    router.push({ name: 'LocationSingle', params: { id: selectedLocation.value.id } });
+    router.push({ name: 'LocationDetails', params: { id: selectedLocation.value.id } });
   } else {
     await openLocationModal();
   }

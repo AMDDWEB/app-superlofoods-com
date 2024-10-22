@@ -70,7 +70,7 @@ const goToRecipesArchive = () => {
 };
 
 const goToRecipeSingle = (id) => {
-  router.push({ name: 'RecipeSingle', params: { id } });
+  router.push({ name: 'RecipeDetails', params: { id } });
 };
 
 onMounted(() => {

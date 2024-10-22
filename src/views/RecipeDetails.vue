@@ -134,8 +134,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-// import { Share } from '@capacitor/share';
-// import { Browser } from '@capacitor/browser';
+import { Share } from '@capacitor/share';
+import { Browser } from '@capacitor/browser';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonButtons, IonButton, IonIcon, IonSpinner
