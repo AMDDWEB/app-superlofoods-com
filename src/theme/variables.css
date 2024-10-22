@@ -1,2 +1,155 @@
 /* For information on how to create your own theme, please see:
 http://ionicframework.com/docs/theming/ */
+
+:root {
+	--ion-color-primary: #0067B3;
+	--ion-color-primary-rgb: 0, 103, 179;
+	--ion-color-primary-contrast: #ffffff;
+	--ion-color-primary-contrast-rgb: 255, 255, 255;
+	--ion-color-primary-shade: #005b9e;
+	--ion-color-primary-tint: #1a76bb;
+
+	--ion-color-secondary: #ED1C24;
+	--ion-color-secondary-rgb: 237, 28, 36;
+	--ion-color-secondary-contrast: #ffffff;
+	--ion-color-secondary-contrast-rgb: 0, 0, 0;
+	--ion-color-secondary-shade: #d11920;
+	--ion-color-secondary-tint: #ef333a;
+
+	--ion-color-tertiary: #cb373c;
+	--ion-color-tertiary-rgb: 203, 55, 60;
+	--ion-color-tertiary-contrast: #ffffff;
+	--ion-color-tertiary-contrast-rgb: 255, 255, 255;
+	--ion-color-tertiary-shade: #b33035;
+	--ion-color-tertiary-tint: #d04b50;
+
+	--ion-color-success: #42C65C;
+	--ion-color-success-rgb: 66, 198, 92;
+	--ion-color-success-contrast: #ffffff;
+	--ion-color-success-contrast-rgb: 0, 0, 0;
+	--ion-color-success-shade: #3aae51;
+	--ion-color-success-tint: #55cc6c;
+
+	--ion-color-warning: #FFAD4F;
+	--ion-color-warning-rgb: 255, 173, 79;
+	--ion-color-warning-contrast: #ffffff;
+	--ion-color-warning-contrast-rgb: 0, 0, 0;
+	--ion-color-warning-shade: #e09846;
+	--ion-color-warning-tint: #ffb561;
+
+	--ion-color-danger: #ED2124;
+	--ion-color-danger-rgb: 237, 33, 36;
+	--ion-color-danger-contrast: #ffffff;
+	--ion-color-danger-contrast-rgb: 0, 0, 0;
+	--ion-color-danger-shade: #d11d20;
+	--ion-color-danger-tint: #ef373a;
+
+	--ion-color-light: #f7f7f7;
+	--ion-color-light-rgb: 247, 247, 247;
+	--ion-color-light-contrast: #ffffff;
+	--ion-color-light-contrast-rgb: 0, 0, 0;
+	--ion-color-light-shade: #d9d9d9;
+	--ion-color-light-tint: #f8f8f8;
+
+	--ion-color-medium: #ACA6A3;
+	--ion-color-medium-rgb: 172, 166, 163;
+	--ion-color-medium-contrast: #ffffff;
+	--ion-color-medium-contrast-rgb: 0, 0, 0;
+	--ion-color-medium-shade: #97928f;
+	--ion-color-medium-tint: #b4afac;
+
+	--ion-color-dark: #383E41;
+	--ion-color-dark-rgb: 56, 62, 65;
+	--ion-color-dark-contrast: #ffffff;
+	--ion-color-dark-contrast-rgb: 255, 255, 255;
+	--ion-color-dark-shade: #313739;
+	--ion-color-dark-tint: #4c5154;
+}
+
+.app-text-primary {
+	color: #c52126 !important;
+}
+
+.uk-button {
+	--border-radius: 5px;
+}
+
+.custom-toolbar {
+	background-color: #c52126 !important;
+	/* Set your desired red color */
+	--background: #c52126 !important;
+	/* Ensure to set this custom property */
+	color: #f7f7f7;
+	/* Change text/icon color if necessary */
+}
+
+.app-toolbar-image {
+	height: 35px;
+	/* Set the desired height for your image */
+	margin-left: auto;
+	margin-right: auto;
+	/* Center the image horizontally */
+	display: block;
+	/* Make it a block-level element */
+}
+
+.app-facebook-button {
+	background-color: transparent !important;
+	--background: tranparent !important;
+	color: #3b5998;
+	margin-top: 0px;
+	margin-bottom: 0px;
+	display: block;
+	width: 100%;
+	margin-left: 0;
+	margin-right: 0;
+	text-transform: capitalize;
+	padding-bottom: 0px;
+}
+
+.app-margin-top {
+	padding-top: 24px;
+}
+
+.app-loading-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+	background-color: var(--ion-background-color, #fff);
+}
+
+.app-loading-spinner {
+	width: 50px;
+	height: 50px;
+	color: var(--ion-color-medium);
+}
+
+.app-search-container {
+	display: block;
+	width: 95%;
+	background-color: #fff;
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom:  8px;
+	border-radius: 8px;
+	border: 1px solid #e5e5e5;
+  }
+  
+  .app-search-input {
+	border: none;
+	background: transparent;
+	flex-grow: 1;
+	padding: 10px 8px 10px 8px;
+	margin-left: 8px;
+	font-size: 16px;
+	outline: none;
+  }
+  
+  .app-custom-search-icon {
+	width: 24px;
+	height: 24px;
+	fill: darkgray;
+	vertical-align: middle;
+	margin-left: 15px;
+  }

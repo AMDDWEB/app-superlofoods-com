@@ -1,11 +1,15 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import { RouteRecordRaw } from 'vue-router';
-import TabsPage from '../views/TabsPage.vue'
+import TabsPage from '../views/TabsPage.vue';
+
+interface RouteParams {
+  id: string;
+}
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    redirect: '/tabs/tab1'
+    redirect: '/tabs/home'
   },
   {
     path: '/tabs/',
@@ -13,27 +17,61 @@ const routes: Array<RouteRecordRaw> = [
     children: [
       {
         path: '',
-        redirect: '/tabs/tab1'
+        redirect: '/tabs/home'
       },
       {
-        path: 'tab1',
-        component: () => import('@/views/Tab1Page.vue')
+        path: 'home',
+        name: 'Home',
+        component: () => import('@/views/HomePage.vue')
       },
       {
-        path: 'tab2',
-        component: () => import('@/views/Tab2Page.vue')
+        path: 'locations',
+        name: 'Locations',
+        component: () => import('@/views/LocationsArchive.vue')
       },
       {
-        path: 'tab3',
-        component: () => import('@/views/Tab3Page.vue')
+        path: 'recipes',
+        name: 'Recipes',
+        component: () => import('@/views/RecipesArchive.vue')
+      },
+      {
+        path: 'preferences',
+        name: 'Preferences',
+        component: () => import('@/views/Preferences.vue')
       }
     ]
+  },
+  {
+    path: '/recipes/:id',
+    name: 'RecipeSingle',
+    component: () => import('@/views/RecipesSingle.vue'),
+    props: (route) => ({ id: route.params.id }),
+    beforeEnter: (to, from, next) => {
+      if (!to.params.id) {
+        next({ name: 'Recipes' });
+      } else {
+        next();
+      }
+    }
+  },
+  {
+    path: '/locations/:id',
+    name: 'LocationSingle',
+    component: () => import('@/views/LocationsSingle.vue'),
+    props: (route) => ({ id: route.params.id }),
+    beforeEnter: (to, from, next) => {
+      if (!to.params.id) {
+        next({ name: 'Locations' });
+      } else {
+        next();
+      }
+    }
   }
-]
+];
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes
-})
+});
 
-export default router
+export default router;
