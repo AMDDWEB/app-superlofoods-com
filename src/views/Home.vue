@@ -84,16 +84,16 @@
 
 <script setup>
 import { ref, onMounted, watch, onUnmounted, computed } from 'vue';
-// import { Browser } from '@capacitor/browser';
+import { Browser } from '@capacitor/browser';
 // Splash Screen Settings can be found in capacitor.config.ts
-// import { SplashScreen } from '@capacitor/splash-screen';
+import { SplashScreen } from '@capacitor/splash-screen';
 import apiPromos from '../axios/apiPromos.js';
 import apiRecipes from '../axios/apiRecipes.js';
 import apiFeaturedItems from '../axios/apiFeaturedItems.js';
-// import PromosCarousel from '@/components/PromosCarousel.vue';
-// import RecipeCarousel from '@/components/RecipeCarousel.vue';
-// import FeaturedItemsCarousel from '@/components/FeaturedItemsCarousel.vue';
-// import SetLocationModal from '@/components/SetLocationModal.vue';
+import PromosCarousel from '@/components/PromosCarousel.vue';
+import RecipeCarousel from '@/components/RecipeCarousel.vue';
+import FeaturedItemsCarousel from '@/components/FeaturedItemsCarousel.vue';
+import SetLocationModal from '@/components/SetLocationModal.vue';
 import { IonPage, IonHeader, IonToolbar, IonContent } from '@ionic/vue';
 import { useRouter } from 'vue-router';
 import { Capacitor } from '@capacitor/core';
