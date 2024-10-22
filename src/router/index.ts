@@ -43,7 +43,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/recipes/:id',
-    name: 'RecipeSingle',
+    name: 'RecipeDetails',
     component: () => import('@/views/RecipeDetails.vue'),
     props: (route) => ({ id: route.params.id }),
     beforeEnter: (to, from, next) => {

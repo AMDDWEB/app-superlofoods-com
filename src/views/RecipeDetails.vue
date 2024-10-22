@@ -134,13 +134,13 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { Share } from '@capacitor/share';
-import { Browser } from '@capacitor/browser';
+// import { Share } from '@capacitor/share';
+// import { Browser } from '@capacitor/browser';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonButtons, IonButton, IonIcon, IonSpinner
 } from '@ionic/vue';
-import RecipesApi from '../ApiCalls/RecipesApi';
+import apiRecipes from '../axios/apiRecipes';
 
 const route = useRoute();
 const loading = ref(true);
@@ -151,7 +151,7 @@ const fetchRecipe = async (id) => {
   try {
     loading.value = true;
     error.value = null;
-    const recipes = await RecipesApi.getRecipes();
+    const recipes = await apiRecipes.getRecipes();
     recipe.value = recipes.find((r) => r.id === Number(id));
     if (!recipe.value) {
       error.value = 'Recipe not found';

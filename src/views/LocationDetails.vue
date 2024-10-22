@@ -142,10 +142,10 @@
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import LocationsApi from '../ApiCalls/LocationsApi';
-import { Browser } from '@capacitor/browser';
-import { Share } from '@capacitor/share';
-import { useDateFormat } from '../composables/useDateFormat';
+import apiLocations from '../axios/apiLocations';
+// import { Browser } from '@capacitor/browser';
+// import { Share } from '@capacitor/share';
+// import { useDateFormat } from '../composables/useDateFormat';
 import { IonPage, IonHeader, IonToolbar, IonContent, IonList, IonItem, IonLabel, IonBadge, IonIcon, IonAlert, IonSpinner, IonRefresher, IonRefresherContent, IonButton, IonButtons, IonTitle, IonGrid, IonRow, IonCol } from '@ionic/vue';
 import { Capacitor } from '@capacitor/core';
 import { alertController } from '@ionic/vue';
@@ -191,7 +191,7 @@ const getLocationStatus = (location) => {
 const fetchLocationById = async (id) => {
   loading.value = true;
   try {
-    const locations = await LocationsApi.getLocations();
+    const locations = await apiLocations.getLocations();
     locationData.value = locations.find(loc => loc.id === parseInt(id));
     console.log('Fetched Location Object:', locationData.value);
 

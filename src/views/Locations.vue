@@ -93,7 +93,7 @@ const fetchLocations = async (isRefreshing = false) => {
 };
 
 const goToLocationsSingle = (id) => {
-  router.push({ name: 'LocationSingle', params: { id } });
+  router.push({ name: 'LocationDetails', params: { id } });
 };
 
 const getLocationStatus = (location) => {

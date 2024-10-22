@@ -87,9 +87,9 @@ import { ref, onMounted, watch, onUnmounted, computed } from 'vue';
 // import { Browser } from '@capacitor/browser';
 // Splash Screen Settings can be found in capacitor.config.ts
 // import { SplashScreen } from '@capacitor/splash-screen';
-// import PromosApi from '../axios/PromosApi.js';
-// import RecipesApi from '../ApiCalls/RecipesApi.js';
-// import FeaturedItemsApi from '../ApiCalls/FeaturedItemsApi.js';
+import apiPromos from '../axios/apiPromos.js';
+import apiRecipes from '../axios/apiRecipes.js';
+import apiFeaturedItems from '../axios/apiFeaturedItems.js';
 // import PromosCarousel from '@/components/PromosCarousel.vue';
 // import RecipeCarousel from '@/components/RecipeCarousel.vue';
 // import FeaturedItemsCarousel from '@/components/FeaturedItemsCarousel.vue';
@@ -164,9 +164,9 @@ async function getData() {
 
   try {
     const [promosResponse, recipesResponse, featuredItemsResponse] = await Promise.all([
-      PromosApi.getPromos(),
-      RecipesApi.getRecipes(),
-      FeaturedItemsApi.getFeaturedItems()
+      apiPromos.getPromos(),
+      apiRecipes.getRecipes(),
+      apiFeaturedItems.getFeaturedItems()
     ]);
 
     promos.value = promosResponse;

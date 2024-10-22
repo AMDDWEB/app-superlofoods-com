@@ -58,7 +58,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import RecipesApi from '../ApiCalls/RecipesApi';
+import apiRecipes from '../axios/apiRecipes';
 import { IonPage, IonHeader, IonToolbar, IonContent, IonImg, IonRefresher, IonRefresherContent, IonSkeletonText } from '@ionic/vue';
 
 const loading = ref(true);
@@ -71,7 +71,7 @@ const fetchRecipes = async (isRefreshing = false) => {
     loading.value = true;
   }
   try {
-    const newRecipes = await RecipesApi.getRecipes();
+    const newRecipes = await apiRecipes.getRecipes();
     recipes.value = Array.isArray(newRecipes) ? newRecipes : [];
     console.log('Fetched Recipes:', recipes.value);
   } catch (error) {
@@ -82,7 +82,7 @@ const fetchRecipes = async (isRefreshing = false) => {
 };
 
 const goToRecipeSingle = (id) => {
-  router.push({ name: 'RecipeSingle', params: { id } });
+  router.push({ name: 'RecipeDetails', params: { id } });
 };
 
 const filteredRecipes = computed(() => {
