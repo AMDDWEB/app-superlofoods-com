@@ -34,6 +34,10 @@ import '@ionic/vue/css/palettes/dark.system.css';
 /* Theme variables */
 import './theme/variables.css';
 
+/* Custom icons */
+import { registerCustomIcons } from './composables/useCustomIcons';
+registerCustomIcons(); // Call the registerCustomIcons function earlier
+
 const app = createApp(App)
   .use(IonicVue)
   .use(router);
