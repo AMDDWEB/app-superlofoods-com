@@ -2,8 +2,7 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-img slot="start" class="app-toolbar-image"
-          src="https://iprosystems-website-media-files.s3.us-east-2.amazonaws.com/wp-content/uploads/rameysmarketplace/2024/03/primary-logo.svg"></ion-img>
+        <ion-img class="app-toolbar-image" :src="logoUrl"></ion-img>
       </ion-toolbar>
     </ion-header>
 
@@ -105,6 +104,7 @@ const featuredItems = ref([]);
 const selectedLocation = ref(null);
 const isLocationModalOpen = ref(false);
 const router = useRouter();
+const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
 
 // New refs for Android modals
 const isWeeklyAdModalOpen = ref(false);

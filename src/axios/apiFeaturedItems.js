@@ -7,7 +7,7 @@ const FeaturedItemsApi = {
   async getFeaturedItems() {
     try {
       const response = await axios.get(
-        `${baseURL}/featured_items` // Use baseURL directly
+        `${baseURL}/featured-items` // Use baseURL directly
       );
 
       // Log the entire response for debugging

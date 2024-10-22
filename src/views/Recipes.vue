@@ -2,11 +2,7 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-img
-          slot="start"
-          class="app-toolbar-image"
-          src="https://iprosystems-website-media-files.s3.us-east-2.amazonaws.com/wp-content/uploads/rameysmarketplace/2024/03/primary-logo.svg"
-        ></ion-img>
+        <ion-img class="app-toolbar-image" :src="logoUrl"></ion-img>
       </ion-toolbar>
       <ion-toolbar>
         <div class="app-search-container">
@@ -65,6 +61,7 @@ const loading = ref(true);
 const recipes = ref([]);
 const router = useRouter();
 const searchQuery = ref('');
+const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
 
 const fetchRecipes = async (isRefreshing = false) => {
   if (!isRefreshing) {

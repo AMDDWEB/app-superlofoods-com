@@ -23,7 +23,7 @@
         </swiper-slide>
       </swiper>
       <div v-else class="no-items-container">
-        <div class="featured-item-card no-items-card">
+        <div class="no-items-card">
           <div class="overlay"></div>
           <h3>No Featured Items Available</h3>
           <p>Check back later for new featured items.</p>
@@ -151,19 +151,20 @@ const onSwiper = (swiper) => {
 }
 
 .no-items-card {
-  background-color: white;
-  justify-content: center;
-  align-items: center;
   text-align: center;
-  height: 150px;
+  height: 125px;
+  position: relative;
+  padding: 12px;
+  margin-right: 10px;
 }
 
 .no-items-card h3 {
-  color: var(--ion-color-primary);
+  color: var(--ion-color-danger);
   font-size: 20px;
   font-weight: bold;
   z-index: 10;
   position: relative;
+  margin-top: 20px;
 }
 
 .no-items-card p {
@@ -171,10 +172,12 @@ const onSwiper = (swiper) => {
   font-size: 16px;
   z-index: 10;
   position: relative;
+  margin-top: 0px;
 }
 
 .no-items-card .overlay {
   background: #f7f7f7;
   border: 1px #eaeaea  solid;
+  vertical-align: middle;
 }
 </style>
