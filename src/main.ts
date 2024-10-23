@@ -39,7 +39,7 @@ import { registerCustomIcons } from './composables/useCustomIcons';
 registerCustomIcons(); // Call the registerCustomIcons function earlier
 
 /* One Signal push notification integration  */
-
+import OneSignal from 'onesignal-cordova-plugin'; // Import OneSignal
 
 const app = createApp(App)
   .use(IonicVue)
@@ -47,4 +47,13 @@ const app = createApp(App)
 
 router.isReady().then(() => {
   app.mount('#app');
+  
+  // Initialize OneSignal with the environment variable
+  OneSignal.initialize(import.meta.env.VITE_ONESIGNAL_APP_ID); // Use the environment variable for the App ID
+  
+  // Request permission for notifications
+  OneSignal.Notifications.requestPermission()
+    .then((response) => {
+      console.log('Push notification permission response:', response);
+    });
 });
