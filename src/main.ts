@@ -38,6 +38,9 @@ import './theme/variables.css';
 import { registerCustomIcons } from './composables/useCustomIcons';
 registerCustomIcons(); // Call the registerCustomIcons function earlier
 
+/* One Signal push notification integration  */
+
+
 const app = createApp(App)
   .use(IonicVue)
   .use(router);
