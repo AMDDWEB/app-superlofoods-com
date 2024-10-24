@@ -165,20 +165,22 @@ const fetchRecipe = async (id) => {
 };
 
 const shareRecipe = async () => {
-  const url = recipe.value?.recipe_url;
-  if (url && url !== 'Link Unavailable') {
-    const modifiedUrl = url.replace('rameysmarketplace.allianceretailgroup.com', 'rameysmarketplace.com');
+  const siteUrl = import.meta.env.VITE_SITE_URL;
+  const storeName = import.meta.env.VITE_STORE_NAME;
+  const recipeSlug = recipe.value?.slug;  // Assuming `slug` is available in recipe data
+  if (siteUrl && recipeSlug && recipe.value?.recipe_url !== 'Link Unavailable') {
+    const fullUrl = `${siteUrl}/recipe/${recipeSlug}/`;
     try {
       await Share.share({
-        title: recipe.value?.name || 'Check out this recipe from Ramey\'s Marketplace.',
-        text: 'Check out this recipe from Ramey\'s Marketplace.',
-        url: modifiedUrl,
+        title: recipe.value?.name || `Check out this recipe from ${storeName}.`,
+        text: `Check out this recipe from ${storeName}.`,
+        url: fullUrl,
       });
     } catch (error) {
       console.error('Error sharing recipe:', error);
     }
   } else {
-    console.log('No valid recipe URL to share.');
+    console.log('No valid recipe URL or recipe slug to share.');
   }
 };
 

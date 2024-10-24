@@ -14,6 +14,7 @@ const RecipesApi = {
       // Process the response and map it to your required format
       return response.data.map((recipe) => ({
         id: recipe.id, // Include the id for key prop
+        slug: recipe.slug,
         recipe_url: recipe.link || 'Link Unavailable',
         name: recipe.title.rendered,
         image_url:

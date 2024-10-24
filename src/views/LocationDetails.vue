@@ -236,16 +236,18 @@ watch(() => route.params.id, (newId) => {
 });
 
 const shareLocation = async () => {
-  const url = locationData.value?.location_url;
-  if (url) {
-    const modifiedUrl = url.replace('rameysmarketplace.allianceretailgroup.com', 'rameysmarketplace.com');
+  const siteUrl = import.meta.env.VITE_SITE_URL;
+  const storeName = import.meta.env.VITE_STORE_NAME;
+  const locationId = locationData.value?.id;  // Assuming `id` is available in locationData
+  if (siteUrl && locationId) {
+    const fullUrl = `${siteUrl}/location/${locationId}/`;
     await Share.share({
-      title: locationData.value.name || 'Visit your nearest Ramey\'s location.',
-      text: 'Visit your nearest Ramey\'s location.',
-      url: modifiedUrl,
+      title: locationData.value?.name || `Visit your nearest ${storeName} location.`,
+      text: `Visit your nearest ${storeName} location.`,
+      url: fullUrl,
     });
   } else {
-    console.log('No location URL to share.');
+    console.log('Site URL or location ID is missing.');
   }
 };
 
