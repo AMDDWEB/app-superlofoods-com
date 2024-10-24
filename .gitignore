@@ -33,3 +33,4 @@ npm-debug.log*
 
 resources/ios/**/*
 resources/android/**/*
+ios/App/App.xcodeproj/project.pbxproj

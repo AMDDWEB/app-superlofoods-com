@@ -51,7 +51,7 @@
           </ion-label>
         </ion-item>
       </ion-list>
-      <div class="preferences-footer">&copy; {{ new Date().getFullYear() }} {{ storeName }}<br>{{ storeName }} v.6.0</div>
+      <div class="preferences-footer">&copy; {{ new Date().getFullYear() }} {{ storeName }}<br>{{ storeName }} v.{{ appVersion }}</div>
     </ion-content>
 
     <!-- Location Modal -->
@@ -70,7 +70,10 @@ import { Capacitor } from '@capacitor/core';
 
 // Store environment variables in reactive variables
 const storeName = import.meta.env.VITE_STORE_NAME; // Store name from .env
-const oneSignalAppId = import.meta.env.VITE_ONESIGNAL_APP_ID; // OneSignal App ID from .env
+const appVersion = import.meta.env.VITE_APP_VERSION; // Store name from .env
+const facebookPageID = import.meta.env.VITE_FACEBOOK_PAGE_ID; // Store name from .env
+const facebookURL = import.meta.env.VITE_FACEBOOK_URL; // Store name from .env
+
 
 // Reactive references
 const isLocationModalOpen = ref(false);
@@ -126,7 +129,7 @@ async function openMyPoints() {
 }
 // Open Facebook page in browser
 async function openFacebook() {
-  const facebookUrl = `fb://page/${import.meta.env.VITE_FACEBOOK_PAGE_ID}`;  // Facebook app URL with your page ID from .env
+  const facebookUrl = import.meta.env.VITE_FACEBOOK_URL;  // Facebook app URL with your page ID from .env
   const fallbackUrl = import.meta.env.VITE_FACEBOOK_URL;  // Fallback URL for browser from .env
 
   // Try to open the Facebook app if installed, else open in browser
