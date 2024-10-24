@@ -108,8 +108,8 @@
       </div>
     </ion-content>
 
-    <!-- Add these modals at the end of the template -->
-    <ion-modal :is-open="isWeeklyAdModalOpen" @didDismiss="isWeeklyAdModalOpen = false">
+    <!-- Replace the modals with buttons to open URLs -->
+    <ion-modal v-if="isWeeklyAdModalOpen" @didDismiss="isWeeklyAdModalOpen = false">
       <ion-header>
         <ion-toolbar>
           <ion-title>Weekly Ad</ion-title>
@@ -118,12 +118,12 @@
           </ion-buttons>
         </ion-toolbar>
       </ion-header>
-      <ion-content class="ion-padding">
-        <iframe :src="wrappedWeeklyAdUrl" width="100%" height="100%" frameborder="0"></iframe>
+      <ion-content>
+        <ion-button @click="openWeeklyAdUrl">Open Weekly Ad</ion-button>
       </ion-content>
     </ion-modal>
 
-    <ion-modal :is-open="isRewardsModalOpen" @didDismiss="isRewardsModalOpen = false">
+    <ion-modal v-if="isRewardsModalOpen" @didDismiss="isRewardsModalOpen = false">
       <ion-header>
         <ion-toolbar>
           <ion-title>Rewards</ion-title>
@@ -132,8 +132,8 @@
           </ion-buttons>
         </ion-toolbar>
       </ion-header>
-      <ion-content class="ion-padding">
-        <iframe :src="wrappedRewardsUrl" width="100%" height="100%" frameborder="0"></iframe>
+      <ion-content>
+        <ion-button @click="openRewardsUrl">Open Rewards</ion-button>
       </ion-content>
     </ion-modal>
   </ion-page>
@@ -342,6 +342,9 @@ const setAsMyStore = async () => {
           {
             text: 'OK',
             handler: () => {
+              // Show loader
+              loading.value = true; // Assuming you have a loading state
+
               localStorage.setItem('selectedLocation', JSON.stringify(locationData.value));
               isSelectedLocation.value = true;
               isPrimaryLocation.value = true;
@@ -349,6 +352,11 @@ const setAsMyStore = async () => {
               window.dispatchEvent(new CustomEvent('locationChanged', {
                 detail: locationData.value
               }));
+
+              // Refresh the page after a short delay
+              setTimeout(() => {
+                location.reload();
+              }, 1000); // Adjust the delay as needed
             }
           }
         ]
@@ -394,19 +402,25 @@ const openRewardsURL = async () => {
   }
 };
 
-const wrappedWeeklyAdUrl = computed(() => {
-  if (locationData.value?.weekly_ad_url) {
-    return `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(locationData.value.weekly_ad_url)}`;
+const openWeeklyAdUrl = async () => {
+  const weeklyAdUrl = locationData.value?.weekly_ad_url;
+  if (weeklyAdUrl) {
+    await Browser.open({
+      url: weeklyAdUrl,
+      presentationStyle: 'popover'
+    });
   }
-  return '';
-});
+};
 
-const wrappedRewardsUrl = computed(() => {
-  if (locationData.value?.rewards_url) {
-    return `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(locationData.value.rewards_url)}`;
+const openRewardsUrl = async () => {
+  const rewardsURL = locationData.value?.rewards_url;
+  if (rewardsURL) {
+    await Browser.open({
+      url: rewardsURL,
+      presentationStyle: 'popover'
+    });
   }
-  return '';
-});
+};
 </script>
 
 <style scoped>
@@ -513,3 +527,4 @@ ion-button ion-icon {
   margin: 0 5px;
 }
 </style>
+
