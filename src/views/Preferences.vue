@@ -127,21 +127,20 @@ async function openMyPoints() {
     presentationStyle: 'popover'
   });
 }
-// Open Facebook page in browser
-async function openFacebook() {
-  const facebookUrl = import.meta.env.VITE_FACEBOOK_URL;  // Facebook app URL with your page ID from .env
-  const fallbackUrl = import.meta.env.VITE_FACEBOOK_URL;  // Fallback URL for browser from .env
 
-  // Try to open the Facebook app if installed, else open in browser
-  window.open(facebookUrl, '_system');  // Opens in system app if available
-  
-  setTimeout(async () => {
-    // If the app doesn't open, fallback to the browser popover
+// Open Facebook page in browser popover
+async function openFacebook() {
+  const facebookUrl = import.meta.env.VITE_FACEBOOK_URL;  // Facebook URL from .env
+
+  try {
     await Browser.open({
-      url: fallbackUrl,
+      url: facebookUrl,
       presentationStyle: 'popover'
     });
-  }, 500);  // Delay to allow app to open, else fall back
+  } catch (error) {
+    console.error('Failed to open Facebook URL:', error);
+    // Optionally, you can handle the error here (e.g., show an alert to the user)
+  }
 }
 
 // Open location modal
