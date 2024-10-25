@@ -279,6 +279,7 @@ onMounted(() => {
 
 .recipe-button {
   margin-bottom: 36px;
+  margin-top: 36px;
   margin-right: 0;
   margin-left: 0;
 }
