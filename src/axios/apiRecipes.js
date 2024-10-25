@@ -5,14 +5,20 @@ import axios from 'axios';
 const baseURL = import.meta.env.VITE_WORDPRESS_API; // Accessing the environment variable
 
 const RecipesApi = {
-  async getRecipes() {
+  async getRecipes({ page = 1, perPage = 100, limit, fetchAll = false } = {}) {
     try {
+      let allRecipes = [];
+
       const response = await axios.get(
-        `${baseURL}/recipes` // Use baseURL directly
+        `${baseURL}/recipes`, // Use baseURL directly
+        {
+          params: { page, per_page: perPage },
+        }
       );
+      allRecipes = response.data; // Assign the fetched recipes to allRecipes
 
       // Process the response and map it to your required format
-      return response.data.map((recipe) => ({
+      return allRecipes.map((recipe) => ({
         id: recipe.id, // Include the id for key prop
         slug: recipe.slug,
         recipe_url: recipe.link || 'Link Unavailable',
