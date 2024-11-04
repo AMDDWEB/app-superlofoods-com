@@ -110,6 +110,9 @@ const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
 const isWeeklyAdModalOpen = ref(false);
 const isRewardsModalOpen = ref(false);
 
+// Add a loading state
+const isLoading = ref(false);
+
 // Lifecycle hooks
 onMounted(async () => {
   await checkSelectedLocation();
@@ -121,6 +124,15 @@ onMounted(async () => {
 onUnmounted(() => {
   // Remove event listener on component unmount
   window.removeEventListener('locationChanged', handleLocationChange);
+});
+
+// Watch for changes in selected location
+watch(selectedLocation, async (newLocation) => {
+  if (newLocation) {
+    isLoading.value = true; // Set loading state
+    await getData();
+    isLoading.value = false; // Reset loading state
+  }
 });
 
 // Handle location change event
@@ -149,13 +161,6 @@ function handleLocationSelected(location) {
   getData();
 }
 
-// Watch for changes in selected location
-watch(selectedLocation, (newLocation) => {
-  if (newLocation) {
-    getData();
-  }
-});
-
 // Fetch data from APIs
 async function getData() {
   promos.value = [];
@@ -173,7 +178,7 @@ async function getData() {
     recipes.value = Array.isArray(recipesResponse) ? recipesResponse : [];
     featuredItems.value = Array.isArray(featuredItemsResponse) ? featuredItemsResponse : [];
   } catch (err) {
-    console.error('Error fetching data:', err);
+    console.error('[Home] Error fetching data:', err);
   }
 }
 
