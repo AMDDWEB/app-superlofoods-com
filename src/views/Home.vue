@@ -84,11 +84,11 @@
 <script setup>
 import { ref, onMounted, watch, onUnmounted, computed } from 'vue';
 import { Browser } from '@capacitor/browser';
-// Splash Screen Settings can be found in capacitor.config.ts
 import { SplashScreen } from '@capacitor/splash-screen';
 import apiPromos from '../axios/apiPromos.js';
 import apiRecipes from '../axios/apiRecipes.js';
 import apiFeaturedItems from '../axios/apiFeaturedItems.js';
+import apiLocations from '../axios/apiLocations.js'; // Import the API for locations
 import PromosCarousel from '@/components/PromosCarousel.vue';
 import RecipeCarousel from '@/components/RecipeCarousel.vue';
 import FeaturedItemsCarousel from '@/components/FeaturedItemsCarousel.vue';
@@ -102,6 +102,7 @@ const promos = ref([]);
 const recipes = ref([]);
 const featuredItems = ref([]);
 const selectedLocation = ref(null);
+const locationData = ref(null); // Initialize locationData
 const isLocationModalOpen = ref(false);
 const router = useRouter();
 const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
@@ -116,6 +117,7 @@ const isLoading = ref(false);
 // Lifecycle hooks
 onMounted(async () => {
   await checkSelectedLocation();
+  await fetchLocationData(); // Fetch location data on mount
   getData();
   window.addEventListener('locationChanged', handleLocationChange);
   await requestNotificationPermission();
@@ -130,7 +132,7 @@ onUnmounted(() => {
 watch(selectedLocation, async (newLocation) => {
   if (newLocation) {
     isLoading.value = true; // Set loading state
-    await getData();
+    await fetchLocationData(); // Fetch latest location data
     isLoading.value = false; // Reset loading state
   }
 });
@@ -146,6 +148,23 @@ async function checkSelectedLocation() {
   const storedLocation = localStorage.getItem('selectedLocation');
   if (storedLocation) {
     selectedLocation.value = JSON.parse(storedLocation);
+  }
+}
+
+// Fetch location data
+async function fetchLocationData() {
+  if (selectedLocation.value) {
+    try {
+      const locations = await apiLocations.getLocations();
+      locationData.value = locations.find(loc => loc.id === selectedLocation.value.id);
+      // Update selectedLocation with the latest data
+      if (locationData.value) {
+        selectedLocation.value = { ...selectedLocation.value, ...locationData.value };
+        localStorage.setItem('selectedLocation', JSON.stringify(selectedLocation.value));
+      }
+    } catch (error) {
+      console.error('Error fetching location data:', error);
+    }
   }
 }
 
@@ -182,16 +201,14 @@ async function getData() {
   }
 }
 
-// Removed handleRefresh function
-
 // Open the Weekly Ad
 async function handleWeeklyAdClick() {
-  if (selectedLocation.value && selectedLocation.value.weekly_ad_url) {
+  if (locationData.value && locationData.value.weekly_ad_url) {
     if (Capacitor.getPlatform() === 'android') {
       isWeeklyAdModalOpen.value = true;
     } else {
       await Browser.open({
-        url: selectedLocation.value.weekly_ad_url,
+        url: locationData.value.weekly_ad_url,
         presentationStyle: 'popover'
       });
     }
@@ -202,12 +219,12 @@ async function handleWeeklyAdClick() {
 
 // Open the Rewards URL
 async function handleRewardsClick() {
-  if (selectedLocation.value && selectedLocation.value.rewards_url) {
+  if (locationData.value && locationData.value.rewards_url) {
     if (Capacitor.getPlatform() === 'android') {
       isRewardsModalOpen.value = true;
     } else {
       await Browser.open({
-        url: selectedLocation.value.rewards_url,
+        url: locationData.value.rewards_url,
         presentationStyle: 'popover'
       });
     }
@@ -228,15 +245,15 @@ async function handleMyStoreClick() {
 
 // New computed properties for Android modals
 const wrappedWeeklyAdUrl = computed(() => {
-  if (selectedLocation.value && selectedLocation.value.weekly_ad_url) {
-    return `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(selectedLocation.value.weekly_ad_url)}`;
+  if (locationData.value && locationData.value.weekly_ad_url) {
+    return `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(locationData.value.weekly_ad_url)}`;
   }
   return '';
 });
 
 const wrappedRewardsUrl = computed(() => {
-  if (selectedLocation.value && selectedLocation.value.rewards_url) {
-    return `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(selectedLocation.value.rewards_url)}`;
+  if (locationData.value && locationData.value.rewards_url) {
+    return `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(locationData.value.rewards_url)}`;
   }
   return '';
 });
