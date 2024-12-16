@@ -15,8 +15,6 @@ const LocationsApi = {
         },
       });
 
-      console.log('Raw API response:', response.data); // Debugging line
-
       // Process the response and map it to your required format
       return response.data.map(location => ({
         id: location.id,
