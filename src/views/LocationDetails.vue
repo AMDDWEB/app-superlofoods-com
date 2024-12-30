@@ -31,7 +31,7 @@
         <ion-item lines="none">
           <ion-label>
             <p class="" style="color: var(--ion-color-dark);">
-              {{ locationData.street_number }} {{ locationData.street_name }}<br>
+              {{ locationData.address }}<br>
               {{ locationData.city }}, {{ locationData.state_short }} {{ locationData.post_code }}
             </p>
           </ion-label>
@@ -43,13 +43,13 @@
           <ion-row>
             <ion-col>
               <ion-button expand="block" size="small" @click="gotoStore">
-                <ion-icon slot="start" name="get-directions"></ion-icon>
+                <ion-icon slot="start" name="get-directions-regular"></ion-icon>
                Directions
               </ion-button>
             </ion-col>
             <ion-col>
               <ion-button expand="block" size="small" @click="callStore">
-                <ion-icon slot="start" name="phone"></ion-icon>
+                <ion-icon slot="start" name="call-store-regular"></ion-icon>
                 Call Store
               </ion-button>
             </ion-col>
@@ -60,7 +60,7 @@
   @click="setAsMyStore"
   :color="isSelectedLocation ? 'primary' : 'medium'"
 >
-  <ion-icon slot="start" name="my-store"></ion-icon>
+  <ion-icon slot="start" name="set-location-regular"></ion-icon>
   {{ isSelectedLocation ? 'My Store' : 'Set as Store' }}
 </ion-button>
             </ion-col>
@@ -77,7 +77,7 @@
               </ion-badge>
             </ion-label>
           </ion-list-header>
-          <ion-item v-for="(hour, index) in storeHours" :key="index" :class="{ 'current-day': isCurrentDay(hour.day) }">
+          <ion-item v-for="hour in storeHours" :key="hour.day" :class="{ 'current-day': isCurrentDay(hour.day) }">
             <ion-label>
               <span class="location-day">{{ hour.day }}</span>
               <span class="location-hours" :class="{ 'current-day-hours': isCurrentDay(hour.day) }">
@@ -93,14 +93,20 @@
           <ion-row>
             <ion-col v-if="hasWeeklyAd">
               <ion-button expand="block" size="small" @click="openWeeklyAd">
-                <ion-icon slot="start" name="weekly-ad"></ion-icon>
+                <ion-icon slot="start" name="ads-regular"></ion-icon>
                 Weekly Ad
               </ion-button>
             </ion-col>
             <ion-col v-if="hasRewards">
               <ion-button expand="block" size="small" @click="openRewardsURL">
-                <ion-icon slot="start" name="rewards"></ion-icon>
+                <ion-icon slot="start" name="rewards-regular"></ion-icon>
                 Rewards
+              </ion-button>
+            </ion-col>
+            <ion-col v-if="hasSale">
+              <ion-button expand="block" size="small" @click="openSale">
+                <ion-icon slot="start" name="sales-regular"></ion-icon>
+                Sale
               </ion-button>
             </ion-col>
           </ion-row>
@@ -108,34 +114,14 @@
       </div>
     </ion-content>
 
-    <!-- Replace the modals with buttons to open URLs -->
-    <ion-modal v-if="isWeeklyAdModalOpen" @didDismiss="isWeeklyAdModalOpen = false">
-      <ion-header>
-        <ion-toolbar>
-          <ion-title>Weekly Ad</ion-title>
-          <ion-buttons slot="end">
-            <ion-button @click="isWeeklyAdModalOpen = false">Close</ion-button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content>
-        <ion-button @click="openWeeklyAdUrl">Open Weekly Ad</ion-button>
-      </ion-content>
-    </ion-modal>
-
-    <ion-modal v-if="isRewardsModalOpen" @didDismiss="isRewardsModalOpen = false">
-      <ion-header>
-        <ion-toolbar>
-          <ion-title>Rewards</ion-title>
-          <ion-buttons slot="end">
-            <ion-button @click="isRewardsModalOpen = false">Close</ion-button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content>
-        <ion-button @click="openRewardsUrl">Open Rewards</ion-button>
-      </ion-content>
-    </ion-modal>
+    <!-- Single PDF Modal -->
+    <PdfViewerModal 
+      :is-open="pdfModalState.isOpen"
+      :pdf-url="pdfModalState.url"
+      :ad-type="pdfModalState.type"
+      :start-date="pdfModalState.startDate"
+      @update:is-open="closePdfModal"
+    />
   </ion-page>
 </template>
 
@@ -143,12 +129,13 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import apiLocations from '../axios/apiLocations';
-import { Browser } from '@capacitor/browser';
 import { Share } from '@capacitor/share';
 import { useDateFormat } from '../composables/useDateFormat';
 import { IonPage, IonHeader, IonToolbar, IonContent, IonList, IonItem, IonLabel, IonBadge, IonIcon, IonAlert, IonSpinner, IonRefresher, IonRefresherContent, IonButton, IonButtons, IonTitle, IonGrid, IonRow, IonCol } from '@ionic/vue';
 import { Capacitor } from '@capacitor/core';
 import { alertController } from '@ionic/vue';
+import PdfViewerModal from '../components/PdfViewerModal.vue';
+import { useLocationDetails } from '@/composables/useLocationDetails';
 
 const route = useRoute();
 const router = useRouter();
@@ -158,76 +145,87 @@ const locationData = ref(null);
 const loading = ref(true);
 const storeHours = ref([]);
 const { formatTime } = useDateFormat();
+const { transformLocationData } = useLocationDetails();
 
 const getLocationStatus = (location) => {
   const now = new Date();
-  const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+  const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' });
   const currentTime = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
 
-  const days = location.day_open.toLowerCase().split(', ');
-  const openingHours = location.opening_hours.split(', ');
-  const closingHours = location.closing_hours.split(', ');
+  const dayIndex = storeHours.value.findIndex(
+    hour => hour.day.toLowerCase() === currentDay.toLowerCase()
+  );
 
-  const todayIndex = days.indexOf(currentDay);
-
-  if (todayIndex === -1) {
+  if (dayIndex === -1) {
     return { text: 'Closed', color: 'danger' };
   }
 
-  const openTime = openingHours[todayIndex];
-  const closeTime = closingHours[todayIndex];
-
-  if (!openTime || !closeTime) {
+  const todayHours = storeHours.value[dayIndex];
+  if (!todayHours.opening || !todayHours.closing) {
     return { text: 'Hours N/A', color: 'warning' };
   }
 
-  if (currentTime >= openTime && currentTime < closeTime) {
+  const openTime = convertTo24HourFormat(todayHours.opening);
+  const closeTime = convertTo24HourFormat(todayHours.closing);
+  const currentTime24 = convertTo24HourFormat(currentTime);
+
+  if (currentTime24 >= openTime && currentTime24 < closeTime) {
     return { text: 'Now Open', color: 'success' };
   } else {
     return { text: 'Closed', color: 'danger' };
   }
 };
 
-const fetchLocationById = async (id) => {
-  loading.value = true;
-  try {
-    const locations = await apiLocations.getLocations();
-    locationData.value = locations.find(loc => loc.id === parseInt(id));
-    console.log('Fetched Location Object:', locationData.value);
+const convertTo24HourFormat = (time) => {
+  if (time.match(/^\d{2}:\d{2}$/)) {
+    return time;
+  }
 
-    if (locationData.value) {
-      const daysOpen = locationData.value.day_open;
-      const openingHours = locationData.value.opening_hours.split(", ");
-      const closingHours = locationData.value.closing_hours.split(", ");
+  const [timePart, modifier] = time.split(' ');
+  if (!timePart || !modifier) {
+    return '00:00';
+  }
 
-      storeHours.value = daysOpen.split(", ").map((day, index) => ({
-        day,
-        opening: formatTime(openingHours[index]),
-        closing: formatTime(closingHours[index]),
-      }));
+  let [hours, minutes] = timePart.split(':');
+  if (hours === undefined || minutes === undefined) {
+    return '00:00';
+  }
 
-      console.log('Store Hours:', storeHours.value);
+  hours = String(hours);
+  minutes = String(minutes);
+
+  if (modifier === 'PM' && hours !== '12') {
+    hours = String(parseInt(hours, 10) + 12);
+  } else if (modifier === 'AM' && hours === '12') {
+    hours = '00';
+  }
+
+  return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+};
+
+const loadLocationData = async () => {
+  const id = route.params.id || props.id;
+  if (id) {
+    try {
+      loading.value = true;
+      const data = await apiLocations.getLocationById(id);
+      locationData.value = transformLocationData(data);
+      
+      if (locationData.value.hours) {
+        storeHours.value = locationData.value.hours;
+      }
+    } catch (error) {
+      // Error handling without logging
+    } finally {
+      loading.value = false;
     }
-  } catch (error) {
-    console.error('Error fetching location:', error);
-  } finally {
-    loading.value = false;
   }
 };
 
 onMounted(() => {
   loadLocationData();
+  checkIfSelectedLocation();
 });
-
-const loadLocationData = () => {
-  const id = route.params.id || props.id;
-  if (id) {
-    fetchLocationById(id);
-    checkIfSelectedLocation();
-  } else {
-    loading.value = false;
-  }
-};
 
 watch(() => route.params.id, (newId) => {
   if (newId) {
@@ -235,52 +233,46 @@ watch(() => route.params.id, (newId) => {
   }
 });
 
+watch(() => locationData.value, () => {
+  checkIfSelectedLocation();
+});
+
 const shareLocation = async () => {
   const siteUrl = import.meta.env.VITE_SITE_URL;
   const storeName = import.meta.env.VITE_STORE_NAME;
-  const locationId = locationData.value?.id;  // Assuming `id` is available in locationData
-  if (siteUrl && locationId) {
-    const fullUrl = `${siteUrl}/location/${locationId}/`;
+  
+  if (locationData.value) {
+    const fullUrl = `${siteUrl}/location/${locationData.value.id}/`;
     await Share.share({
-      title: locationData.value?.name || `Visit your nearest ${storeName} location.`,
-      text: `Visit your nearest ${storeName} location.`,
+      title: locationData.value.name || `Visit your nearest ${storeName} location.`,
+      text: `Visit your nearest ${storeName} location at ${locationData.value.address}`,
       url: fullUrl,
     });
-  } else {
-    console.log('Site URL or location ID is missing.');
   }
 };
 
 const callStore = () => {
   const phoneNumber = locationData.value?.phone_number;
-
   if (phoneNumber) {
     window.location.href = `tel:${phoneNumber}`;
-  } else {
-    console.log('No phone number available to call.');
   }
 };
 
-// Get directions buttons for each mobile platform
 const gotoStore = () => {
-  const mapLocation = locationData.value?.address;
+  if (locationData.value) {
+    const address = locationData.value.address;
+    if (address) {
+      const encodedLocation = encodeURIComponent(address);
+      let url;
 
-  if (mapLocation) {
-    const encodedLocation = encodeURIComponent(mapLocation);
-    let url;
+      if (Capacitor.getPlatform() === 'ios') {
+        url = `https://maps.apple.com/?daddr=${encodedLocation}`;
+      } else {
+        url = `https://www.google.com/maps/dir/?destination=${encodedLocation}`;
+      }
 
-    if (Capacitor.getPlatform() === 'ios') {
-      // For iOS, use Apple Maps
-      url = `https://maps.apple.com/?daddr=${encodedLocation}`;
-    } else {
-      // For Android and other platforms, use Google Maps
-      url = `https://www.google.com/maps/dir/?destination=${encodedLocation}`;
+      window.open(url, '_system');
     }
-
-    // Open the URL in the default browser, which should redirect to the maps app
-    window.open(url, '_system');
-  } else {
-    console.log('No map location to open.');
   }
 };
 
@@ -292,8 +284,11 @@ const isCurrentDay = (day) => {
 const isSelectedLocation = ref(false);
 
 const checkIfSelectedLocation = () => {
-  const storedLocation = JSON.parse(localStorage.getItem('selectedLocation') || '{}');
-  isSelectedLocation.value = storedLocation.id === parseInt(props.id);
+  const storedLocation = localStorage.getItem('selectedLocation');
+  if (storedLocation && locationData.value) {
+    const parsed = JSON.parse(storedLocation);
+    isSelectedLocation.value = parsed.id === locationData.value.id;
+  }
 };
 
 const isPrimaryLocation = computed(() => {
@@ -301,13 +296,9 @@ const isPrimaryLocation = computed(() => {
   return storedLocation.id === parseInt(props.id);
 });
 
-
-
-// Then modify the setAsMyStore function like this:
 const setAsMyStore = async () => {
   if (locationData.value) {
-    if (isPrimaryLocation.value) {
-      // If it's already the primary location, show an alert and redirect to preferences
+    if (isSelectedLocation.value) {
       const alert = await alertController.create({
         header: 'My Store',
         message: `${locationData.value.name} is already set as your primary store. To change your main location, please click the preferences button below.`,
@@ -320,7 +311,6 @@ const setAsMyStore = async () => {
           {
             text: 'Preferences',
             handler: () => {
-              // Redirect to the preferences tab
               router.push('/tabs/preferences');
             }
           }
@@ -329,7 +319,6 @@ const setAsMyStore = async () => {
 
       await alert.present();
     } else {
-      // If it's not the primary location, show the confirmation alert to set it as primary
       const alert = await alertController.create({
         header: 'Confirm Store Selection',
         message: `Are you sure you want to set the ${locationData.value.name} location as your primary store?`,
@@ -342,8 +331,7 @@ const setAsMyStore = async () => {
           {
             text: 'OK',
             handler: () => {
-              // Show loader
-              loading.value = true; // Assuming you have a loading state
+              loading.value = true;
 
               localStorage.setItem('selectedLocation', JSON.stringify(locationData.value));
               isSelectedLocation.value = true;
@@ -353,10 +341,9 @@ const setAsMyStore = async () => {
                 detail: locationData.value
               }));
 
-              // Refresh the page after a short delay
               setTimeout(() => {
                 location.reload();
-              }, 1000); // Adjust the delay as needed
+              }, 1000);
             }
           }
         ]
@@ -367,60 +354,91 @@ const setAsMyStore = async () => {
   }
 };
 
+const showPreferencesAlert = async () => {
+  const alert = await alertController.create({
+    header: 'My Store',
+    message: 'To set a new preferred store location, please visit the preferences page.',
+    buttons: [
+      {
+        text: 'Cancel',
+        role: 'cancel'
+      },
+      {
+        text: 'Preferences',
+        handler: () => {
+          router.push('/tabs/preferences');
+        }
+      }
+    ]
+  });
+
+  await alert.present();
+};
+
 const hasWeeklyAd = computed(() => !!locationData.value?.weekly_ad_url);
 const hasRewards = computed(() => !!locationData.value?.rewards_url);
 const hasWeeklyAdOrRewards = computed(() => hasWeeklyAd.value || hasRewards.value);
+const hasSale = computed(() => !!locationData.value?.sale_url);
 
-const isWeeklyAdModalOpen = ref(false);
-const isRewardsModalOpen = ref(false);
+// Replace individual modal refs with a single state object
+const pdfModalState = ref({
+  isOpen: false,
+  url: '',
+  type: '',
+  startDate: ''
+});
 
-const openWeeklyAd = async () => {
-  const weeklyAdUrl = locationData.value?.weekly_ad_url;
-  if (weeklyAdUrl) {
-    if (Capacitor.getPlatform() === 'android') {
-      isWeeklyAdModalOpen.value = true;
-    } else {
-      await Browser.open({
-        url: weeklyAdUrl,
-        presentationStyle: 'popover'
-      });
-    }
+// Replace individual open functions with a single function
+const openPdfModal = (type) => {
+  if (!locationData.value) return;
+
+  let modalData = {
+    isOpen: true,
+    url: '',
+    type: '',
+    startDate: ''
+  };
+
+  switch (type) {
+    case 'weekly':
+      modalData.url = locationData.value.weekly_ad_url;
+      modalData.type = locationData.value.weekly_ad_type;
+      modalData.startDate = locationData.value.weekly_ad_start_date;
+      break;
+    case 'rewards':
+      modalData.url = locationData.value.rewards_url;
+      modalData.type = locationData.value.rewards_type;
+      modalData.startDate = locationData.value.rewards_start_date;
+      break;
+    case 'sale':
+      const saleAd = locationData.value.ads?.find(ad => ad.type === 'Sale');
+      modalData.url = locationData.value.sale_url;
+      modalData.type = 'Sale';
+      modalData.startDate = saleAd?.start_date || '';
+      break;
+  }
+
+  pdfModalState.value = modalData;
+};
+
+const closePdfModal = (isOpen) => {
+  if (!isOpen) {
+    pdfModalState.value = {
+      isOpen: false,
+      url: '',
+      type: '',
+      startDate: ''
+    };
   }
 };
 
-const openRewardsURL = async () => {
-  const rewardsURL = locationData.value?.rewards_url;
-  if (rewardsURL) {
-    if (Capacitor.getPlatform() === 'android') {
-      isRewardsModalOpen.value = true;
-    } else {
-      await Browser.open({
-        url: rewardsURL,
-        presentationStyle: 'popover'
-      });
-    }
-  }
-};
+// Update the click handlers
+const openWeeklyAd = () => openPdfModal('weekly');
+const openRewardsURL = () => openPdfModal('rewards');
+const openSale = () => openPdfModal('sale');
 
-const openWeeklyAdUrl = async () => {
-  const weeklyAdUrl = locationData.value?.weekly_ad_url;
-  if (weeklyAdUrl) {
-    await Browser.open({
-      url: weeklyAdUrl,
-      presentationStyle: 'popover'
-    });
-  }
-};
-
-const openRewardsUrl = async () => {
-  const rewardsURL = locationData.value?.rewards_url;
-  if (rewardsURL) {
-    await Browser.open({
-      url: rewardsURL,
-      presentationStyle: 'popover'
-    });
-  }
-};
+// Remove the old modal state refs
+// Remove: isWeeklyAdModalOpen, isRewardsModalOpen, isSaleModalOpen
 </script>
 
 <style scoped>

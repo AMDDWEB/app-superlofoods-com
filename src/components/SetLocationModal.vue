@@ -36,6 +36,7 @@
 import { ref, onMounted, watch } from 'vue';
 import { IonModal, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonToggle, IonButtons, IonButton } from '@ionic/vue';
 import apiLocations from '../axios/apiLocations';
+import { useLocationDetails } from '@/composables/useLocationDetails';
 
 // Props and emits
 const props = defineProps(['isOpen']);
@@ -60,10 +61,11 @@ watch(() => props.isOpen, async (newValue) => {
 // Fetch locations from API
 async function fetchLocations() {
   try {
-    locations.value = await apiLocations.getLocations();
+    const response = await apiLocations.getLocations();
+    locations.value = response.data.map(transformLocationData);
     loadSelectedLocation();
   } catch (error) {
-    console.error('Error fetching locations:', error);
+    // Error handling without logging
   }
 }
 
@@ -77,19 +79,25 @@ function loadSelectedLocation() {
 
 // Toggle location selection
 function toggleLocation(location) {
-  if (selectedLocation.value && selectedLocation.value.id === location.id) {
-    selectedLocation.value = null;
-  } else {
-    selectedLocation.value = location;
-  }
-  emit('location-selected', selectedLocation.value);
-  // The modal will not close here
+  selectedLocation.value = location;
+  localStorage.setItem('selectedLocation', JSON.stringify(location));
+  emit('location-selected', location);
+  
+  // Dispatch the locationChanged event
+  window.dispatchEvent(new CustomEvent('locationChanged', {
+    detail: location
+  }));
+  
+  // Close the modal after selection
+  closeModal();
 }
 
 // Close the modal
 function closeModal() {
   emit('update:is-open', false);
 }
+
+const { transformLocationData } = useLocationDetails();
 </script>
 
 <style scoped>

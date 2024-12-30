@@ -48,43 +48,20 @@
       <SetLocationModal :is-open="isLocationModalOpen" @update:is-open="isLocationModalOpen = $event"
         @location-selected="handleLocationSelected" />
 
-      <!-- Weekly Ad Modal for Android -->
-      <ion-modal :is-open="isWeeklyAdModalOpen" @didDismiss="isWeeklyAdModalOpen = false">
-        <ion-header>
-          <ion-toolbar>
-            <ion-title>Weekly Ad</ion-title>
-            <ion-buttons slot="end">
-              <ion-button @click="isWeeklyAdModalOpen = false">Close</ion-button>
-            </ion-buttons>
-          </ion-toolbar>
-        </ion-header>
-        <ion-content class="ion-padding">
-          <iframe :src="wrappedWeeklyAdUrl" width="100%" height="100%" frameborder="0"></iframe>
-        </ion-content>
-      </ion-modal>
-
-      <!-- Rewards Modal for Android -->
-      <ion-modal :is-open="isRewardsModalOpen" @didDismiss="isRewardsModalOpen = false">
-        <ion-header>
-          <ion-toolbar>
-            <ion-title>Rewards</ion-title>
-            <ion-buttons slot="end">
-              <ion-button @click="isRewardsModalOpen = false">Close</ion-button>
-            </ion-buttons>
-          </ion-toolbar>
-        </ion-header>
-        <ion-content class="ion-padding">
-          <iframe :src="wrappedRewardsUrl" width="100%" height="100%" frameborder="0"></iframe>
-        </ion-content>
-      </ion-modal>
+      <!-- Pdf Viewer Modal -->
+      <PdfViewerModal 
+        :is-open="pdfModalState.isOpen"
+        :pdf-url="pdfModalState.url"
+        :ad-type="pdfModalState.type"
+        :start-date="pdfModalState.startDate"
+        @update:is-open="closePdfModal"
+      />
     </ion-content>
   </ion-page>
 </template>
 
 <script setup>
 import { ref, onMounted, watch, onUnmounted, computed } from 'vue';
-import { Browser } from '@capacitor/browser';
-import { SplashScreen } from '@capacitor/splash-screen';
 import apiPromos from '../axios/apiPromos.js';
 import apiRecipes from '../axios/apiRecipes.js';
 import apiFeaturedItems from '../axios/apiFeaturedItems.js';
@@ -93,6 +70,7 @@ import PromosCarousel from '@/components/PromosCarousel.vue';
 import RecipeCarousel from '@/components/RecipeCarousel.vue';
 import FeaturedItemsCarousel from '@/components/FeaturedItemsCarousel.vue';
 import SetLocationModal from '@/components/SetLocationModal.vue';
+import PdfViewerModal from '@/components/PdfViewerModal.vue';
 import { IonPage, IonHeader, IonToolbar, IonContent } from '@ionic/vue';
 import { useRouter } from 'vue-router';
 import { Capacitor } from '@capacitor/core';
@@ -107,12 +85,16 @@ const isLocationModalOpen = ref(false);
 const router = useRouter();
 const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
 
-// New refs for Android modals
-const isWeeklyAdModalOpen = ref(false);
-const isRewardsModalOpen = ref(false);
-
 // Add a loading state
 const isLoading = ref(false);
+
+// Add pdfModalState ref
+const pdfModalState = ref({
+  isOpen: false,
+  url: '',
+  type: '',
+  startDate: ''
+});
 
 // Lifecycle hooks
 onMounted(async () => {
@@ -201,37 +183,23 @@ async function getData() {
   }
 }
 
-// Open the Weekly Ad
-async function handleWeeklyAdClick() {
-  if (locationData.value && locationData.value.weekly_ad_url) {
-    if (Capacitor.getPlatform() === 'android') {
-      isWeeklyAdModalOpen.value = true;
-    } else {
-      await Browser.open({
-        url: locationData.value.weekly_ad_url,
-        presentationStyle: 'popover'
-      });
-    }
+// Update handleWeeklyAdClick function
+const handleWeeklyAdClick = () => {
+  if (selectedLocation.value?.weekly_ad_url) {
+    openPdfModal('weekly');
   } else {
-    await openLocationModal();
+    openLocationModal();
   }
-}
+};
 
-// Open the Rewards URL
-async function handleRewardsClick() {
-  if (locationData.value && locationData.value.rewards_url) {
-    if (Capacitor.getPlatform() === 'android') {
-      isRewardsModalOpen.value = true;
-    } else {
-      await Browser.open({
-        url: locationData.value.rewards_url,
-        presentationStyle: 'popover'
-      });
-    }
+// Update handleRewardsClick function
+const handleRewardsClick = () => {
+  if (selectedLocation.value?.rewards_url) {
+    openPdfModal('rewards');
   } else {
-    await openLocationModal();
+    openLocationModal();
   }
-}
+};
 
 // Open my store location
 async function handleMyStoreClick() {
@@ -243,78 +211,44 @@ async function handleMyStoreClick() {
   }
 }
 
-// New computed properties for Android modals
-const wrappedWeeklyAdUrl = computed(() => {
-  if (locationData.value && locationData.value.weekly_ad_url) {
-    return `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(locationData.value.weekly_ad_url)}`;
+// Add openPdfModal function
+const openPdfModal = (type) => {
+  if (!selectedLocation.value) return;
+
+  let modalData = {
+    isOpen: true,
+    url: '',
+    type: '',
+    startDate: ''
+  };
+
+  switch (type) {
+    case 'weekly':
+      modalData.url = selectedLocation.value.weekly_ad_url;
+      modalData.type = 'Weekly Ad';
+      modalData.startDate = selectedLocation.value.weekly_ad_start_date;
+      break;
+    case 'rewards':
+      modalData.url = selectedLocation.value.rewards_url;
+      modalData.type = 'Rewards';
+      modalData.startDate = selectedLocation.value.rewards_start_date;
+      break;
   }
-  return '';
-});
 
-const wrappedRewardsUrl = computed(() => {
-  if (locationData.value && locationData.value.rewards_url) {
-    return `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(locationData.value.rewards_url)}`;
+  pdfModalState.value = modalData;
+};
+
+// Add closePdfModal function
+const closePdfModal = (isOpen) => {
+  if (!isOpen) {
+    pdfModalState.value = {
+      isOpen: false,
+      url: '',
+      type: '',
+      startDate: ''
+    };
   }
-  return '';
-});
-
-async function requestNotificationPermission() {
-  if (Capacitor.getPlatform() === 'web') {
-    console.log('Push notifications are not available on web');
-    return;
-  }
-
-  try {
-    // Check if permission is already granted
-    const permissionStatus = await PushNotifications.checkPermissions();
-    
-    if (permissionStatus.receive === 'granted') {
-      console.log('Permission is already granted');
-      await registerNotifications();
-    } else {
-      // Request permission
-      const permission = await PushNotifications.requestPermissions();
-      if (permission.receive === 'granted') {
-        console.log('Permission granted');
-        await registerNotifications();
-      } else {
-        console.log('Permission denied');
-      }
-    }
-  } catch (error) {
-    console.error('Error requesting notification permission:', error);
-  }
-}
-
-async function registerNotifications() {
-  try {
-    await PushNotifications.register();
-    console.log('Push notification register success');
-
-    // Add listeners after successful registration
-    addNotificationListeners();
-  } catch (error) {
-    console.error('Error registering for push notifications', error);
-  }
-}
-
-function addNotificationListeners() {
-  // Show push notifications when app is in foreground
-  PushNotifications.addListener('pushNotificationReceived',
-    (notification) => {
-      console.log('Push notification received: ', notification);
-      // You can add custom logic here to handle the notification
-    }
-  );
-
-  // Method called when tapping on a notification
-  PushNotifications.addListener('pushNotificationActionPerformed',
-    (notification) => {
-      console.log('Push notification action performed', notification);
-      // You can add custom logic here to handle the action
-    }
-  );
-}
+};
 
 </script>
 

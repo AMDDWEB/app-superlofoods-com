@@ -24,12 +24,10 @@
         <ion-refresher-content></ion-refresher-content>
       </ion-refresher>
 
-      <!-- Display loading spinner while data is being fetched -->
       <div v-if="loading" class="app-loading-container">
         <ion-spinner name="crescent" class="app-loading-spinner"></ion-spinner>
       </div>
 
-      <!-- Display the locations once loaded -->
       <ion-list v-else lines="full">
         <ion-item
           v-for="location in filteredLocations"
@@ -67,23 +65,25 @@ import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import apiLocations from '../axios/apiLocations';
 import { IonPage, IonHeader, IonToolbar, IonContent, IonList, IonItem, IonLabel, IonBadge, IonIcon, IonImg, IonSpinner, IonRefresher, IonRefresherContent } from '@ionic/vue';
+import { useLocationDetails } from '@/composables/useLocationDetails';
 
 const loading = ref(true);
 const locations = ref([]);
 const router = useRouter();
 const searchQuery = ref('');
 const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
+const { transformLocationData } = useLocationDetails();
 
 const fetchLocations = async (isRefreshing = false) => {
   if (!isRefreshing) {
     loading.value = true;
   }
   try {
-    const newLocations = await apiLocations.getLocations();
-    locations.value = Array.isArray(newLocations) ? newLocations : [];
-    console.log('Fetched locations:', locations.value);
+    const response = await apiLocations.getLocations();
+    const transformedLocations = response.data.map(transformLocationData);
+    locations.value = transformedLocations;
   } catch (error) {
-    console.error('Error fetching locations:', error);
+    // Error handling without console.error
   } finally {
     loading.value = false;
   }
@@ -95,31 +95,47 @@ const goToLocationsSingle = (id) => {
 
 const getLocationStatus = (location) => {
   const now = new Date();
-  const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+  const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' });
   const currentTime = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
 
-  const days = location.day_open.toLowerCase().split(', ');
-  const openingHours = location.opening_hours.split(', ');
-  const closingHours = location.closing_hours.split(', ');
+  const todayHours = location.hours?.find(hour => hour.day === currentDay);
 
-  const todayIndex = days.indexOf(currentDay);
-
-  if (todayIndex === -1) {
+  if (!todayHours) {
     return { text: 'Closed', color: 'danger' };
   }
 
-  const openTime = openingHours[todayIndex];
-  const closeTime = closingHours[todayIndex];
+  const openTime = convertTo24HourFormat(todayHours.opening);
+  const closeTime = convertTo24HourFormat(todayHours.closing);
+  const currentTime24 = convertTo24HourFormat(currentTime);
 
-  if (!openTime || !closeTime) {
-    return { text: 'Hours N/A', color: 'warning' };
-  }
-
-  if (currentTime >= openTime && currentTime < closeTime) {
+  if (currentTime24 >= openTime && currentTime24 < closeTime) {
     return { text: 'Now Open', color: 'success' };
   } else {
     return { text: 'Closed', color: 'danger' };
   }
+};
+
+const convertTo24HourFormat = (time) => {
+  if (time.match(/^\d{2}:\d{2}$/)) {
+    return time;
+  }
+
+  const [timePart, modifier] = time.split(' ');
+  if (!timePart || !modifier) {
+    return '00:00';
+  }
+
+  let [hours, minutes] = timePart.split(':');
+  hours = String(hours);
+  minutes = String(minutes);
+
+  if (modifier === 'PM' && hours !== '12') {
+    hours = String(parseInt(hours, 10) + 12);
+  } else if (modifier === 'AM' && hours === '12') {
+    hours = '00';
+  }
+
+  return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
 };
 
 onMounted(() => {
