@@ -7,7 +7,7 @@ let locations;
 class LocationsApi {
   constructor() {
     const base = axios.create({
-      baseURL: import.meta.env.VITE_WORDPRESS_API,
+      baseURL: import.meta.env.VITE_DEV_URL,
       withCredentials: false,
       headers: {
         'Content-type': 'application/json'
@@ -17,7 +17,7 @@ class LocationsApi {
   }
 
   async getLocations() {
-    return locations.get('/locations');
+    return locations.get('/wp-json/iproweb/v1/locations');
   }
 
   async getLocationById(id) {

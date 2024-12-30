@@ -8,7 +8,7 @@
     >
       <ion-header>
         <ion-toolbar>
-          <ion-title>{{ adType }} {{ formattedStartDate }}</ion-title>
+          <ion-title>{{ adType }} for {{ formattedStartDate }}</ion-title>
           <ion-buttons slot="end">
             <ion-button @click="closeModal">Close</ion-button>
           </ion-buttons>

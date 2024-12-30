@@ -184,6 +184,8 @@ const doRefresh = async (event) => {
   position: absolute;
   right: 32px;
   top: 0px;
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
 
 .ion-item {
@@ -193,6 +195,7 @@ const doRefresh = async (event) => {
 ion-icon {
   color: var(--ion-color-medium);
   font-size: 14px;
+  vertical-align: middle;
 }
 
 ion-list {

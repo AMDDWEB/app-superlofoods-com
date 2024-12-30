@@ -2,79 +2,99 @@
 http://ionicframework.com/docs/theming/ */
 
 :root {
-	--ion-color-primary: #ED1C24;
-	--ion-color-primary-rgb: 0, 103, 179;
-	--ion-color-primary-contrast: #ffffff;
-	--ion-color-primary-contrast-rgb: 255, 255, 255;
-	--ion-color-primary-shade: #d11920;
-	--ion-color-primary-tint: #ef333a;
+	--ion-color-primary: #374D9B;
+	--ion-color-primary-rgb: 55,77,155;
+	--ion-color-primary-contrast: #f7f7f7;
+	--ion-color-primary-contrast-rgb: 247,247,247;
+	--ion-color-primary-shade: #304488;
+	--ion-color-primary-tint: #4b5fa5;
 
-	--ion-color-secondary: #0067B3;
-	--ion-color-secondary-rgb: 237, 28, 36;
-	--ion-color-secondary-contrast: #ffffff;
-	--ion-color-secondary-contrast-rgb: 0, 0, 0;
-	--ion-color-secondary-shade: #005b9e;
-	--ion-color-secondary-tint: #1a76bb;
+	--ion-color-secondary: #2C396A;
+	--ion-color-secondary-rgb: 44,57,106;
+	--ion-color-secondary-contrast: #f7f7f7;
+	--ion-color-secondary-contrast-rgb: 247,247,247;
+	--ion-color-secondary-shade: #27325d;
+	--ion-color-secondary-tint: #414d79;
 
-	--ion-color-tertiary: #cb373c;
-	--ion-color-tertiary-rgb: 203, 55, 60;
-	--ion-color-tertiary-contrast: #ffffff;
-	--ion-color-tertiary-contrast-rgb: 255, 255, 255;
-	--ion-color-tertiary-shade: #b33035;
-	--ion-color-tertiary-tint: #d04b50;
+	--ion-color-tertiary: #ce5e66;
+	--ion-color-tertiary-rgb: 206,94,102;
+	--ion-color-tertiary-contrast: #f7f7f7;
+	--ion-color-tertiary-contrast-rgb: 247,247,247;
+	--ion-color-tertiary-shade: #b5535a;
+	--ion-color-tertiary-tint: #d36e75;
 
-	--ion-color-success: #42C65C;
-	--ion-color-success-rgb: 66, 198, 92;
-	--ion-color-success-contrast: #ffffff;
-	--ion-color-success-contrast-rgb: 0, 0, 0;
-	--ion-color-success-shade: #3aae51;
-	--ion-color-success-tint: #55cc6c;
+	--ion-color-success: #41D298;
+	--ion-color-success-rgb: 65,210,152;
+	--ion-color-success-contrast: #f7f7f7;
+	--ion-color-success-contrast-rgb: 247,247,247;
+	--ion-color-success-shade: #39b986;
+	--ion-color-success-tint: #54d7a2;
 
-	--ion-color-warning: #FFAD4F;
-	--ion-color-warning-rgb: 255, 173, 79;
-	--ion-color-warning-contrast: #ffffff;
-	--ion-color-warning-contrast-rgb: 0, 0, 0;
-	--ion-color-warning-shade: #e09846;
-	--ion-color-warning-tint: #ffb561;
+	--ion-color-warning: #FC6350;
+	--ion-color-warning-rgb: 252,99,80;
+	--ion-color-warning-contrast: #f7f7f7;
+	--ion-color-warning-contrast-rgb: 247,247,247;
+	--ion-color-warning-shade: #de5746;
+	--ion-color-warning-tint: #fc7362;
 
-	--ion-color-danger: #ED2124;
-	--ion-color-danger-rgb: 237, 33, 36;
-	--ion-color-danger-contrast: #ffffff;
-	--ion-color-danger-contrast-rgb: 0, 0, 0;
-	--ion-color-danger-shade: #d11d20;
-	--ion-color-danger-tint: #ef373a;
+	--ion-color-danger: #CE5E66;
+	--ion-color-danger-rgb: 206,94,102;
+	--ion-color-danger-contrast: #f7f7f7;
+	--ion-color-danger-contrast-rgb: 247,247,247;
+	--ion-color-danger-shade: #b5535a;
+	--ion-color-danger-tint: #d36e75;
 
 	--ion-color-light: #f7f7f7;
-	--ion-color-light-rgb: 247, 247, 247;
-	--ion-color-light-contrast: #ffffff;
-	--ion-color-light-contrast-rgb: 0, 0, 0;
+	--ion-color-light-rgb: 247,247,247;
+	--ion-color-light-contrast: #f7f7f7;
+	--ion-color-light-contrast-rgb: 247,247,247;
 	--ion-color-light-shade: #d9d9d9;
 	--ion-color-light-tint: #f8f8f8;
 
-	--ion-color-medium: #ACA6A3;
-	--ion-color-medium-rgb: 172, 166, 163;
-	--ion-color-medium-contrast: #ffffff;
-	--ion-color-medium-contrast-rgb: 0, 0, 0;
-	--ion-color-medium-shade: #97928f;
-	--ion-color-medium-tint: #b4afac;
+	--ion-color-medium: #868585;
+	--ion-color-medium-rgb: 134,133,133;
+	--ion-color-medium-contrast: #f7f7f7;
+	--ion-color-medium-contrast-rgb: 247,247,247;
+	--ion-color-medium-shade: #767575;
+	--ion-color-medium-tint: #929191;
 
-	--ion-color-dark: #383E41;
-	--ion-color-dark-rgb: 56, 62, 65;
-	--ion-color-dark-contrast: #ffffff;
-	--ion-color-dark-contrast-rgb: 255, 255, 255;
-	--ion-color-dark-shade: #313739;
-	--ion-color-dark-tint: #4c5154;
+	--ion-color-dark: #2f2f2f;
+	--ion-color-dark-rgb: 47,47,47;
+	--ion-color-dark-contrast: #f7f7f7;
+	--ion-color-dark-contrast-rgb: 247,247,247;
+	--ion-color-dark-shade: #292929;
+	--ion-color-dark-tint: #444444;
+
+	--ion-color-recipe-servings: #374D9B;
+	--ion-color-recipe-servings-rgb: 55,77,155;
+	--ion-color-recipe-servings-contrast: #f7f7f7;
+	--ion-color-recipe-servings-contrast-rgb: 247,247,247;
+	--ion-color-recipe-servings-shade: #304488;
+	--ion-color-recipe-servings-tint: #4b5fa5;
+
+	--ion-color-recipe-prep-time: #2C396A;
+	--ion-color-recipe-prep-time-rgb: 44,57,106;
+	--ion-color-recipe-prep-time-contrast: #f7f7f7;
+	--ion-color-recipe-prep-time-contrast-rgb: 247,247,247;
+	--ion-color-recipe-prep-time-shade: #27325d;
+	--ion-color-recipe-prep-time-tint: #414d79;
+
+	--ion-color-recipe-cook-time: #FC6350;
+	--ion-color-recipe-cook-time-rgb: 252,99,80;
+	--ion-color-recipe-cook-time-contrast: #f7f7f7;
+	--ion-color-recipe-cook-time-contrast-rgb: 247,247,247;
+	--ion-color-recipe-cook-time-shade: #de5746;
+	--ion-color-recipe-cook-time-tint: #fc7362;
+
+	--ion-color-recipe-cook-time: #41D298;
+	--ion-color-recipe-cook-time-rgb: 65,210,152;
+	--ion-color-recipe-cook-time-contrast: #f7f7f7;
+	--ion-color-recipe-cook-time-contrast-rgb: 247,247,247;
+	--ion-color-recipe-cook-time-shade: #39b986;
+	--ion-color-recipe-cook-time-tint: #54d7a2;
 }
 
-.app-text-primary {
-	color: #c52126 !important;
-}
-
-.uk-button {
-	--border-radius: 5px;
-}
-
-.custom-toolbar {
+.app-custom-toolbar {
 	background-color: #c52126 !important;
 	/* Set your desired red color */
 	--background: #c52126 !important;
@@ -135,6 +155,17 @@ http://ionicframework.com/docs/theming/ */
 	border-radius: 8px;
 	border: 1px solid #e5e5e5;
   }
+
+  .app-list-heading {
+	font-weight: bold;
+	margin-bottom: 0px;
+  }
+  
+  .app-list-subheading {
+	margin-top: 0px;
+	color: var(--ion-color-medium);
+	font-size: 14px;
+  }
   
   .app-search-input {
 	border: none;
@@ -152,4 +183,19 @@ http://ionicframework.com/docs/theming/ */
 	fill: darkgray;
 	vertical-align: middle;
 	margin-left: 15px;
+  }
+
+  .truncate {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+  }
+  
+  .truncate-multiline {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	-webkit-line-clamp: 2;
+	line-height: 1.2em;
+	max-height: 3.6em;
   }

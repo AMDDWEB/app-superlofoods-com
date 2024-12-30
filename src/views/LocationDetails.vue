@@ -476,6 +476,8 @@ const openSale = () => openPdfModal('sale');
   display: flex;
   float: right;
   margin-right: 20px;
+  padding-top: 4px;
+  padding-bottom: 4px;
 }
 
 .current-day {
