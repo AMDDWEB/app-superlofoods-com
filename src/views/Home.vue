@@ -9,8 +9,8 @@
     <ion-content :fullscreen="true">
       <!-- Removed ion-refresher -->
 
-      <!-- Display promos -->
-      <PromosCarousel :promos="promos.map(promo => promo.promo_url)" />
+      <!-- Display Sliders -->
+      <sliderCarousel :sliders="sliders.map(slider => slider.imageUrl)" />
 
       <!-- Weekly ads, rewards and my store buttons -->
       <ion-grid :fixed="true">
@@ -62,11 +62,12 @@
 
 <script setup>
 import { ref, onMounted, watch, onUnmounted, computed } from 'vue';
-import apiPromos from '../axios/apiPromos.js';
+import apiSliders from '../axios/apiSliders.js';
+import { useSliderDetails } from '@/composables/useSliderDetails';
+import sliderCarousel from '@/components/sliderCarousel.vue';
 import apiRecipes from '../axios/apiRecipes.js';
 import apiFeaturedItems from '../axios/apiFeaturedItems.js';
 import apiLocations from '../axios/apiLocations.js'; // Import the API for locations
-import PromosCarousel from '@/components/PromosCarousel.vue';
 import RecipeCarousel from '@/components/RecipeCarousel.vue';
 import FeaturedItemsCarousel from '@/components/FeaturedItemsCarousel.vue';
 import SetLocationModal from '@/components/SetLocationModal.vue';
@@ -76,7 +77,7 @@ import { useRouter } from 'vue-router';
 import { Capacitor } from '@capacitor/core';
 
 // Reactive references
-const promos = ref([]);
+const sliders = ref([]);
 const recipes = ref([]);
 const featuredItems = ref([]);
 const selectedLocation = ref(null);
@@ -84,6 +85,7 @@ const locationData = ref(null); // Initialize locationData
 const isLocationModalOpen = ref(false);
 const router = useRouter();
 const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
+const { transformAllSliders } = useSliderDetails();
 
 // Add a loading state
 const isLoading = ref(false);
@@ -164,18 +166,18 @@ function handleLocationSelected(location) {
 
 // Fetch data from APIs
 async function getData() {
-  promos.value = [];
+  sliders.value = [];
   recipes.value = [];
   featuredItems.value = [];
 
   try {
-    const [promosResponse, recipesResponse, featuredItemsResponse] = await Promise.all([
-      apiPromos.getPromos(),
+    const [slidersResponse, recipesResponse, featuredItemsResponse] = await Promise.all([
+      apiSliders.getSliders(),
       apiRecipes.getRecipes(),
       apiFeaturedItems.getFeaturedItems()
     ]);
 
-    promos.value = promosResponse;
+    sliders.value = slidersResponse;
     recipes.value = Array.isArray(recipesResponse) ? recipesResponse : [];
     featuredItems.value = Array.isArray(featuredItemsResponse) ? featuredItemsResponse : [];
   } catch (err) {
