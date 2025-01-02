@@ -2,8 +2,8 @@ export function useSliderDetails() {
     const transformSliderData = (slider = {}) => {
       return {
         imageUrl: slider.slider_image_url || '',
-        hasWebsiteLink: slider.website_link,
-        websiteUrl: slider.website_url || null,
+        hasWebsiteLink: Boolean(slider.website_link),
+        websiteUrl: slider.website_link ? slider.website_url : null,
       };
     };
   

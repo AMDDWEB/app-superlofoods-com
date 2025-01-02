@@ -1,7 +1,7 @@
 <template>
     <div class="ion-margin-bottom">
       <swiper
-        v-if="sliders.length > 0"
+        v-if="transformedSliders.length > 0"
         ref="mySwiper"
         :pagination="true"
         :modules="modules"
@@ -10,12 +10,12 @@
         loop
         :onSwiper="onSwiper"
       >
-      <swiper-slide v-for="(slider, index) in sliders.slice(0, 10)" :key="slider.slider_url">
-    
-      <img :src="slider.imageUrl">
-      
-    
-  </swiper-slide>
+      <swiper-slide v-for="slider in transformedSliders.slice(0, 10)" :key="slider.imageUrl">
+        <a v-if="slider.hasWebsiteLink" :href="slider.websiteUrl" target="_blank">
+          <img :src="slider.imageUrl" alt="">
+        </a>
+        <img v-else :src="slider.imageUrl" alt="">
+      </swiper-slide>
       </swiper>
       <div v-else class="skeleton-container">
         <ion-skeleton-text :animated="true" class="skeleton-slider"></ion-skeleton-text>
@@ -24,13 +24,20 @@
   </template>
   
   <script setup>
-  import { ref, onMounted } from 'vue';
+  import { ref, onMounted, computed } from 'vue';
   import { Swiper, SwiperSlide } from 'swiper/vue';
   import { Autoplay, Pagination } from 'swiper/modules';
   import 'swiper/css';
   import apiSliders from '../axios/apiSliders';
+  import { useSliderDetails } from '../composables/useSliderDetails';
   
   const sliders = ref([]);
+  const { transformAllSliders } = useSliderDetails();
+  
+  const transformedSliders = computed(() => {
+    return transformAllSliders(sliders.value);
+  });
+  
   const modules = [Autoplay, Pagination];
   const autoplayOptions = {
     delay: 3000,
@@ -47,8 +54,8 @@
   const fetchSliders = async () => {
     try {
       const response = await apiSliders.getSliders();
-      if (Array.isArray(response)) {
-        sliders.value = response;
+      if (response?.data && Array.isArray(response.data)) {
+        sliders.value = response.data;
       } else {
         console.error('Response is not an array');
       }
