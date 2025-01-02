@@ -11,9 +11,9 @@
         :onSwiper="onSwiper"
       >
       <swiper-slide v-for="slider in transformedSliders.slice(0, 10)" :key="slider.imageUrl">
-        <a v-if="slider.hasWebsiteLink" :href="slider.websiteUrl" target="_blank">
+        <div v-if="slider.hasWebsiteLink" @click="openUrl(slider.websiteUrl)" style="cursor: pointer;">
           <img :src="slider.imageUrl" alt="">
-        </a>
+        </div>
         <img v-else :src="slider.imageUrl" alt="">
       </swiper-slide>
       </swiper>
@@ -30,6 +30,8 @@
   import 'swiper/css';
   import apiSliders from '../axios/apiSliders';
   import { useSliderDetails } from '../composables/useSliderDetails';
+  import { Browser } from '@capacitor/browser';
+  import { Capacitor } from '@capacitor/core';
   
   const sliders = ref([]);
   const { transformAllSliders } = useSliderDetails();
@@ -61,6 +63,19 @@
       }
     } catch (err) {
       console.error('Error fetching sliders:', err);
+    }
+  };
+  
+  const isSliderModalOpen = ref(false);
+  
+  const openUrl = async (url) => {
+    if (Capacitor.getPlatform() === 'android') {
+      isSliderModalOpen.value = true;
+    } else {
+      await Browser.open({ 
+        url,
+        presentationStyle: 'popover'
+      });
     }
   };
   
