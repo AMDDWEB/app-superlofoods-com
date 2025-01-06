@@ -1,22 +1,24 @@
 export function useSpotlightDetails() {
-  const transformSpotlightData = (spotlight = {}, imageUrl = '', id) => {
+  const transformSpotlightData = (spotlight, id) => {
     return {
       id,
-      image_url: imageUrl || '',
-      price: spotlight.arg_featured_item_price || '',
-      description: spotlight.arg_featured_item_desciption || '', // Note: Keeping the typo as it matches API
+      image_url: spotlight.image_url || '',
+      price: spotlight.price || '',
+      description: spotlight.details || '',
     };
   };
 
   const transformAllSpotlights = (data = []) => {
-    return data.flatMap((item) => {
-      const imageUrls = item.arg_featured_item_image_urls || [];
-      const spotlights = item.acf?.arg_featured_items || [];
+    // Handle empty or invalid data
+    if (!Array.isArray(data) || data.length === 0) return [];
 
-      return spotlights.map((spotlight, idx) => 
-        transformSpotlightData(spotlight, imageUrls[idx], `${item.id}-${idx}`)
-      );
-    });
+    // Get the first spotlight group (assuming we only show one group at a time)
+    const spotlightGroup = data[0];
+    
+    // Transform each product in the products array
+    return spotlightGroup.products.map((product, idx) => 
+      transformSpotlightData(product, `spotlight-${idx}`)
+    );
   };
 
   return {

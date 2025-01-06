@@ -42,22 +42,22 @@ import { ref, onMounted } from 'vue';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import 'swiper/css';
 import apiSpotlights from '../axios/apiSpotlights';
+import { useSpotlightDetails } from '../composables/useSpotlightDetails';
 
 const spotlights = ref([]);
 const loading = ref(true);
+const { transformAllSpotlights } = useSpotlightDetails();
 
 const fetchSpotlights = async () => {
   loading.value = true;
   try {
     const response = await apiSpotlights.getSpotlights();
-    if (Array.isArray(response)) {
-      spotlights.value = response;
-      console.log('Spotlights:', spotlights.value);
-    } else {
-      console.error('Spotlights response is not an array:', response);
-    }
+    const transformedData = transformAllSpotlights(response);
+    spotlights.value = transformedData;
+    console.log('Spotlights:', spotlights.value);
   } catch (error) {
     console.error('Error fetching spotlights:', error);
+    spotlights.value = [];
   } finally {
     loading.value = false;
   }
@@ -121,17 +121,6 @@ const onSwiper = (swiper) => {
   border-radius: 15px;
 }
 
-.app-list-heading {
-  font-weight: bold;
-  margin-bottom: 0px;
-}
-
-.app-list-subheading {
-  margin-top: 0px;
-  color: var(--ion-color-medium);
-  font-size: 14px;
-}
-
 .skeleton-container {
   display: flex;
   overflow-x: scroll;
@@ -179,5 +168,16 @@ const onSwiper = (swiper) => {
   background: #f7f7f7;
   border: 1px #eaeaea solid;
   vertical-align: middle;
+}
+
+.app-list-heading {
+  font-weight: bold;
+  margin-bottom: 0px;
+}
+
+.app-list-subheading {
+  margin-top: 0px;
+  color: var(--ion-color-medium);
+  font-size: 14px;
 }
 </style> 

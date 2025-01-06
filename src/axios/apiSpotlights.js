@@ -5,10 +5,11 @@ let spotlights;
 class SpotlightsApi {
   constructor() {
     const base = axios.create({
-      baseURL: import.meta.env.VITE_WORDPRESS_API,
+      baseURL: import.meta.env.VITE_DEV_URL,
       withCredentials: false,
       headers: {
-        'Content-type': 'application/json'
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
       }
     });
     spotlights = base;
@@ -16,11 +17,15 @@ class SpotlightsApi {
 
   async getSpotlights() {
     try {
-      const response = await spotlights.get('/spotlights');
-      return response.data;
+      const response = await spotlights.get('/wp-json/iproweb/v1/spotlights');
+      // Verify we have a valid response
+      if (response.data && Array.isArray(response.data)) {
+        return response.data;
+      }
+      return [];
     } catch (error) {
       console.error('Error fetching spotlights:', error);
-      throw error;
+      return [];
     }
   }
 }
