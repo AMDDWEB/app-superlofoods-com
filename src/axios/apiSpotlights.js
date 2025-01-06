@@ -18,13 +18,8 @@ class SpotlightsApi {
   async getSpotlights() {
     try {
       const response = await spotlights.get('/wp-json/iproweb/v1/spotlights');
-      // Verify we have a valid response
-      if (response.data && Array.isArray(response.data)) {
-        return response.data;
-      }
-      return [];
+      return response.data;
     } catch (error) {
-      console.error('Error fetching spotlights:', error);
       return [];
     }
   }
