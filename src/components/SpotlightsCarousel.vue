@@ -3,17 +3,17 @@
     <ion-list lines="none">
       <ion-item>
         <ion-text>
-          <h3 class="app-list-heading">Featured Items</h3>
+          <h3 class="app-list-heading">Spotlight Specials</h3>
           <p class="app-list-subheading">Don't miss out on this week's top picks.</p>
         </ion-text>
       </ion-item>
     </ion-list>
 
     <div v-if="!loading">
-      <swiper v-if="featuredItems.length > 0" @swiper="onSwiper" slides-per-view="1.5">
-        <swiper-slide v-for="(item, index) in featuredItems.slice(0, 10)" :key="index">
+      <swiper v-if="spotlights.length > 0" @swiper="onSwiper" slides-per-view="1.5">
+        <swiper-slide v-for="(item, index) in spotlights.slice(0, 10)" :key="index">
           <div
-            class="featured-item-card"
+            class="spotlight-card"
             :style="{ backgroundImage: 'url(' + item.image_url + ')' }"
           >
             <div class="overlay"></div>
@@ -25,14 +25,14 @@
       <div v-else class="no-items-container">
         <div class="no-items-card">
           <div class="overlay"></div>
-          <h3>No Featured Items Available</h3>
-          <p>Check back later for new featured items.</p>
+          <h3>No Spotlight Specials Available</h3>
+          <p>Check back later for new spotlight specials.</p>
         </div>
       </div>
     </div>
     <div v-else class="skeleton-container">
-      <ion-skeleton-text :animated="true" class="skeleton-featured-item"></ion-skeleton-text>
-      <ion-skeleton-text :animated="true" class="skeleton-featured-item"></ion-skeleton-text>
+      <ion-skeleton-text :animated="true" class="skeleton-spotlight"></ion-skeleton-text>
+      <ion-skeleton-text :animated="true" class="skeleton-spotlight"></ion-skeleton-text>
     </div>
   </div>
 </template>
@@ -41,30 +41,30 @@
 import { ref, onMounted } from 'vue';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import 'swiper/css';
-import apiFeaturedItems from '../axios/apiFeaturedItems';
+import apiSpotlights from '../axios/apiSpotlights';
 
-const featuredItems = ref([]);
+const spotlights = ref([]);
 const loading = ref(true);
 
-const fetchFeaturedItems = async () => {
+const fetchSpotlights = async () => {
   loading.value = true;
   try {
-    const response = await apiFeaturedItems.getFeaturedItems();
+    const response = await apiSpotlights.getSpotlights();
     if (Array.isArray(response)) {
-      featuredItems.value = response;
-      console.log('Featured Items:', featuredItems.value);
+      spotlights.value = response;
+      console.log('Spotlights:', spotlights.value);
     } else {
-      console.error('Featured Items response is not an array:', response);
+      console.error('Spotlights response is not an array:', response);
     }
   } catch (error) {
-    console.error('Error fetching featured items:', error);
+    console.error('Error fetching spotlights:', error);
   } finally {
     loading.value = false;
   }
 };
 
 onMounted(() => {
-  fetchFeaturedItems();
+  fetchSpotlights();
 });
 
 const onSwiper = (swiper) => {
@@ -78,8 +78,8 @@ const onSwiper = (swiper) => {
   padding-right: 16px;
 }
 
-.featured-item-card {
-    text-align: left;
+.spotlight-card {
+  text-align: left;
   background-size: cover;
   background-position: center;
   border-radius: 8px;
@@ -94,7 +94,7 @@ const onSwiper = (swiper) => {
   margin-right: 10px;
 }
 
-.featured-item-card h3 {
+.spotlight-card h3 {
   margin: 0;
   z-index: 10;
   font-size: 24px;
@@ -103,7 +103,7 @@ const onSwiper = (swiper) => {
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-.featured-item-card p {
+.spotlight-card p {
   margin: 0;
   z-index: 10;
   font-size: 16px;
@@ -138,7 +138,7 @@ const onSwiper = (swiper) => {
   padding: 0 16px;
 }
 
-.skeleton-featured-item {
+.skeleton-spotlight {
   flex: 0 0 auto;
   width: 250px;
   height: 250px;
@@ -177,7 +177,7 @@ const onSwiper = (swiper) => {
 
 .no-items-card .overlay {
   background: #f7f7f7;
-  border: 1px #eaeaea  solid;
+  border: 1px #eaeaea solid;
   vertical-align: middle;
 }
-</style>
+</style> 

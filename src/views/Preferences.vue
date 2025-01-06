@@ -51,7 +51,10 @@
           </ion-label>
         </ion-item>
       </ion-list>
-      <div class="preferences-footer">&copy; {{ new Date().getFullYear() }} {{ storeName }}<br>{{ storeName }} v.{{ appVersion }}</div>
+      <div class="preferences-footer">
+        &copy; {{ new Date().getFullYear() }} {{ storeName }}<br>
+        <span @click="handleVersionClick">{{ storeName }} v.{{ appVersion }}</span>
+      </div>
     </ion-content>
 
     <!-- Location Modal -->
@@ -61,7 +64,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { IonPage, IonHeader, IonToolbar, IonContent, IonList, IonListHeader, IonItem, IonLabel, IonIcon, IonImg } from '@ionic/vue';
 import { Browser } from '@capacitor/browser';
 import { NativeSettings, AndroidSettings, IOSSettings } from 'capacitor-native-settings';
@@ -79,6 +82,8 @@ const facebookURL = import.meta.env.VITE_FACEBOOK_URL; // Store name from .env
 const isLocationModalOpen = ref(false);
 const currentLocation = ref(null);
 const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
+const clickCount = ref(0);
+const clickTimer = ref(null);
 
 // Lifecycle hooks
 onMounted(() => {
@@ -158,6 +163,62 @@ function handleLocationSelected(location) {
   // Emit a custom event to notify other components about the location change
   window.dispatchEvent(new CustomEvent('locationChanged', { detail: location }));
 }
+
+// Add the handler function
+const handleVersionClick = () => {
+  clickCount.value++;
+  
+  // Clear existing timer if it exists
+  if (clickTimer.value) {
+    clearTimeout(clickTimer.value);
+  }
+
+  // Set new timer to reset clicks after 2 seconds
+  clickTimer.value = setTimeout(() => {
+    clickCount.value = 0;
+  }, 2000);
+
+  // Only proceed if we've reached 5 clicks
+  if (clickCount.value === 5) {
+    try {
+      // Reset click count
+      clickCount.value = 0;
+      
+      // Clear the timer
+      clearTimeout(clickTimer.value);
+
+      // 1. Log what's in storage before clearing
+      console.log('Before clearing:', { ...localStorage });
+
+      // 2. Clear everything in localStorage
+      window.localStorage.clear();
+
+      // 3. Double check specific items are removed
+      window.localStorage.removeItem('selectedLocation');
+      window.localStorage.removeItem('currentLocation');
+      window.localStorage.removeItem('refresh_token');
+
+      // 4. Reset the reactive ref
+      currentLocation.value = null;
+
+      // 5. Log storage after clearing
+      console.log('After clearing:', { ...localStorage });
+
+      // 6. Force a complete page reload
+      window.location.href = '/';
+
+    } catch (error) {
+      console.error('Failed to clear storage:', error);
+    }
+  }
+};
+
+// Add cleanup
+onUnmounted(() => {
+  if (clickTimer.value) {
+    clearTimeout(clickTimer.value);
+  }
+});
 
 </script>
 

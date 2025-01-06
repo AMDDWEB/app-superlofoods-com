@@ -79,16 +79,29 @@ function loadSelectedLocation() {
 
 // Toggle location selection
 function toggleLocation(location) {
-  selectedLocation.value = location;
-  localStorage.setItem('selectedLocation', JSON.stringify(location));
-  emit('location-selected', location);
+  // If clicking the currently selected location, deselect it
+  if (selectedLocation.value && selectedLocation.value.id === location.id) {
+    selectedLocation.value = null;
+    localStorage.removeItem('selectedLocation');
+    emit('location-selected', null);
+    
+    // Dispatch the locationChanged event with null
+    window.dispatchEvent(new CustomEvent('locationChanged', {
+      detail: null
+    }));
+  } else {
+    // Select the new location
+    selectedLocation.value = location;
+    localStorage.setItem('selectedLocation', JSON.stringify(location));
+    emit('location-selected', location);
+    
+    // Dispatch the locationChanged event
+    window.dispatchEvent(new CustomEvent('locationChanged', {
+      detail: location
+    }));
+  }
   
-  // Dispatch the locationChanged event
-  window.dispatchEvent(new CustomEvent('locationChanged', {
-    detail: location
-  }));
-  
-  // Close the modal after selection
+  // Close the modal after selection/deselection
   closeModal();
 }
 

@@ -38,11 +38,11 @@
         </ion-row>
       </ion-grid>
 
-      <!-- Featured Items Carousel -->
-      <FeaturedItemsCarousel :featuredItems="featuredItems" />
-
       <!-- Featured Recipes Carousel -->
       <RecipeCarousel :recipes="recipes" />
+
+      <!-- Spotlights Carousel -->
+      <SpotlightsCarousel :spotlights="spotlights" />
 
       <!-- Location Modal -->
       <SetLocationModal :is-open="isLocationModalOpen" @update:is-open="isLocationModalOpen = $event"
@@ -66,10 +66,10 @@ import apiSliders from '../axios/apiSliders.js';
 import { useSliderDetails } from '@/composables/useSliderDetails';
 import sliderCarousel from '@/components/sliderCarousel.vue';
 import apiRecipes from '../axios/apiRecipes.js';
-import apiFeaturedItems from '../axios/apiFeaturedItems.js';
+import apiSpotlights from '../axios/apiSpotlights.js';
 import apiLocations from '../axios/apiLocations.js'; // Import the API for locations
 import RecipeCarousel from '@/components/RecipeCarousel.vue';
-import FeaturedItemsCarousel from '@/components/FeaturedItemsCarousel.vue';
+import SpotlightsCarousel from '@/components/SpotlightsCarousel.vue';
 import SetLocationModal from '@/components/SetLocationModal.vue';
 import PdfViewerModal from '@/components/PdfViewerModal.vue';
 import { IonPage, IonHeader, IonToolbar, IonContent } from '@ionic/vue';
@@ -79,7 +79,7 @@ import { Capacitor } from '@capacitor/core';
 // Reactive references
 const sliders = ref([]);
 const recipes = ref([]);
-const featuredItems = ref([]);
+const spotlights = ref([]);
 const selectedLocation = ref(null);
 const locationData = ref(null); // Initialize locationData
 const isLocationModalOpen = ref(false);
@@ -168,18 +168,18 @@ function handleLocationSelected(location) {
 async function getData() {
   sliders.value = [];
   recipes.value = [];
-  featuredItems.value = [];
+  spotlights.value = [];
 
   try {
-    const [slidersResponse, recipesResponse, featuredItemsResponse] = await Promise.all([
+    const [slidersResponse, recipesResponse, spotlightsResponse] = await Promise.all([
       apiSliders.getSliders(),
       apiRecipes.getRecipes(),
-      apiFeaturedItems.getFeaturedItems()
+      apiSpotlights.getSpotlights()
     ]);
 
     sliders.value = slidersResponse;
     recipes.value = Array.isArray(recipesResponse) ? recipesResponse : [];
-    featuredItems.value = Array.isArray(featuredItemsResponse) ? featuredItemsResponse : [];
+    spotlights.value = Array.isArray(spotlightsResponse) ? spotlightsResponse : [];
   } catch (err) {
     console.error('[Home] Error fetching data:', err);
   }
