@@ -13,15 +13,21 @@
           </ion-label>
         </ion-list-header>
         <ion-item button @click="openGeneralNotificationSettings">
-          <ion-icon color="primary" name="notifications" slot="start"></ion-icon>
+          <ion-icon color="primary" name="notifications-settings-regular" slot="start"></ion-icon>
           <ion-label>
             Notification Settings
           </ion-label>
         </ion-item>
         <ion-item button @click="openLocationModal">
-          <ion-icon name="set-location" slot="start" color="primary"></ion-icon>
+          <ion-icon name="my-location-regular" slot="start" color="primary"></ion-icon>
           <ion-label>
             Select My Location
+          </ion-label>
+        </ion-item>
+        <ion-item button @click="openLocationModal">
+          <ion-icon name="my-notifications-regular" slot="start" color="primary"></ion-icon>
+          <ion-label>
+            My Notifications
           </ion-label>
         </ion-item>
       </ion-list>
@@ -33,13 +39,13 @@
           </ion-label>
         </ion-list-header>
         <ion-item button @click="openWebsite">
-          <ion-icon name="website" color="primary" slot="start"></ion-icon>
+          <ion-icon name="website-regular" color="primary" slot="start"></ion-icon>
           <ion-label>
             Visit Our Website
           </ion-label>
         </ion-item>
         <ion-item button @click="openMyPoints">
-          <ion-icon name="rewards" color="primary" slot="start"></ion-icon>
+          <ion-icon name="rewards-regular" color="primary" slot="start"></ion-icon>
           <ion-label>
             Check My Points
           </ion-label>

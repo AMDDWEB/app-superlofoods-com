@@ -23,9 +23,25 @@ import cookTimeIcon from  '../icons/solid/temperature-three-quarters-solid.svg';
 import totalTimeIcon from  '../icons/solid/plate-utensils-solid.svg';
 import loadingIcon from '../icons/solid/circle-notch-solid.svg';
 import chevronRightIcon from '../icons/solid/chevron-right-solid.svg'
-
-// Brand icons
+import moneyBillIcon from '../icons/solid/money-bill-solid.svg';
 import facebookIcon from  '../icons/brands/facebook-f-brands-solid.svg';
+
+//Regular icons
+import homeRegularIcon from '../icons/regular/house-regular.svg';
+import locationDotRegularIcon from '../icons/regular/location-dot-regular.svg';
+import scissorsRegularIcon from '../icons/regular/scissors-regular.svg';
+import plateUtensilsRegularIcon from '../icons/regular/plate-utensils-regular.svg';
+import moreRegularIcon from '../icons/regular/circle-ellipsis-regular.svg';
+import notificationsRegularIcon from '../icons/regular/regular-bell-exclamation-gear.svg';
+import mynotificationsRegularIcon from '../icons/regular/regular-bell-exclamation-circle-user.svg';
+import mylocationRegularIcon from '../icons/regular/regular-circle-location-arrow-circle-user.svg';
+import websiteRegularIcon from '../icons/regular/globe-pointer-regular.svg';
+import adsRegularIcon from '../icons/regular/regular-calendar-range-circle-dollar.svg';
+import rewardsRegularIcon from '../icons/regular/circle-dollar-to-slot-regular.svg';
+import setlocationRegularIcon from '../icons/regular/cart-circle-check-regular.svg';
+import salesRegularIcon from '../icons/regular/badge-dollar-regular.svg';
+import getdirectionsRegularIcon from '../icons/regular/diamond-turn-right-regular.svg';
+import callstoreRegularIcon from '../icons/regular/phone-flip-regular.svg';
 
 const customIcons = {
   'house': homeIcon,
@@ -49,7 +65,24 @@ const customIcons = {
   'total-time': totalTimeIcon,
   'app-loading': loadingIcon,
   'chevron-right': chevronRightIcon,
-  // Add more custom icons here
+  'money-bill': moneyBillIcon,
+  
+  // Regular icons are below 
+  'home-regular': homeRegularIcon,
+  'locations-regular': locationDotRegularIcon,
+  'coupons-regular': scissorsRegularIcon,
+  'recipes-regular': plateUtensilsRegularIcon,
+  'more-regular': moreRegularIcon,
+  'ads-regular' : adsRegularIcon,
+  'rewards-regular' : rewardsRegularIcon,
+  'sales-regular' : salesRegularIcon,
+  'set-location-regular' : setlocationRegularIcon,
+  'notifications-settings-regular': notificationsRegularIcon,
+  'my-notifications-regular': mynotificationsRegularIcon,
+  'my-location-regular': mylocationRegularIcon,
+  'website-regular': websiteRegularIcon,
+  'get-directions-regular': getdirectionsRegularIcon,
+  'call-store-regular': callstoreRegularIcon,
 };
 
 export function registerCustomIcons() {
