@@ -38,6 +38,9 @@
         </ion-row>
       </ion-grid>
 
+      <!-- Spotlights Carousel -->
+      <SpotlightsCarousel :spotlights="spotlights" />
+
       <!-- Featured Recipes Carousel -->
       <RecipeCarousel :recipes="recipes" />
 

@@ -66,7 +66,12 @@ const routes: Array<RouteRecordRaw> = [
         next();
       }
     }
-  }
+  },
+  {
+    path: 'notifications',
+    name: 'Notifications',
+    component: () => import('@/views/Notifications.vue')
+  },
 ];
 
 const router = createRouter({
