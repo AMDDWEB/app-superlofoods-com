@@ -1,216 +1,196 @@
 <template>
-    <ion-page>
-      <ion-header>
-        <ion-toolbar>
-          <ion-img class="app-toolbar-image" :src="logoUrl"></ion-img>
-        </ion-toolbar>
-      </ion-header>
-  
-      <ion-content>
-        <ion-refresher slot="fixed" @ionRefresh="doRefresh($event)">
-          <ion-refresher-content></ion-refresher-content>
-        </ion-refresher>
-  
-        <div v-if="loading" class="app-loading-container">
-          <ion-spinner name="crescent" class="app-loading-spinner"></ion-spinner>
-        </div>
-  
-        <ion-list v-else lines="full">
-          <ion-item
-            v-for="location in filteredLocations"
-            :key="location.id"
-            button
-            @click="goToLocationsSingle(location.id)"
-          >
-            <ion-label>
-              <h3 class="location-heading">
-                {{ location.name }}
-                <ion-badge 
-                  class="location-badge"
-                  :color="getLocationStatus(location).color"
-                >
-                  {{ getLocationStatus(location).text }}
-                </ion-badge>
-              </h3>
-              <p class="app-text-overflow">
-                <ion-icon name="location-dot" class="app-icon-list-margin" />
-                {{ location.address }}
-              </p>
-              <p>
-                <ion-icon name="phone" class="app-icon-list-margin" />
-                {{ location.phone_number }}
-              </p>
-            </ion-label>
-          </ion-item>
-        </ion-list>
-      </ion-content>
-    </ion-page>
-  </template>
-  
-  <script setup>
-  import { ref, onMounted, computed } from 'vue';
-  import { useRouter } from 'vue-router';
-  import apiLocations from '../axios/apiLocations';
-  import { IonPage, IonHeader, IonToolbar, IonContent, IonList, IonItem, IonLabel, IonBadge, IonIcon, IonImg, IonSpinner, IonRefresher, IonRefresherContent } from '@ionic/vue';
-  import { useLocationDetails } from '@/composables/useLocationDetails';
-  
-  const loading = ref(true);
-  const locations = ref([]);
-  const router = useRouter();
-  const searchQuery = ref('');
-  const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
-  const { transformLocationData } = useLocationDetails();
-  
-  const fetchLocations = async (isRefreshing = false) => {
+  <ion-page>
+    <ion-header>
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-button @click="$router.go(-1)">
+            <ion-icon slot="icon-only" color="primary" name="back-button" class="toolbar-icon"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+        <ion-title>Notifications</ion-title>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content>
+      <ion-refresher slot="fixed" @ionRefresh="doRefresh($event)">
+        <ion-refresher-content></ion-refresher-content>
+      </ion-refresher>
+
+      <div v-if="loading" class="app-loading-container">
+        <ion-spinner name="crescent" class="app-loading-spinner"></ion-spinner>
+      </div>
+
+      <ion-list v-if="notifications.length > 0" lines="full">
+  <ion-item v-for="notification in notifications" :key="notification.id" @click="presentAlert(notification)">
+    <ion-icon color="danger" name="notifications-regular" slot="start"></ion-icon>
+    <ion-label>
+      <h3 class="notification-heading">
+        {{ notification.notification_title }}
+      </h3>
+      <p class="app-text-overflow">
+        {{ notification.notification_details }}
+      </p>
+    </ion-label>
+  </ion-item>
+</ion-list>
+
+<!-- Message for No Notifications -->
+<div v-else class="no-notifications">
+  <ion-icon name="no-notifications-regular" size="large"></ion-icon>
+  <p class="no-notifications">No Unread Notifications</p>
+</div>
+    </ion-content>
+  </ion-page>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import apiNotifications from '../axios/apiNotifications';
+import { IonPage, IonHeader, IonToolbar, IonContent, IonList, IonItem, IonLabel, IonIcon, IonSpinner, IonRefresher, IonRefresherContent, alertController } from '@ionic/vue';
+import { useNotificationDetails } from '@/composables/useNotificationDetails';
+
+const loading = ref(true);
+const notifications = ref([]);
+const router = useRouter();
+const { transformNotificationData } = useNotificationDetails();
+
+const fetchNotifications = async (isRefreshing = false) => {
     if (!isRefreshing) {
-      loading.value = true;
+        loading.value = true;
     }
     try {
-      const response = await apiLocations.getLocations();
-      const transformedLocations = response.data.map(transformLocationData);
-      locations.value = transformedLocations;
+        const response = await apiNotifications.getNotifications();
+        
+        // Retrieve discarded notifications from localStorage
+        const discarded = JSON.parse(localStorage.getItem('discardedNotifications')) || [];
+        
+        // Filter out discarded notifications based on their IDs
+        const transformedNotifications = response.data
+            .map(transformNotificationData)
+            .filter(notification => !discarded.includes(notification.id));
+        
+        notifications.value = transformedNotifications;
     } catch (error) {
-      // Error handling without console.error
+        console.error('Error fetching notifications:', error);
     } finally {
-      loading.value = false;
+        loading.value = false;
     }
-  };
-  
-  const goToLocationsSingle = (id) => {
-    router.push({ name: 'LocationDetails', params: { id } });
-  };
-  
-  const getLocationStatus = (location) => {
-    const now = new Date();
-    const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' });
-    const currentTime = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
-  
-    const todayHours = location.hours?.find(hour => hour.day === currentDay);
-  
-    if (!todayHours) {
-      return { text: 'Closed', color: 'danger' };
-    }
-  
-    const openTime = convertTo24HourFormat(todayHours.opening);
-    const closeTime = convertTo24HourFormat(todayHours.closing);
-    const currentTime24 = convertTo24HourFormat(currentTime);
-  
-    if (currentTime24 >= openTime && currentTime24 < closeTime) {
-      return { text: 'Now Open', color: 'success' };
-    } else {
-      return { text: 'Closed', color: 'danger' };
-    }
-  };
-  
-  const convertTo24HourFormat = (time) => {
-    if (time.match(/^\d{2}:\d{2}$/)) {
-      return time;
-    }
-  
-    const [timePart, modifier] = time.split(' ');
-    if (!timePart || !modifier) {
-      return '00:00';
-    }
-  
-    let [hours, minutes] = timePart.split(':');
-    hours = String(hours);
-    minutes = String(minutes);
-  
-    if (modifier === 'PM' && hours !== '12') {
-      hours = String(parseInt(hours, 10) + 12);
-    } else if (modifier === 'AM' && hours === '12') {
-      hours = '00';
-    }
-  
-    return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
-  };
-  
-  onMounted(() => {
-    fetchLocations();
-  });
-  
-  const filteredLocations = computed(() => {
-    if (!searchQuery.value) return locations.value;
-    const query = searchQuery.value.toLowerCase();
-    return locations.value.filter(location => 
-      location.name.toLowerCase().includes(query) ||
-      location.address.toLowerCase().includes(query) ||
-      location.phone_number.includes(query)
-    );
-  });
-  
-  const handleSearch = () => {
-    // The filtering is handled by the computed property
-  };
-  
-  const doRefresh = async (event) => {
-    await fetchLocations(true);
-    event.target.complete();
-  };
-  </script>
-  
-  <style scoped>
-  .app-text-overflow {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap !important;
-  }
-  
-  .app-icon-list-margin {
-    margin-right: 5px;
-  }
-  
-  .location-heading {
-    font-weight: bold;
-    color: var(--ion-color-primary);
-  }
-  
-  .location-badge {
-    font-size: 12px;
-    color: var(--ion-color-light);
-    position: absolute;
-    right: 32px;
-    top: 0px;
-    padding-top: 4px;
-    padding-bottom: 4px;
-  }
-  
-  .ion-item {
-    position: relative;
-  }
-  
-  ion-icon {
+};
+
+onMounted(() => {
+  fetchNotifications();
+});
+
+const doRefresh = async (event) => {
+  await fetchNotifications(true);
+  event.target.complete();
+};
+
+const presentAlert = async (notification) => {
+    const alert = await alertController.create({
+        header: notification.notification_title,
+        message: notification.notification_details,
+        buttons: [
+            {
+                text: 'Discard',
+                role: 'destructive',
+                handler: () => {
+                    // Fetch discarded notifications from localStorage
+                    let discarded = JSON.parse(localStorage.getItem('discardedNotifications')) || [];
+                    
+                    // Prevent duplicate entries
+                    if (!discarded.includes(notification.id)) {
+                        discarded.push(notification.id);
+                        localStorage.setItem('discardedNotifications', JSON.stringify(discarded));
+                    }
+
+                    // Remove from current notifications array
+                    notifications.value = notifications.value.filter(n => n.id !== notification.id);
+                }
+            },
+            {
+                text: 'Keep',
+                role: 'cancel'  // No action taken
+            }
+        ]
+    });
+    await alert.present();
+};
+</script>
+
+<style scoped>
+.app-text-overflow {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap !important;
+}
+
+.app-icon-list-margin {
+  margin-right: 5px;
+}
+
+.notification-heading {
+  font-weight: bold;
+  color: var(--ion-color-primary);
+}
+
+.location-badge {
+  font-size: 12px;
+  color: var(--ion-color-light);
+  position: absolute;
+  right: 32px;
+  top: 0px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.ion-item {
+  position: relative;
+}
+
+ion-list {
+  padding: 0;
+}
+
+ion-item {
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 12px;
+  --padding-bottom: 12px;
+}
+
+ion-item:last-of-type {
+  --border-width: 0;
+}
+
+ion-label {
+  margin: 0;
+}
+
+ion-label h3 {
+  margin-bottom: 4px;
+}
+
+ion-label p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.toolbar-icon {
+  font-size: 20px !important;
+}
+
+.no-notifications{
+    text-align: center;
+    font-size: 18px;
     color: var(--ion-color-medium);
-    font-size: 14px;
-    vertical-align: middle;
-  }
-  
-  ion-list {
-    padding: 0;
-  }
-  
-  ion-item {
-    --padding-start: 16px;
-    --padding-end: 16px;
-    --padding-top: 12px;
-    --padding-bottom: 12px;
-  }
-  
-  ion-item:last-of-type {
-    --border-width: 0;
-  }
-  
-  ion-label {
-    margin: 0;
-  }
-  
-  ion-label h3 {
-    margin-bottom: 4px;
-  }
-  
-  ion-label p {
-    margin: 0;
-    font-size: 14px;
-    line-height: 1.4;
-  }
-  </style>  
+}
+
+.no-notifications ion-icon {
+    font-size: 48px;
+    color: var(--ion-color-primary);
+    padding-top: 80px;
+}
+</style>

@@ -32,7 +32,7 @@ import locationDotRegularIcon from '../icons/regular/location-dot-regular.svg';
 import scissorsRegularIcon from '../icons/regular/scissors-regular.svg';
 import plateUtensilsRegularIcon from '../icons/regular/plate-utensils-regular.svg';
 import moreRegularIcon from '../icons/regular/circle-ellipsis-regular.svg';
-import notificationsRegularIcon from '../icons/regular/regular-bell-exclamation-gear.svg';
+import notificationsettingsRegularIcon from '../icons/regular/regular-bell-exclamation-gear.svg';
 import mynotificationsRegularIcon from '../icons/regular/regular-bell-exclamation-circle-user.svg';
 import mylocationRegularIcon from '../icons/regular/regular-circle-location-arrow-circle-user.svg';
 import websiteRegularIcon from '../icons/regular/globe-pointer-regular.svg';
@@ -42,6 +42,8 @@ import setlocationRegularIcon from '../icons/regular/cart-circle-check-regular.s
 import salesRegularIcon from '../icons/regular/badge-dollar-regular.svg';
 import getdirectionsRegularIcon from '../icons/regular/diamond-turn-right-regular.svg';
 import callstoreRegularIcon from '../icons/regular/phone-flip-regular.svg';
+import notificationsRegularIcon from '../icons/regular/bell-exclamation-regular.svg';
+import nonotificationsRegularIcon from '../icons/regular/regular-bell-slash.svg';
 
 const customIcons = {
   'house': homeIcon,
@@ -77,12 +79,14 @@ const customIcons = {
   'rewards-regular' : rewardsRegularIcon,
   'sales-regular' : salesRegularIcon,
   'set-location-regular' : setlocationRegularIcon,
-  'notifications-settings-regular': notificationsRegularIcon,
+  'notifications-regular': notificationsRegularIcon,
+  'notifications-settings-regular': notificationsettingsRegularIcon,
   'my-notifications-regular': mynotificationsRegularIcon,
   'my-location-regular': mylocationRegularIcon,
   'website-regular': websiteRegularIcon,
   'get-directions-regular': getdirectionsRegularIcon,
   'call-store-regular': callstoreRegularIcon,
+  'no-notifications-regular': nonotificationsRegularIcon,
 };
 
 export function registerCustomIcons() {

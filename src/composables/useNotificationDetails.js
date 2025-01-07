@@ -1,16 +1,17 @@
 export function useNotificationDetails() {
-    const transformNotificationData = (notification = {}) => {
+  const transformNotificationData = (notification = {}) => {
       return {
-        notification_title: notification.title,
-        notification_details: notification.details,
+          notification_title: notification.title,
+          notification_details: notification.details,
       };
-    };
-  
-    const transformAllNotifications = (notifications = []) => {
+  };
+
+  const transformAllNotifications = (notifications = []) => {
       return notifications.map(transformNotificationData);
-    };
-  
-    return {
+  };
+
+  return {
       transformNotificationData,
-    };
-  }
+      transformAllNotifications, // Added to the returned object
+  };
+}

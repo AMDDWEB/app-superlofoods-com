@@ -24,7 +24,7 @@
             Select My Location
           </ion-label>
         </ion-item>
-        <ion-item button @click="openLocationModal">
+        <ion-item button @click="$router.push('/notifications')">
           <ion-icon name="my-notifications-regular" slot="start" color="primary"></ion-icon>
           <ion-label>
             My Notifications

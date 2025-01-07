@@ -68,10 +68,10 @@ const routes: Array<RouteRecordRaw> = [
     }
   },
   {
-    path: 'notifications',
+    path: '/notifications',
     name: 'Notifications',
-    component: () => import('@/views/Notifications.vue')
-  },
+    component: () => import('@/views/Notifications.vue'),
+  }
 ];
 
 const router = createRouter({
