@@ -35,12 +35,12 @@
 
     <!-- Title and Details Change Based on isRead -->
     <ion-label>
-      <h3 
+      <h2 
         class="notification-heading" 
         :style="{ color: notification.isRead ? 'var(--ion-color-medium)' : 'var(--ion-color-primary)' }"
       >
         {{ notification.notification_title }}
-      </h3>
+      </h2>
       <p 
         class="app-text-overflow" 
         :style="{ color: notification.isRead ? 'var(--ion-color-medium)' : 'var(--ion-color-dark)' }"

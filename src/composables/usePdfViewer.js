@@ -73,7 +73,7 @@ const usePdfViewer = () => {
       `;
       loadingDiv.innerHTML = `
         <ion-spinner></ion-spinner>
-        <div>Loading PDF...</div>
+        <div>Loading ad...</div>
       `;
       container.appendChild(loadingDiv);
 
