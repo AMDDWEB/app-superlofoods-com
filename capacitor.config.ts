@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.rameysmarketplace.com',
-  appName: 'Rameys',
+  appId: 'com.iproweb.app',
+  appName: 'Market Place',
   webDir: 'dist',
   plugins: { 
     SplashScreen: {

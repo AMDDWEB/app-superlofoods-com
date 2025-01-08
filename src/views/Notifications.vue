@@ -188,7 +188,6 @@ ion-label h2 {
 
 ion-label p {
   margin: 0;
-  font-size:;
   line-height: 1.4;
 }
 
