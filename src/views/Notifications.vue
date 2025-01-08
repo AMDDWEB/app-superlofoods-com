@@ -21,23 +21,40 @@
       </div>
 
       <ion-list v-if="notifications.length > 0" lines="full">
-  <ion-item v-for="notification in notifications" :key="notification.id" @click="presentAlert(notification)">
-    <ion-icon color="danger" name="notifications-regular" slot="start"></ion-icon>
+  <ion-item 
+    v-for="notification in notifications" 
+    :key="notification.id" 
+    @click="presentAlert(notification)"
+  >
+    <!-- Icon Changes Based on isRead -->
+    <ion-icon 
+      :color="notification.isRead ? 'medium' : 'danger'" 
+      name="notifications-regular" 
+      slot="start"
+    ></ion-icon>
+
+    <!-- Title and Details Change Based on isRead -->
     <ion-label>
-      <h3 class="notification-heading">
+      <h3 
+        class="notification-heading" 
+        :style="{ color: notification.isRead ? 'var(--ion-color-medium)' : 'var(--ion-color-primary)' }"
+      >
         {{ notification.notification_title }}
       </h3>
-      <p class="app-text-overflow">
+      <p 
+        class="app-text-overflow" 
+        :style="{ color: notification.isRead ? 'var(--ion-color-medium)' : 'var(--ion-color-dark)' }"
+      >
         {{ notification.notification_details }}
       </p>
     </ion-label>
   </ion-item>
 </ion-list>
 
-<!-- Message for No Notifications -->
+<!-- No Notifications Message -->
 <div v-else class="no-notifications">
-  <ion-icon name="no-notifications-regular" size="large"></ion-icon>
-  <p class="no-notifications">No Unread Notifications</p>
+  <ion-icon name="mail-open-outline" size="large"></ion-icon>
+  <p>No Unread Notifications</p>
 </div>
     </ion-content>
   </ion-page>
@@ -62,15 +79,14 @@ const fetchNotifications = async (isRefreshing = false) => {
     try {
         const response = await apiNotifications.getNotifications();
         
-        // Retrieve discarded notifications from localStorage
-        const discarded = JSON.parse(localStorage.getItem('discardedNotifications')) || [];
-        
-        // Filter out discarded notifications based on their IDs
-        const transformedNotifications = response.data
-            .map(transformNotificationData)
-            .filter(notification => !discarded.includes(notification.id));
-        
-        notifications.value = transformedNotifications;
+        // Get read notifications from localStorage
+        const readNotifications = JSON.parse(localStorage.getItem('readNotifications')) || [];
+
+        // Ensure notifications load with correct read state
+        notifications.value = response.data.map(notification => ({
+            ...transformNotificationData(notification),
+            isRead: readNotifications.includes(notification.id)
+        }));
     } catch (error) {
         console.error('Error fetching notifications:', error);
     } finally {
@@ -93,25 +109,23 @@ const presentAlert = async (notification) => {
         message: notification.notification_details,
         buttons: [
             {
-                text: 'Discard',
-                role: 'destructive',
+                text: 'Mark as Read',
+                role: 'cancel',
                 handler: () => {
-                    // Fetch discarded notifications from localStorage
-                    let discarded = JSON.parse(localStorage.getItem('discardedNotifications')) || [];
-                    
-                    // Prevent duplicate entries
-                    if (!discarded.includes(notification.id)) {
-                        discarded.push(notification.id);
-                        localStorage.setItem('discardedNotifications', JSON.stringify(discarded));
+                    let readNotifications = JSON.parse(localStorage.getItem('readNotifications')) || [];
+
+                    // Prevent duplicates and store the updated read list
+                    if (!readNotifications.includes(notification.id)) {
+                        readNotifications.push(notification.id);
+                        localStorage.setItem('readNotifications', JSON.stringify(readNotifications));
                     }
 
-                    // Remove from current notifications array
-                    notifications.value = notifications.value.filter(n => n.id !== notification.id);
+                    // Update the reactive state directly using find
+                    const notificationToUpdate = notifications.value.find(n => n.id === notification.id);
+                    if (notificationToUpdate) {
+                        notificationToUpdate.isRead = true;
+                    }
                 }
-            },
-            {
-                text: 'Keep',
-                role: 'cancel'  // No action taken
             }
         ]
     });
@@ -168,13 +182,13 @@ ion-label {
   margin: 0;
 }
 
-ion-label h3 {
+ion-label h2 {
   margin-bottom: 4px;
 }
 
 ion-label p {
   margin: 0;
-  font-size: 14px;
+  font-size:;
   line-height: 1.4;
 }
 
@@ -182,15 +196,20 @@ ion-label p {
   font-size: 20px !important;
 }
 
-.no-notifications{
-    text-align: center;
-    font-size: 18px;
-    color: var(--ion-color-medium);
+.notification-heading {
+  font-weight: bold;
+  color: var(--ion-color-primary);
+}
+
+.no-notifications {
+  text-align: center;
+  font-size: 18px;
+  color: var(--ion-color-medium);
 }
 
 .no-notifications ion-icon {
-    font-size: 48px;
-    color: var(--ion-color-primary);
-    padding-top: 80px;
+  font-size: 48px;
+  color: var(--ion-color-primary);
+  padding-top: 80px;
 }
 </style>
