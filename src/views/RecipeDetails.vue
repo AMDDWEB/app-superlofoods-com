@@ -138,26 +138,30 @@ import { Share } from '@capacitor/share';
 import { Browser } from '@capacitor/browser';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
-  IonButtons, IonButton, IonIcon, IonSpinner
+  IonButtons, IonButton, IonIcon, IonSpinner, IonGrid,
+  IonRow, IonCol, IonItem, IonLabel, IonList, IonListHeader
 } from '@ionic/vue';
 import apiRecipes from '../axios/apiRecipes';
+import { useRecipeDetails } from '../composables/useRecipeDetails';
 
 const route = useRoute();
 const loading = ref(true);
 const recipe = ref(null);
 const error = ref(null);
+const { transformRecipe } = useRecipeDetails();
 
 const fetchRecipe = async (id) => {
   try {
     loading.value = true;
     error.value = null;
-    const recipes = await apiRecipes.getRecipes();
-    recipe.value = recipes.find((r) => r.id === Number(id));
+    const response = await apiRecipes.getRecipes();
+    const recipes = Array.isArray(response) ? response.map(transformRecipe) : [];
+    recipe.value = recipes.find((r) => r.id === id);
+    
     if (!recipe.value) {
       error.value = 'Recipe not found';
     }
   } catch (err) {
-    console.error('Error fetching recipe:', err);
     error.value = 'Failed to fetch recipe';
   } finally {
     loading.value = false;
@@ -167,20 +171,17 @@ const fetchRecipe = async (id) => {
 const shareRecipe = async () => {
   const siteUrl = import.meta.env.VITE_SITE_URL;
   const storeName = import.meta.env.VITE_STORE_NAME;
-  const recipeSlug = recipe.value?.slug;  // Assuming `slug` is available in recipe data
-  if (siteUrl && recipeSlug && recipe.value?.recipe_url !== 'Link Unavailable') {
-    const fullUrl = `${siteUrl}/recipe/${recipeSlug}/`;
+  if (siteUrl && recipe.value?.id) {
+    const fullUrl = `${siteUrl}/recipe/${recipe.value.id}/`;
     try {
       await Share.share({
-        title: recipe.value?.name || `Check out this recipe from ${storeName}.`,
+        title: recipe.value.name || `Check out this recipe from ${storeName}.`,
         text: `Check out this recipe from ${storeName}.`,
         url: fullUrl,
       });
     } catch (error) {
       console.error('Error sharing recipe:', error);
     }
-  } else {
-    console.log('No valid recipe URL or recipe slug to share.');
   }
 };
 

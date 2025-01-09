@@ -55,31 +55,52 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import apiRecipes from '../axios/apiRecipes';
-import { IonPage, IonHeader, IonToolbar, IonContent, IonImg, IonRefresher, IonRefresherContent, IonSkeletonText } from '@ionic/vue';
+import { 
+  IonPage, 
+  IonHeader, 
+  IonToolbar, 
+  IonContent, 
+  IonImg, 
+  IonRefresher, 
+  IonRefresherContent, 
+  IonSkeletonText,
+  IonCard,
+  IonTitle,
+  IonSpinner
+} from '@ionic/vue';
+import { useRecipeDetails } from '../composables/useRecipeDetails';
 
 const loading = ref(true);
 const recipes = ref([]);
 const router = useRouter();
 const searchQuery = ref('');
 const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
+const { transformRecipe } = useRecipeDetails();
 
 const fetchRecipes = async (isRefreshing = false) => {
   if (!isRefreshing) {
     loading.value = true;
   }
   try {
-    const newRecipes = await apiRecipes.getRecipes();
-    recipes.value = Array.isArray(newRecipes) ? newRecipes : [];
-    console.log('Fetched Recipes:', recipes.value);
+    const response = await apiRecipes.getRecipes();
+    recipes.value = Array.isArray(response) ? response.map(transformRecipe) : [];
   } catch (error) {
-    console.error('Error fetching recipes:', error);
+    // Error handling without console.error
+    recipes.value = [];
   } finally {
     loading.value = false;
   }
 };
 
+onMounted(() => {
+  fetchRecipes();
+});
+
 const goToRecipeSingle = (id) => {
-  router.push({ name: 'RecipeDetails', params: { id } });
+  router.push({
+    name: 'RecipeDetails',
+    params: { id },
+  });
 };
 
 const filteredRecipes = computed(() => {
@@ -87,25 +108,20 @@ const filteredRecipes = computed(() => {
   const query = searchQuery.value.toLowerCase();
   return recipes.value.filter(recipe => 
     recipe.name.toLowerCase().includes(query) ||
-    (recipe.description && recipe.description.toLowerCase().includes(query)) ||
-    (recipe.ingredients && recipe.ingredients.some(ingredient => 
-      ingredient.toLowerCase().includes(query)
-    ))
+    recipe.recipe_ingredients.some(ingredient => 
+      ingredient.name.toLowerCase().includes(query)
+    )
   );
 });
 
 const handleSearch = () => {
-  // The filtering is handled by the computed property
+  // Filtering is handled by computed property
 };
 
 const doRefresh = async (event) => {
   await fetchRecipes(true);
   event.target.complete();
 };
-
-onMounted(() => {
-  fetchRecipes();
-});
 </script>
 
 <style scoped>
@@ -182,7 +198,6 @@ onMounted(() => {
   height: 150px;
   border-radius: 8px;
   overflow: hidden;
-  /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); */
 }
 
 .skeleton-image {

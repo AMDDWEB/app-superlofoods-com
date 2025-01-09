@@ -10,7 +10,7 @@
       <!-- Removed ion-refresher -->
 
       <!-- Display Sliders -->
-      <sliderCarousel :sliders="sliders.map(slider => slider.imageUrl)" />
+      <sliderCarousel :sliders="sliderImages" />
 
       <!-- Weekly ads, rewards and my store buttons -->
       <ion-grid :fixed="true">
@@ -66,7 +66,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, onUnmounted, computed } from 'vue';
+import { ref, onMounted, watch, onUnmounted, computed, inject } from 'vue';
 import apiSliders from '../axios/apiSliders.js';
 import { useSliderDetails } from '@/composables/useSliderDetails';
 import sliderCarousel from '@/components/sliderCarousel.vue';
@@ -82,15 +82,14 @@ import { IonPage, IonHeader, IonToolbar, IonContent } from '@ionic/vue';
 import { useRouter } from 'vue-router';
 import { Capacitor } from '@capacitor/core';
 
-// Reactive references
+// Initialize all refs at the top
 const sliders = ref([]);
+const locations = ref([]);
+const selectedLocation = ref(null);
+const loading = ref(true);
+const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
 const recipes = ref([]);
 const spotlights = ref([]);
-const selectedLocation = ref(null);
-const locationData = ref(null); // Initialize locationData
-const isLocationModalOpen = ref(false);
-const router = useRouter();
-const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
 const { transformAllSliders } = useSliderDetails();
 
 // Add a loading state
@@ -104,11 +103,13 @@ const pdfModalState = ref({
   startDate: ''
 });
 
+const requestNotificationPermission = inject('requestNotificationPermission');
+
 // Lifecycle hooks
 onMounted(async () => {
   await checkSelectedLocation();
   await fetchLocationData(); // Fetch location data on mount
-  getData();
+  await getData();
   window.addEventListener('locationChanged', handleLocationChange);
   await requestNotificationPermission();
 });
@@ -143,18 +144,20 @@ async function checkSelectedLocation() {
 
 // Fetch location data
 async function fetchLocationData() {
-  if (selectedLocation.value) {
-    try {
-      const locations = await apiLocations.getLocations();
-      locationData.value = locations.find(loc => loc.id === selectedLocation.value.id);
-      // Update selectedLocation with the latest data
-      if (locationData.value) {
-        selectedLocation.value = { ...selectedLocation.value, ...locationData.value };
-        localStorage.setItem('selectedLocation', JSON.stringify(selectedLocation.value));
+  try {
+    const response = await apiLocations.getLocations();
+    locations.value = Array.isArray(response.data) ? response.data : [];
+    
+    // Only try to find location if we have data
+    if (locations.value.length > 0 && selectedLocation.value) {
+      const found = locations.value.find(loc => loc.id === selectedLocation.value.id);
+      if (!found) {
+        selectedLocation.value = locations.value[0];
       }
-    } catch (error) {
-      console.error('Error fetching location data:', error);
     }
+  } catch (error) {
+    console.error('Error fetching location data:', error);
+    locations.value = [];
   }
 }
 
@@ -255,6 +258,26 @@ const closePdfModal = (isOpen) => {
       type: '',
       startDate: ''
     };
+  }
+};
+
+// In your computed property or where you're mapping sliders
+const sliderImages = computed(() => {
+  return Array.isArray(sliders.value) ? sliders.value.map(slider => slider.imageUrl) : [];
+});
+
+// Update your location finding function
+const findSelectedLocation = computed(() => {
+  if (!selectedLocation.value || !Array.isArray(locations.value)) {
+    return null;
+  }
+  return locations.value.find(loc => loc.id === selectedLocation.value.id) || null;
+});
+
+// Use it in your component
+const handleNotificationRequest = async () => {
+  if (requestNotificationPermission) {
+    await requestNotificationPermission();
   }
 };
 

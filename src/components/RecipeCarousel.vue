@@ -49,17 +49,20 @@ import { Swiper, SwiperSlide } from 'swiper/vue';
 import 'swiper/css';
 import { useRouter } from 'vue-router';
 import apiRecipes from '../axios/apiRecipes';
+import { useRecipeDetails } from '../composables/useRecipeDetails';
 
 const loading = ref(true);
 const recipes = ref([]);
 const router = useRouter();
+const { transformRecipe } = useRecipeDetails();
 
 const fetchRecipes = async () => {
   try {
-    recipes.value = await apiRecipes.getRecipes();
-    console.log('Fetched Recipes:', recipes.value);
+    loading.value = true;
+    const response = await apiRecipes.getRecipes();
+    recipes.value = Array.isArray(response) ? response.map(transformRecipe) : [];
   } catch (error) {
-    console.error('Error fetching recipes:', error);
+    recipes.value = [];
   } finally {
     loading.value = false;
   }

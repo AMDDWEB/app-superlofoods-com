@@ -1,30 +1,30 @@
-export function useRecipeDetails() {
-    const transformRecipeData = (recipe = {}) => {
-        return {
-            recipe_title: recipe.recipe_title,
-            recipe_hero_image: recipe.recipe_hero_image,
-            recipe_import_image_url: recipe.recipe_import_image_url,
-            recipe_additional_images: recipe.recipe_additional_images?.map(img => img.recipe_additional_image) || [],
-            recipe_hero_copy: recipe.recipe_hero_copy,
-            recipe_total_prep_time: recipe.recipe_total_prep_time,
-            recipe_total_cook_time: recipe.recipe_total_cook_time,
-            recipe_serving_size: recipe.recipe_serving_size,
-            recipe_video_url: recipe.recipe_video_url,
-            recipe_source_url: recipe.recipe_source_url,
-            recipe_steps: recipe.recipe_steps?.map(step => step.recipe_step) || [],
-            recipe_ingredients: recipe.recipe_ingredients?.map(ingredient => ({
-                ingredient: ingredient.recipe_ingredient,
-                serving: ingredient.recipe_ingredient_serving
-            })) || []
-        };
-    };
+export const useRecipeDetails = () => {
+  const transformRecipe = (recipe) => ({
+    id: recipe.slug,
+    slug: recipe.slug,
+    recipe_url: recipe.source_url || 'Link Unavailable',
+    name: recipe.title,
+    image_url: recipe.recipe_import_image_url,
+    recipe_difficulty_level: '',
+    recipe_serving_size: recipe.serving_size,
+    recipe_total_cook_time: recipe.cook_time,
+    recipe_total_prep_time: recipe.prep_time,
+    recipe_total_time: recipe.total_time,
+    recipe_source_url: recipe.source_url || '',
+    recipe_ingredients: recipe.recipe_ingredients?.map(
+      (ingredient) => ({
+        name: ingredient.ingredient,
+        serving: ingredient.serving,
+      })
+    ) || [],
+    recipe_steps: recipe.recipe_steps?.map(
+      (step) => ({
+        method: step,
+      })
+    ) || [],
+  });
 
-    const transformAllRecipes = (recipes = []) => {
-        return recipes.map(transformRecipeData);
-    };
-
-    return {
-        transformRecipeData,
-        transformAllRecipes
-    };
-}
+  return {
+    transformRecipe
+  };
+};
