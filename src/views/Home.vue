@@ -217,7 +217,14 @@ const handleRewardsClick = () => {
 // Open my store location
 async function handleMyStoreClick() {
   if (selectedLocation.value) {
-    // Navigate to the location details page
+    // Close any open modals first
+    pdfModalState.value = {
+      isOpen: false,
+      url: '',
+      type: '',
+      startDate: ''
+    };
+    // Then navigate
     router.push(`/locations/${selectedLocation.value.id}`);
   } else {
     await openLocationModal();
