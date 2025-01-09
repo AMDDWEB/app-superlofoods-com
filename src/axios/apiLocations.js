@@ -34,9 +34,14 @@ class LocationsApi {
 }
 
   async getLocationById(id) {
-    const allLocations = await this.getLocations();
-    return allLocations.data.find(location => location.id.toString() === id.toString());
-  }
+    try {
+        const response = await this.getLocations();
+        return response.find(location => location.id.toString() === id.toString());
+    } catch (error) {
+        console.error('Error fetching location by ID:', error);
+        return null;
+    }
+}
 }
 
 export default new LocationsApi();
