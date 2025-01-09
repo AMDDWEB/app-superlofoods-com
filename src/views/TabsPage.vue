@@ -11,6 +11,10 @@
       <ion-icon name="locations-regular" />
       <ion-label>Locations</ion-label>
     </ion-tab-button>
+    <ion-tab-button tab="coupons" href="/tabs/coupons">
+      <ion-icon name="more-regular" />
+      <ion-label>Coupons</ion-label>
+    </ion-tab-button>
     <ion-tab-button tab="recipes" href="/tabs/recipes">
       <ion-icon name="recipes-regular" />
       <ion-label>Recipes</ion-label>

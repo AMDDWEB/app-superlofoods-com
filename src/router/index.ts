@@ -30,6 +30,11 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/Locations.vue')
       },
       {
+        path: 'coupons',
+        name: 'Coupons',
+        component: () => import('@/views/Coupons.vue')
+      },
+      {
         path: 'recipes',
         name: 'Recipes',
         component: () => import('@/views/Recipes.vue')
@@ -40,6 +45,19 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/Preferences.vue')
       }
     ]
+  },
+  {
+    path: '/coupons/:id',
+    name: 'CouponDetails',
+    component: () => import('@/views/CouponDetails.vue'),
+    props: (route) => ({ id: route.params.id }),
+    beforeEnter: (to, from, next) => {
+      if (!to.params.id) {
+        next({ name: 'Coupons' });
+      } else {
+        next();
+      }
+    }
   },
   {
     path: '/recipes/:id',

@@ -40,11 +40,13 @@
 
       <!-- Spotlights Carousel -->
       <SpotlightsCarousel :spotlights="spotlights" />
+      <!-- Featured Coupons Carousel -->
+      <CouponsCarousel :coupons="coupons" />
 
       <!-- Featured Recipes Carousel -->
       <RecipeCarousel :recipes="recipes" />
 
-      <!-- Spotlights Carousel -->
+      <!-- Second Spotlights Carousel -->
       <SpotlightsCarousel :spotlights="spotlights" />
 
       <!-- Location Modal -->
@@ -75,6 +77,7 @@ import RecipeCarousel from '@/components/RecipeCarousel.vue';
 import SpotlightsCarousel from '@/components/SpotlightsCarousel.vue';
 import SetLocationModal from '@/components/SetLocationModal.vue';
 import PdfViewerModal from '@/components/PdfViewerModal.vue';
+import CouponsCarousel from '@/components/CouponsCarousel.vue';
 import { IonPage, IonHeader, IonToolbar, IonContent } from '@ionic/vue';
 import { useRouter } from 'vue-router';
 import { Capacitor } from '@capacitor/core';
