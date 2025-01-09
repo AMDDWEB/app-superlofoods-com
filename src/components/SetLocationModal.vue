@@ -62,10 +62,11 @@ watch(() => props.isOpen, async (newValue) => {
 async function fetchLocations() {
   try {
     const response = await apiLocations.getLocations();
-    locations.value = response.data.map(transformLocationData);
+    locations.value = response.map(transformLocationData);
     loadSelectedLocation();
   } catch (error) {
     // Error handling without logging
+    locations.value = [];
   }
 }
 
