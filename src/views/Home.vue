@@ -84,12 +84,12 @@ import { Capacitor } from '@capacitor/core';
 
 // Initialize all refs at the top
 const sliders = ref([]);
-const locations = ref([]);
-const selectedLocation = ref(null);
-const loading = ref(true);
-const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
 const recipes = ref([]);
 const spotlights = ref([]);
+const selectedLocation = ref(null);
+const locations = ref([]);
+const loading = ref(true);
+const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
 const { transformAllSliders } = useSliderDetails();
 
 // Add a loading state
@@ -104,6 +104,12 @@ const pdfModalState = ref({
 });
 
 const requestNotificationPermission = inject('requestNotificationPermission');
+
+// Add this with other refs at the top
+const isLocationModalOpen = ref(false);
+
+// Add router to imports if not already present
+const router = useRouter();
 
 // Lifecycle hooks
 onMounted(async () => {
@@ -144,20 +150,19 @@ async function checkSelectedLocation() {
 
 // Fetch location data
 async function fetchLocationData() {
-  try {
-    const response = await apiLocations.getLocations();
-    locations.value = Array.isArray(response.data) ? response.data : [];
-    
-    // Only try to find location if we have data
-    if (locations.value.length > 0 && selectedLocation.value) {
-      const found = locations.value.find(loc => loc.id === selectedLocation.value.id);
-      if (!found) {
-        selectedLocation.value = locations.value[0];
+  if (selectedLocation.value) {
+    try {
+      const response = await apiLocations.getLocations();
+      locations.value = response;
+      const updatedLocation = locations.value.find(loc => loc.id === selectedLocation.value.id);
+      // Update selectedLocation with the latest data
+      if (updatedLocation) {
+        selectedLocation.value = { ...selectedLocation.value, ...updatedLocation };
+        localStorage.setItem('selectedLocation', JSON.stringify(selectedLocation.value));
       }
+    } catch (error) {
+      console.error('Error fetching location data:', error);
     }
-  } catch (error) {
-    console.error('Error fetching location data:', error);
-    locations.value = [];
   }
 }
 
@@ -215,8 +220,8 @@ const handleRewardsClick = () => {
 // Open my store location
 async function handleMyStoreClick() {
   if (selectedLocation.value) {
-    // Navigate to the LocationSingle page using the location's ID
-    router.push({ name: 'LocationDetails', params: { id: selectedLocation.value.id } });
+    // Navigate to the location details page
+    router.push(`/locations/${selectedLocation.value.id}`);
   } else {
     await openLocationModal();
   }
