@@ -16,9 +16,22 @@ class LocationsApi {
     locations = base;
   }
 
-  async getLocations() {
-    return locations.get('/wp-json/iproweb/v1/locations');
-  }
+  async getLocations({ page = 1, perPage = 150 } = {}) {
+    try {
+        const response = await locations.get('/wp-json/iproweb/v1/locations', {
+            params: { page, perPage }
+        });
+
+        // Simplified: Filter and sort in one step
+        return response.data
+            .filter(location => location?.title) // Ensure title exists
+            .sort((a, b) => a.title > b.title ? 1 : -1) // Basic alphabetical sorting
+            .slice(0, 150); // Limit to 150 items
+    } catch (error) {
+        console.error('Error fetching locations:', error);
+        return [];
+    }
+}
 
   async getLocationById(id) {
     const allLocations = await this.getLocations();

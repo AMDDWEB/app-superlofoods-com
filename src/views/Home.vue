@@ -18,20 +18,20 @@
           <ion-col>
             <ion-button expand="block" size="small" @click="handleWeeklyAdClick"
               :color="selectedLocation && selectedLocation.weekly_ad_url ? 'primary' : 'medium'">
-              <ion-icon slot="start" name="weekly-ad"></ion-icon>
+              <ion-icon slot="start" name="ads-regular"></ion-icon>
               Weekly Ad
             </ion-button>
           </ion-col>
           <ion-col v-if="selectedLocation && selectedLocation.rewards_url">
             <ion-button expand="block" size="small" @click="handleRewardsClick" color="primary">
-              <ion-icon slot="start" name="rewards"></ion-icon>
+              <ion-icon slot="start" name="rewards-regular"></ion-icon>
               Rewards
             </ion-button>
           </ion-col>
           <ion-col>
             <ion-button expand="block" size="small" @click="handleMyStoreClick"
               :color="selectedLocation ? 'primary' : 'medium'">
-              <ion-icon slot="start" name="my-store"></ion-icon>
+              <ion-icon slot="start" name="set-location-regular"></ion-icon>
               {{ selectedLocation ? 'My Store' : 'Set My Store' }}
             </ion-button>
           </ion-col>
@@ -45,9 +45,6 @@
 
       <!-- Featured Recipes Carousel -->
       <RecipeCarousel :recipes="recipes" />
-
-      <!-- Second Spotlights Carousel -->
-      <SpotlightsCarousel :spotlights="spotlights" />
 
       <!-- Location Modal -->
       <SetLocationModal :is-open="isLocationModalOpen" @update:is-open="isLocationModalOpen = $event"

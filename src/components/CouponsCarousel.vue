@@ -4,7 +4,7 @@
       <ion-item @click="goToCouponsArchive">
         <ion-text>
           <h3 class="app-list-heading">
-            Featured Coupons
+            Clip & Save Coupons
             <ion-icon
               style="font-size: 16px;"
               name="chevron-right"
@@ -17,7 +17,7 @@
     </ion-list>
 
     <div v-if="!loading">
-      <swiper @swiper="onSwiper" :slides-per-view="2.5" :space-between="12">
+      <swiper @swiper="onSwiper" :slides-per-view="2.5" :space-between="1" loop>
         <swiper-slide v-for="coupon in displayCoupons" :key="coupon.id">
           <CouponCard 
             :coupon="coupon"

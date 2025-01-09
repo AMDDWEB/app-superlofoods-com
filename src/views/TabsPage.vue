@@ -12,7 +12,7 @@
       <ion-label>Locations</ion-label>
     </ion-tab-button>
     <ion-tab-button tab="coupons" href="/tabs/coupons">
-      <ion-icon name="more-regular" />
+      <ion-icon name="barcode-coupon-regular" />
       <ion-label>Coupons</ion-label>
     </ion-tab-button>
     <ion-tab-button tab="recipes" href="/tabs/recipes">

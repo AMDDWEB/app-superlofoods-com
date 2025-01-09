@@ -80,7 +80,7 @@ const fetchLocations = async (isRefreshing = false) => {
   }
   try {
     const response = await apiLocations.getLocations();
-    const transformedLocations = response.data.map(transformLocationData);
+locations.value = response.map(transformLocationData); 
     locations.value = transformedLocations;
   } catch (error) {
     // Error handling without console.error

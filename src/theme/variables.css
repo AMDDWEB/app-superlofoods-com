@@ -190,6 +190,8 @@ http://ionicframework.com/docs/theming/ */
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+	-webkit-line-clamp: 1;
+	max-width: 90%;
   }
   
   .truncate-multiline {

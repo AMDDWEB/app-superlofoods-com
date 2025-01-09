@@ -12,22 +12,25 @@
 
     <!-- Text Content -->
     <span class="coupon-brand">{{ coupon.subtitle }}</span>
-    <ion-card-title class="coupon-value ion-text-center">{{ coupon.title }}</ion-card-title>
+    <ion-card-title class="coupon-value ion-text-center truncate">{{ coupon.title }}</ion-card-title>
     <span class="coupon-description truncate-multiline">{{ coupon.description }}</span>
     <span class="coupon-expiration ion-text-center">Expires {{ formatExpDate(coupon.to_date) }}</span>
     
     <!-- Button -->
     <ion-button 
-      size="small" 
-      color="danger" 
-      fill="outline"
-      style="display: flex; align-items: center;"
-      @click.stop="handleClipClick"
-      :disabled="isCouponClipped(coupon.id) || isClipping"
-    >
-      <ion-icon v-if="!isCouponClipped(coupon.id)" slot="start" :icon="cut"></ion-icon>
-      {{ isCouponClipped(coupon.id) ? 'Clipped' : 'Clip Coupon' }}
-    </ion-button>
+    size="small" 
+    :color="isCouponClipped(coupon.id) ? 'success' : 'danger'" 
+    fill="solid"
+    style="display: flex; align-items: center; width: 90%;"
+    :disabled="isCouponClipped(coupon.id)"
+    @click.stop="!isCouponClipped(coupon.id) && handleClipClick()"
+>
+    <ion-icon 
+        slot="start" 
+        name="coupons-regular">
+    </ion-icon>
+    {{ isCouponClipped(coupon.id) ? 'Clipped' : 'Clip Coupon' }}
+</ion-button>
   </ion-card>
   
   <SignupModal />
@@ -97,6 +100,7 @@ ion-card {
   display: flex;
   flex-direction: column;
   align-items: center;
+  border-radius: 8px;
 }
 
 .coupon-image-container {
@@ -111,13 +115,13 @@ ion-card {
   font-size: 12px;
   text-align: center;
   margin-top: 10px;
-  color: var(--ion-color-dark);
+  color: var(--ion-color-medium-shade);
 }
 
 .coupon-value {
   font-weight: bold;
   font-size: 16px;
-  color: #ec0000;
+  color: var(--ion-color-danger);
   padding: 0;
   margin: 5px 0;
 }

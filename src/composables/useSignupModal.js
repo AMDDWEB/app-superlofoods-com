@@ -32,7 +32,7 @@ export function useSignupModal() {
       case 2:
         return 'Verify Your Number';
       case 3:
-        return 'Welcome Aboard! 🎉';
+        return 'Start Saving Today';
       default:
         return '';
     }
@@ -98,7 +98,7 @@ export function useSignupModal() {
     const cleanPhone = phoneNumber.value.replace(/\D/g, '');
     
     if (!validatePhoneNumber(cleanPhone)) {
-      errorMessage.value = 'Please enter a valid phone number';
+      errorMessage.value = 'Please enter a valid phone number.';
       return;
     }
 
@@ -119,7 +119,7 @@ export function useSignupModal() {
 
   const submitVerification = async () => {
     if (!validatePinCode(pinCode.value)) {
-      errorMessage.value = 'Please enter a valid 4-digit code';
+      errorMessage.value = 'Please enter a valid 4-digit code.';
       return;
     }
 
@@ -337,8 +337,7 @@ export function useSignupModal() {
   style.textContent = `
     .auth-modal {
       --height: 100%;
-      --border-radius: 24px;
-      --background: #ffffff;
+      --background: var(--ion-color-light);
     }
 
     .modal-content-wrapper {
@@ -368,19 +367,21 @@ export function useSignupModal() {
       height: 32px;
       border-radius: 50%;
       background: var(--ion-color-medium-tint);
-      color: var(--ion-color-medium);
+      color: var(--ion-color-light);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: bold;
       transition: all 0.3s ease;
+      margin-top: 40px;
     }
 
     .step.active {
-      background: var(--ion-color-primary);
-      color: white;
+      background: var(--ion-color-success);
+      color: var(--ion-color-light);
       transform: scale(1.1);
       box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.2);
+      margin-top: 40px;
     }
 
     .step-line {
@@ -388,6 +389,7 @@ export function useSignupModal() {
       width: 60px;
       background: var(--ion-color-medium-tint);
       margin: 0 8px;
+      margin-top: 40px;
     }
 
     .close-button {
@@ -431,9 +433,9 @@ export function useSignupModal() {
 
     .custom-input {
       --background: transparent;
-      --border-color: var(--ion-color-medium-shade);
-      --border-radius: 12px;
-      --border-width: 1px;
+      --border-color: var(--ion-color-light-shade);
+      --border-radius: 8px;
+      --border-width: 2px;
       margin-bottom: 24px;
       --highlight-height: 2px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
@@ -448,20 +450,12 @@ export function useSignupModal() {
       --padding: 12px;
     }
 
-    .verification-input {
-      letter-spacing: 8px;
-      font-size: 32px !important;
-      text-align: center;
-      font-weight: 600;
-    }
-
     .submit-button {
-      --background: var(--ion-color-primary);
-      --border-radius: 12px;
       margin-top: 24px;
       height: 52px;
       font-size: 16px;
       font-weight: 600;
+      --border-radius: 8px;
       text-transform: none;
       --box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.2);
     }
@@ -487,6 +481,7 @@ export function useSignupModal() {
       margin-top: auto;
       text-align: center;
       padding-bottom: 24px;
+      display: none !important;
     }
 
     .terms-text {

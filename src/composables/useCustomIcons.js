@@ -44,6 +44,10 @@ import getdirectionsRegularIcon from '../icons/regular/diamond-turn-right-regula
 import callstoreRegularIcon from '../icons/regular/phone-flip-regular.svg';
 import notificationsRegularIcon from '../icons/regular/bell-exclamation-regular.svg';
 import nonotificationsRegularIcon from '../icons/regular/regular-bell-slash.svg';
+import barcodecouponRegularIcon from '../icons/regular/regular-barcode-read-circle-dollar.svg';
+
+//Duotone icons
+import handwaveDuotoneIcon from '../icons/duotone/hand-wave-duotone-regular.svg';
 
 const customIcons = {
   'house': homeIcon,
@@ -87,6 +91,10 @@ const customIcons = {
   'get-directions-regular': getdirectionsRegularIcon,
   'call-store-regular': callstoreRegularIcon,
   'no-notifications-regular': nonotificationsRegularIcon,
+  'barcode-coupon-regular': barcodecouponRegularIcon,
+
+  // Duotone icons are below 
+  'hand-wave-duotone': handwaveDuotoneIcon,
 };
 
 export function registerCustomIcons() {

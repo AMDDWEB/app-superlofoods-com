@@ -10,7 +10,7 @@
     </ion-list>
 
     <div v-if="!loading">
-      <swiper v-if="spotlights.length > 0" @swiper="onSwiper" slides-per-view="1.5">
+      <swiper v-if="spotlights.length > 0" @swiper="onSwiper" slides-per-view="1.5" loop>
         <swiper-slide v-for="(item, index) in spotlights.slice(0, 10)" :key="index">
           <div
             class="spotlight-card"
