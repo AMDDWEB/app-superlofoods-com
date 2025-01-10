@@ -18,19 +18,19 @@
     
     <!-- Button -->
     <ion-button 
-    size="small" 
-    :color="isCouponClipped(coupon.id) ? 'success' : 'danger'" 
-    fill="solid"
-    style="display: flex; align-items: center; width: 90%;"
-    :disabled="isCouponClipped(coupon.id)"
-    @click.stop="!isCouponClipped(coupon.id) && handleClipClick()"
->
-    <ion-icon 
+      size="small" 
+      :color="isCouponClipped(coupon.id) ? 'success' : 'danger'" 
+      fill="solid"
+      style="display: flex; align-items: center; width: 90%;"
+      :disabled="isCouponClipped(coupon.id)"
+      @click.stop="handleClipClick"
+    >
+      <ion-icon 
         slot="start" 
-        name="coupons-regular">
-    </ion-icon>
-    {{ isCouponClipped(coupon.id) ? 'Clipped' : 'Clip Coupon' }}
-</ion-button>
+        :icon="cut">
+      </ion-icon>
+      {{ isCouponClipped(coupon.id) ? 'Clipped' : 'Clip Coupon' }}
+    </ion-button>
   </ion-card>
   
   <SignupModal />
@@ -55,16 +55,16 @@ const props = defineProps({
   }
 });
 
-const handleCardClick = () => {
-  router.push(`/coupons/${props.coupon.id}`);
-};
-
 const emit = defineEmits(['clip']);
 const { openSignupModal, SignupModal } = useSignupModal();
 const { isCouponClipped, addClippedCoupon } = useClippedCoupons();
 const isClipping = ref(false);
 
 const formatExpDate = (date) => format(new Date(date), 'MM/dd/yyyy');
+
+const handleCardClick = () => {
+  router.push(`/coupons/${props.coupon.id}`);
+};
 
 const handleClipClick = async (event) => {
   event.stopPropagation(); // Prevent the card click event
@@ -75,12 +75,12 @@ const handleClipClick = async (event) => {
     return;
   }
   
-  if (isClipping.value) return;
+  if (isClipping.value || isCouponClipped(props.coupon.id)) return;
   
   isClipping.value = true;
   try {
     await CouponsApi.clipCoupon(props.coupon.id);
-    addClippedCoupon(props.coupon.id); // Move this after successful API call
+    addClippedCoupon(props.coupon.id);
     emit('clip');
   } catch (error) {
     console.error('Error clipping coupon:', error);
