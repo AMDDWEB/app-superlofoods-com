@@ -6,6 +6,11 @@
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
+      <div class="loyalty-card" v-if="loyaltyNumber">
+        <div class="loyalty-label">My Loyalty Number</div>
+        <div class="loyalty-number">{{ formatPhone(loyaltyNumber) }}</div>
+      </div>
+
       <ion-list>
         <ion-list-header>
           <ion-label>
@@ -76,6 +81,7 @@ import { Browser } from '@capacitor/browser';
 import { NativeSettings, AndroidSettings, IOSSettings } from 'capacitor-native-settings';
 import SetLocationModal from '@/components/SetLocationModal.vue';
 import { Capacitor } from '@capacitor/core';
+import { useSignupModal } from '@/composables/useSignupModal';
 
 // Store environment variables in reactive variables
 const storeName = import.meta.env.VITE_STORE_NAME; // Store name from .env
@@ -90,6 +96,8 @@ const currentLocation = ref(null);
 const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
 const clickCount = ref(0);
 const clickTimer = ref(null);
+const { getLoyaltyNumber } = useSignupModal();
+const loyaltyNumber = ref('');
 
 // Lifecycle hooks
 onMounted(() => {
@@ -98,6 +106,7 @@ onMounted(() => {
   if (storedLocation) {
     currentLocation.value = JSON.parse(storedLocation);
   }
+  loyaltyNumber.value = getLoyaltyNumber();
 });
 
 // Open app general notification settings for testing
@@ -226,6 +235,12 @@ onUnmounted(() => {
   }
 });
 
+const formatPhone = (phone) => {
+  if (!phone) return '';
+  const cleaned = phone.replace(/\D/g, '');
+  return `(${cleaned.slice(0,3)}) ${cleaned.slice(3,6)}-${cleaned.slice(6)}`;
+};
+
 </script>
 
 <style scoped>
@@ -239,5 +254,25 @@ onUnmounted(() => {
 
 ion-icon {
   color: var(--ion-color-primary) !important;
+}
+
+.loyalty-card {
+  background: var(--ion-color-light);
+  margin: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.loyalty-label {
+  color: var(--ion-color-medium);
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.loyalty-number {
+  color: var(--ion-color-dark);
+  font-size: 18px;
+  font-weight: 600;
 }
 </style>

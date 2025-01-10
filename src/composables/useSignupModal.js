@@ -24,6 +24,7 @@ export function useSignupModal() {
   const errorMessage = ref('');
   const isAuthenticated = ref(CouponsApi.isAuthenticated());
   const router = useRouter();
+  const loyaltyNumber = ref('');
   
   const stepTitle = computed(() => {
     switch(currentStep.value) {
@@ -132,7 +133,6 @@ export function useSignupModal() {
         merchantId: import.meta.env.VITE_COUPONS_MERCHANT_ID
       });
       
-      // The tokens are nested inside response.data
       const tokens = {
         access: response.data.access_token,
         refresh: response.data.refresh_token
@@ -141,16 +141,15 @@ export function useSignupModal() {
       if (tokens.access && tokens.refresh) {
         // Store tokens
         TokenStorage.setTokens(tokens.access, tokens.refresh);
-        console.log('Tokens stored successfully');
-
+        
+        // Store loyalty number (phone number)
+        loyaltyNumber.value = phoneNumber.value;
+        localStorage.setItem('loyaltyNumber', phoneNumber.value);
+        
         // Update authentication state
         isAuthenticated.value = true;
-        
-        // Move to next step
         currentStep.value = 3;
         errorMessage.value = '';
-
-        // Notify other components
         window.dispatchEvent(new Event('userSignedUp'));
       } else {
         throw new Error('Missing tokens in response');
@@ -187,6 +186,11 @@ export function useSignupModal() {
       console.error('Error clipping coupon:', error);
       return false;
     }
+  };
+
+  const getLoyaltyNumber = () => {
+    // Try to get from ref first, then localStorage
+    return loyaltyNumber.value || localStorage.getItem('loyaltyNumber') || '';
   };
 
   // Create the modal component within the composable
@@ -584,6 +588,7 @@ export function useSignupModal() {
     openSignupModal,
     closeSignupModal,
     clipCoupon,
-    SignupModal
+    SignupModal,
+    getLoyaltyNumber,
   };
 } 
