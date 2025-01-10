@@ -1,6 +1,7 @@
 <template>
   <ion-page>
     <ion-header>
+      <!-- All/Clipped Toggle First -->
       <ion-toolbar>
         <ion-segment v-model="selectedView" style="margin: 0 auto; width: 200px;">
           <ion-segment-button value="all">
@@ -8,6 +9,25 @@
           </ion-segment-button>
           <ion-segment-button value="clipped">
             <ion-label>Clipped ({{ getClippedCount() }})</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+      </ion-toolbar>
+
+      <!-- Category Menu Second -->
+      <ion-toolbar>
+        <ion-segment
+          mode="ios"
+          scrollable
+          class="ion-padding-start ion-no-margin"
+          :value="selectedCategory"
+        >
+          <ion-segment-button
+            v-for="category in sortedCategories"
+            :key="category"
+            :value="category"
+            @click="setCategory(category)"
+          >
+            {{ category }}
           </ion-segment-button>
         </ion-segment>
       </ion-toolbar>
@@ -36,7 +56,7 @@
 
       <ion-infinite-scroll
         @ionInfinite="loadMore"
-        :disabled="!hasMoreCoupons || selectedView === 'clipped'"
+        :disabled="true"
       >
         <ion-infinite-scroll-content></ion-infinite-scroll-content>
       </ion-infinite-scroll>
@@ -48,42 +68,57 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import {
-  IonPage,
-  IonHeader,
-  IonToolbar,
-  IonContent,
-  IonSegment,
-  IonSegmentButton,
-  IonLabel,
-  IonSpinner,
-  IonInfiniteScroll,
-  IonInfiniteScrollContent,
-  IonBackButton,
-  IonTitle
-} from '@ionic/vue';
 import { useCouponDetails } from '@/composables/useCouponDetails';
 import { useSignupModal } from '@/composables/useSignupModal';
 import { useClippedCoupons } from '@/composables/useClippedCoupons';
 import { useRouter } from 'vue-router';
 import CouponCard from '@/components/CouponCard.vue';
+import { IonPage, IonHeader, IonToolbar, IonContent, IonSegment, IonSegmentButton, 
+         IonLabel, IonSpinner, IonInfiniteScroll, IonInfiniteScrollContent } from '@ionic/vue';
 
 const router = useRouter();
-const { coupons, loading, fetchCoupons } = useCouponDetails();
+const { coupons, loading, fetchCoupons, availableCategories, fetchCategories } = useCouponDetails();
 const { isAuthenticated, openSignupModal, SignupModal } = useSignupModal();
-const { clippedCoupons, addClippedCoupon, isCouponClipped, getClippedCount } = useClippedCoupons();
+const { clippedCoupons, isCouponClipped, getClippedCount } = useClippedCoupons();
 
 const offset = ref(0);
 const limit = 100;
 const hasMoreCoupons = ref(true);
 const selectedView = ref('all');
+const selectedCategory = ref('All Coupons');
+
+const sortedCategories = computed(() => {
+  console.log('Available categories:', availableCategories.value);
+  const filteredCategories = availableCategories.value
+    .filter(category => category !== 'All Coupons')
+    .sort((a, b) => a.localeCompare(b));
+  
+  const result = ['All Coupons', ...filteredCategories];
+  console.log('Sorted categories:', result);
+  return result;
+});
 
 const displayedCoupons = computed(() => {
-  if (selectedView.value === 'clipped') {
-    return coupons.value.filter(coupon => isCouponClipped(coupon.id));
+  let filtered = coupons.value;
+  
+  // Filter by category if not "All Coupons"
+  if (selectedCategory.value !== 'All Coupons') {
+    filtered = filtered.filter(coupon => coupon.category === selectedCategory.value);
   }
-  return coupons.value;
+  
+  // Filter by clipped status
+  if (selectedView.value === 'clipped') {
+    filtered = filtered.filter(coupon => isCouponClipped(coupon.id));
+  }
+  
+  return filtered;
 });
+
+const setCategory = async (category) => {
+  selectedCategory.value = category;
+  offset.value = 0;
+  await fetchCoupons({ limit, offset: 0 });
+};
 
 const loadMore = async (event) => {
   if (selectedView.value === 'clipped') {
@@ -95,7 +130,6 @@ const loadMore = async (event) => {
   await fetchCoupons({ limit, offset: offset.value });
   event.target.complete();
   
-  // Check if we've reached the end
   if (coupons.value.length < offset.value + limit) {
     hasMoreCoupons.value = false;
   }
@@ -106,6 +140,7 @@ const goToCouponDetails = (couponId) => {
 };
 
 onMounted(async () => {
+  await fetchCategories();
   await fetchCoupons({ limit, offset: offset.value });
   window.addEventListener('userSignedUp', () => fetchCoupons({ limit, offset: 0 }));
 });
@@ -126,6 +161,29 @@ onUnmounted(() => {
   gap: 16px;
 }
 
+ion-segment {
+  --background: var(--ion-color-light);
+}
+
+ion-segment-button::before {
+  content: none;
+}
+
+ion-segment-button {
+  border: none;
+  text-transform: capitalize;
+  margin-bottom: 8px;
+}
+
+ion-segment-button.segment-button-checked {
+  background: var(--ion-color-primary) !important;
+  color: #fff;
+}
+
+ion-segment-button::part(indicator-background) {
+  height: 0px;
+}
+
 .loading-container {
   display: flex;
   justify-content: center;
@@ -139,10 +197,6 @@ onUnmounted(() => {
   color: var(--ion-color-medium);
 }
 
-.segment-container {
-  padding: 8px 16px;
-}
-
 @media (min-width: 768px) {
   .coupon-container {
     grid-template-columns: repeat(3, 1fr);
@@ -153,5 +207,17 @@ onUnmounted(() => {
   .coupon-container {
     grid-template-columns: repeat(4, 1fr);
   }
+}
+
+ion-segment {
+  min-height: 48px;
+  display: flex;
+  overflow-x: auto;
+}
+
+ion-segment-button {
+  min-width: fit-content;
+  --padding-start: 16px;
+  --padding-end: 16px;
 }
 </style> 

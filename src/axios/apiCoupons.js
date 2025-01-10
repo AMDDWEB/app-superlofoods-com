@@ -16,14 +16,33 @@ class CouponsApi {
     couponsInstance = base;
   }
 
-  async getCoupons({ limit = 100, offset = 0 } = {}) {
+  async getCategories() {
+    const response = await couponsInstance({
+      url: '/categories',
+      method: 'GET',
+      params: {
+        merchant_id: import.meta.env.VITE_COUPONS_MERCHANT_ID
+      }
+    });
+    return response.data;
+  }
+
+  async getCoupons({ 
+    limit = 1000, 
+    offset = 0, 
+    category = null,
+    sortBy = 'newest' 
+  } = {}) {
     const params = {
       merchant_id: import.meta.env.VITE_COUPONS_MERCHANT_ID,
-      ...(limit !== -1 && { 
-        limit: limit.toString(),
-        offset: offset.toString()
-      })
+      limit: limit.toString(),
+      offset: offset.toString(),
+      sort_by: sortBy
     };
+
+    if (category) {
+      params.category_id = category;
+    }
 
     const response = await couponsInstance({
       url: '/offers',

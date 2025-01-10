@@ -150,7 +150,11 @@ export function useSignupModal() {
         isAuthenticated.value = true;
         currentStep.value = 3;
         errorMessage.value = '';
-        window.dispatchEvent(new Event('userSignedUp'));
+        
+        // Dispatch a custom event with the loyalty number
+        window.dispatchEvent(new CustomEvent('userSignedUp', {
+          detail: { loyaltyNumber: phoneNumber.value }
+        }));
       } else {
         throw new Error('Missing tokens in response');
       }

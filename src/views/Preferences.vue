@@ -106,7 +106,14 @@ onMounted(() => {
   if (storedLocation) {
     currentLocation.value = JSON.parse(storedLocation);
   }
+  
+  // Set initial loyalty number
   loyaltyNumber.value = getLoyaltyNumber();
+  
+  // Listen for signup event
+  window.addEventListener('userSignedUp', (event) => {
+    loyaltyNumber.value = event.detail.loyaltyNumber;
+  });
 });
 
 // Open app general notification settings for testing
@@ -233,6 +240,10 @@ onUnmounted(() => {
   if (clickTimer.value) {
     clearTimeout(clickTimer.value);
   }
+  // Remove event listener
+  window.removeEventListener('userSignedUp', (event) => {
+    loyaltyNumber.value = event.detail.loyaltyNumber;
+  });
 });
 
 const formatPhone = (phone) => {

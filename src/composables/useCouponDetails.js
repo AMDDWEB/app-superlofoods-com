@@ -1,149 +1,130 @@
 import { ref, computed } from 'vue'
-import CouponsApi from '../axios/apiCoupons'
+import CouponsApi from '@/axios/apiCoupons'
 import { TokenStorage } from '../utils/tokenStorage'
 
-const transformCouponData = (coupon) => ({
-  id: coupon.id,
-  title: coupon.title,
-  subtitle: coupon.subtitle,
-  description: coupon.description,
-  category: coupon.category,
-  to_date: coupon.to_date,
-  value: coupon.value,
-  disclaimer: coupon.disclaimer,
-  encoded_img: coupon.encoded_img,
-})
+const coupons = ref([]);
+const loading = ref(false);
+const categories = ref([]);
+const selectedSort = ref('newest');
+const allCoupons = ref([]);
 
 export function useCouponDetails() {
-  const coupons = ref([])
-  const loading = ref(false)
-  const error = ref(null)
-  const currentCoupon = ref(null)
-
-  // Fetch all coupons
-  const fetchCoupons = async ({ limit, offset } = {}) => {
-    loading.value = true
-    error.value = null
+  // Helper function to load all coupons
+  const loadAllCoupons = async () => {
     try {
-      const response = await CouponsApi.getCoupons({ limit, offset })
-      const newCoupons = (response.items || []).map(transformCouponData)
-      
-      if (offset > 0) {
-        // Append new coupons to existing ones
-        coupons.value = [...coupons.value, ...newCoupons]
-      } else {
-        // Reset coupons if it's the initial load (offset = 0)
-        coupons.value = newCoupons
-      }
-    } catch (err) {
-      error.value = err.message || 'Failed to fetch coupons'
-    } finally {
-      loading.value = false
-    }
-  }
+      loading.value = true;
+      let allLoaded = false;
+      let currentOffset = 0;
+      const batchSize = 100;
+      const tempCoupons = [];
 
-  // Fetch single coupon by ID
-  const fetchCouponById = async (id) => {
-    loading.value = true;
-    error.value = null;
-    try {
-      // Check if the coupon exists in our current coupons array
-      const found = coupons.value.find(c => c.id === id);
-      if (found) {
-        currentCoupon.value = found;
-        return currentCoupon.value;
+      while (!allLoaded) {
+        const response = await CouponsApi.getCoupons({
+          limit: batchSize,
+          offset: currentOffset,
+          sortBy: selectedSort.value
+        });
+
+        tempCoupons.push(...response.items);
+        
+        if (response.items.length < batchSize) {
+          allLoaded = true;
+        } else {
+          currentOffset += batchSize;
+        }
       }
-      
-      throw new Error('Coupon not found');
-    } catch (err) {
-      console.error('Error in fetchCouponById:', err);
-      error.value = err.message || 'Failed to fetch coupon details';
-      throw err;
+
+      return tempCoupons;
+    } catch (error) {
+      console.error('Error loading all coupons:', error);
+      return [];
     } finally {
       loading.value = false;
     }
   };
 
-  // Clip/save a coupon
-  const clipCoupon = async (offerId) => {
-    loading.value = true
-    error.value = null
+  const fetchCategories = async () => {
     try {
-      const response = await CouponsApi.clipCoupon(offerId)
-      return response
-    } catch (err) {
-      error.value = err.message || 'Failed to clip coupon'
-      throw err
-    } finally {
-      loading.value = false
-    }
-  }
-
-  // Authentication methods
-  const startSignup = async (phoneNumber) => {
-    loading.value = true
-    error.value = null
-    try {
-      return await CouponsApi.startCouponSignup(phoneNumber)
-    } catch (err) {
-      error.value = err.message || 'Failed to start signup'
-      throw err
-    } finally {
-      loading.value = false
-    }
-  }
-
-  const verifyCode = async (data) => {
-    loading.value = true
-    error.value = null
-    try {
-      const response = await CouponsApi.verifyCode(data)
+      // Load all coupons first
+      const allLoadedCoupons = await loadAllCoupons();
       
-      // Move token handling here
-      if (response) {
-        const tokens = {
-          access: response.access_token || response.accessToken || response.token,
-          refresh: response.refresh_token || response.refreshToken
-        };
+      // Store all coupons for filtering
+      allCoupons.value = allLoadedCoupons.map(coupon => ({
+        ...coupon,
+        category: coupon.category || 'Uncategorized'
+      }));
 
-        if (tokens.access && tokens.refresh) {
-          TokenStorage.setTokens(tokens.access, tokens.refresh);
-        }
+      // Extract unique categories from coupons that have at least one coupon
+      const categoryCounts = allCoupons.value.reduce((acc, coupon) => {
+        const category = coupon.category || 'Uncategorized';
+        acc[category] = (acc[category] || 0) + 1;
+        return acc;
+      }, {});
+
+      // Only include categories that have coupons
+      const uniqueCategories = Object.entries(categoryCounts)
+        .filter(([_, count]) => count > 0)
+        .map(([category]) => category)
+        .sort();
+
+      categories.value = ['All Coupons', ...uniqueCategories];
+      
+      // Initialize coupons with all available coupons
+      coupons.value = allCoupons.value;
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      categories.value = ['All Coupons'];
+    }
+  };
+
+  const fetchCoupons = async ({ 
+    limit = 1000,
+    offset = 0, 
+    category = null 
+  } = {}) => {
+    loading.value = true;
+    try {
+      // Get all coupons at once if they haven't been loaded yet
+      if (allCoupons.value.length === 0) {
+        const loadedCoupons = await loadAllCoupons();
+        allCoupons.value = loadedCoupons.map(coupon => ({
+          ...coupon,
+          category: coupon.category || 'Uncategorized'
+        }));
       }
-      
-      return response
-    } catch (err) {
-      error.value = err.message || 'Failed to verify code'
-      throw err
+
+      if (category && category !== 'All Coupons') {
+        // Filter from allCoupons if category is selected
+        const filteredCoupons = allCoupons.value.filter(
+          coupon => coupon.category === category
+        );
+        coupons.value = filteredCoupons;
+        return filteredCoupons.length;
+      } else {
+        // Use all coupons for 'All Coupons'
+        coupons.value = allCoupons.value;
+        return allCoupons.value.length;
+      }
+    } catch (error) {
+      console.error('Error fetching coupons:', error);
+      return 0;
     } finally {
-      loading.value = false
+      loading.value = false;
     }
-  }
+  };
 
-  // Move isAuthenticated logic entirely to composable
-  const isAuthenticated = computed(() => TokenStorage.hasTokens())
-
-  // Helper methods
-  const clearError = () => {
-    error.value = null
-  }
+  const availableCategories = computed(() => categories.value);
 
   return {
-    // State
     coupons,
     loading,
-    error,
-    currentCoupon,
-    
-    // Methods
     fetchCoupons,
-    fetchCouponById,
-    clipCoupon,
-    startSignup,
-    verifyCode,
-    clearError,
-    
-    // Computed
-    isAuthenticated,
-  }
+    fetchCategories,
+    availableCategories,
+    changeSort: async (newSort) => {
+      selectedSort.value = newSort;
+      await loadAllCoupons(); // Reload all coupons with new sort
+      return fetchCoupons({ limit: 100, offset: 0 });
+    }
+  };
 } 
