@@ -1,5 +1,3 @@
-//import { ref } from 'vue';
-
 export function useLocationDetails() {
   const transformLocationData = (location) => {
     // Helper function to find ad by type
@@ -13,6 +11,8 @@ export function useLocationDetails() {
       id: location.id.toString(),
       name: location.title,
       address: location.address?.address || '',
+      street_number: location.address?.street_number || '',
+      street_name: location.address?.street_name || '',
       city: location.address?.city || '',
       state: location.address?.state || '',
       state_short: location.address?.state_short || '',
@@ -39,11 +39,15 @@ export function useLocationDetails() {
           start_date: ad.ad_start_date,
           types: ad.ad_type.map(type => type.type_name),
           title: ad.ad_title
-        }))
+        })),
+      location_banner: location.location_banner?.map(banner => ({
+        banner_id: banner.banner_id || '',
+        banner_name: banner.banner_name || ''
+      })) || []
     };
   };
 
   return {
     transformLocationData
   };
-} 
+}

@@ -20,7 +20,7 @@
       <div v-if="loading" class="app-loading-container">
         <ion-spinner name="crescent" class="app-loading-spinner"></ion-spinner>
       </div>
-<!-- Recipe image and title -->
+      <!-- Recipe image and title -->
       <div v-else-if="recipe">
         <div class="recipe-image-container">
           <img :src="recipe?.image_url" :alt="recipe?.name" />
@@ -37,94 +37,89 @@
 
       <div>
 
-  <ion-grid>
-  <ion-row>
-    <ion-col size="6">
-      <ion-item color="primary" class="recipe-overview">
-        <ion-icon name="serving-size" color="light" size="large" slot="start"></ion-icon>
-        <ion-label>
-          
-          <div class="recipe-overview-heading">Servings</div>
-          <div v-if="recipe" class="recipe-overview-subheading">{{ recipe.recipe_serving_size }}</div>
-        </ion-label>
-      </ion-item>
-    </ion-col>
-    <ion-col size="6">
-      <ion-item color="secondary" class="recipe-overview">
-        <ion-icon name="prep-time" color="light" size="large" slot="start"></ion-icon>
-        <ion-label>
-          
-          <div class="recipe-overview-heading">Prep Time</div>
-          <div v-if="recipe" class="recipe-overview-subheading">{{ recipe.recipe_total_prep_time }}</div>
-        </ion-label>
-      </ion-item>
-    </ion-col>
-  </ion-row>
-  <ion-row>
-    <ion-col size="6">
-      <ion-item color="warning" class="recipe-overview">
-        <ion-icon name="cook-time" color="light" size="large" slot="start"></ion-icon>
-        <ion-label>
-          
-          <div class="recipe-overview-heading">Cook Time</div>
-          <div v-if="recipe" class="recipe-overview-subheading">{{ recipe.recipe_total_cook_time }}</div>
-        </ion-label>
-      </ion-item>
-    </ion-col>
-    <ion-col size="6">
-      <ion-item color="success" class="recipe-overview">
-        <ion-icon name="total-time" color="light" size="large" slot="start"></ion-icon>
-        <ion-label>
-          
-          <div class="recipe-overview-heading">Total Time</div>
-          <div v-if="recipe" class="recipe-overview-subheading">{{ recipe.recipe_total_time }}</div>
-        </ion-label>
-      </ion-item>
-    </ion-col>
-  </ion-row>
-</ion-grid>
+        <ion-grid>
+          <ion-row>
+            <ion-col size="6">
+              <ion-item color="recipe-servings" class="recipe-overview">
+                <ion-icon name="recipe-servings-regular" color="light" size="large" slot="start"></ion-icon>
+                <ion-label>
 
-</div>
+                  <div class="recipe-overview-heading">Servings</div>
+                  <div v-if="recipe" class="recipe-overview-subheading">{{ recipe.recipe_serving_size }}</div>
+                </ion-label>
+              </ion-item>
+            </ion-col>
+            <ion-col size="6">
+              <ion-item color="recipe-prep-time" class="recipe-overview">
+                <ion-icon name="recipe-prep-time-regular" color="light" size="large" slot="start"></ion-icon>
+                <ion-label>
 
-  <!-- New section for ingredients -->
-  <div>
-    <ion-list lines="full">
-      <ion-list-header>
-        <ion-label>Ingredients</ion-label>
-      </ion-list-header>
-      <ion-item v-for="(ingredient, index) in recipe?.recipe_ingredients" :key="index">
-        <ion-label>
-          <span class="recipe-ingredients-start">{{ ingredient.name }}</span>
-          <span class="recipe-ingredients-end">{{ ingredient.serving }}</span>
-        </ion-label>
-      </ion-item>
-    </ion-list>
-  </div>
+                  <div class="recipe-overview-heading">Prep Time</div>
+                  <div v-if="recipe" class="recipe-overview-subheading">{{ recipe.recipe_total_prep_time }}</div>
+                </ion-label>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="6">
+              <ion-item color="recipe-cook-time" class="recipe-overview">
+                <ion-icon name="recipe-cook-time-regular" color="light" size="large" slot="start"></ion-icon>
+                <ion-label>
 
-    <!-- Method section - only show if there are steps with non-empty methods -->
-    <template v-if="recipe?.recipe_steps?.some(step => step.method && step.method.trim() !== '')">
-      <div class="recipe-steps">
+                  <div class="recipe-overview-heading">Cook Time</div>
+                  <div v-if="recipe" class="recipe-overview-subheading">{{ recipe.recipe_total_cook_time }}</div>
+                </ion-label>
+              </ion-item>
+            </ion-col>
+            <ion-col size="6">
+              <ion-item color="recipe-total-time" class="recipe-overview">
+                <ion-icon name="recipe-total-time-regular" color="light" size="large" slot="start"></ion-icon>
+                <ion-label>
+
+                  <div class="recipe-overview-heading">Total Time</div>
+                  <div v-if="recipe" class="recipe-overview-subheading">{{ recipe.recipe_total_time }}</div>
+                </ion-label>
+              </ion-item>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+
+      </div>
+
+      <!-- New section for ingredients -->
+      <div>
         <ion-list lines="full">
           <ion-list-header>
-            <ion-label>Instructions</ion-label>
+            <ion-label>Ingredients</ion-label>
           </ion-list-header>
-          <ion-item v-for="(step, index) in recipe.recipe_steps" :key="index">
-            <ion-label v-if="step.method && step.method.trim() !== ''">
-              <span>{{ step.method }}</span>
+          <ion-item v-for="(ingredient, index) in recipe?.recipe_ingredients" :key="index">
+            <ion-label>
+              <span class="recipe-ingredients-start">{{ ingredient.name }}</span>
+              <span class="recipe-ingredients-end">{{ ingredient.serving }}</span>
             </ion-label>
           </ion-item>
         </ion-list>
       </div>
-    </template>
+
+      <!-- Method section - only show if there are steps with non-empty methods -->
+      <template v-if="recipe?.recipe_steps?.some(step => step.method && step.method.trim() !== '')">
+        <div class="recipe-steps">
+          <ion-list lines="full">
+            <ion-list-header>
+              <ion-label>Instructions</ion-label>
+            </ion-list-header>
+            <ion-item v-for="(step, index) in recipe.recipe_steps" :key="index">
+              <ion-label v-if="step.method && step.method.trim() !== ''">
+                <span>{{ step.method }}</span>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+        </div>
+      </template>
 
       <!-- View More Details button - only show if there's a source URL -->
-      <ion-button 
-        v-if="recipe?.recipe_source_url" 
-        expand="full" 
-        color="secondary" 
-        class="recipe-button"
-        @click="openSourceUrl"
-      >
+      <ion-button v-if="recipe?.recipe_source_url" expand="block" color="secondary" class="recipe-button"
+        @click="openSourceUrl">
         View More Details
       </ion-button>
     </ion-content>
@@ -157,7 +152,7 @@ const fetchRecipe = async (id) => {
     const response = await apiRecipes.getRecipes();
     const recipes = Array.isArray(response) ? response.map(transformRecipe) : [];
     recipe.value = recipes.find((r) => r.id === id);
-    
+
     if (!recipe.value) {
       error.value = 'Recipe not found';
     }
@@ -212,7 +207,8 @@ onMounted(() => {
 .recipe-image-container {
   position: relative;
   width: 100%;
-  height: 250px; /* Adjust as needed */
+  height: 250px;
+  /* Adjust as needed */
   overflow: hidden;
 }
 
@@ -267,11 +263,29 @@ onMounted(() => {
 .recipe-ingredients-start {
   font-weight: 500;
   text-transform: capitalize;
+  display: inline-block;
+  white-space: nowrap;
+  /* Prevents wrapping */
+  overflow: hidden;
+  /* Hides overflow content */
+  text-overflow: ellipsis;
+  /* Adds ellipsis (...) when content overflows */
+  max-width: 20ch;
+  /* Limits to approximately 20 characters */
 }
 
 .recipe-ingredients-end {
   float: right;
   text-transform: capitalize;
+  display: inline-block;
+  white-space: nowrap;
+  /* Prevents wrapping */
+  overflow: hidden;
+  /* Hides overflow content */
+  text-overflow: ellipsis;
+  /* Adds ellipsis (...) when content overflows */
+  max-width: 10ch;
+  /* Limits to approximately 20 characters */
 }
 
 .recipe-steps {
@@ -283,5 +297,8 @@ onMounted(() => {
   margin-top: 36px;
   margin-right: 0;
   margin-left: 0;
+  max-width: 95%;
+  margin-left: auto;
+	margin-right: auto;
 }
 </style>

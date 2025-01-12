@@ -108,6 +108,27 @@
   onMounted(() => {
     initPdfViewer();
   });
+
+  const scale = ref(1);
+const MIN_SCALE = 1;
+const MAX_SCALE = 3;
+
+const handlePinchZoom = (event) => {
+    if (event.scale) {
+        let newScale = scale.value * event.scale;
+        if (newScale < MIN_SCALE) newScale = MIN_SCALE;
+        if (newScale > MAX_SCALE) newScale = MAX_SCALE;
+
+        scale.value = newScale;
+        if (pdfContainer.value) {
+            pdfContainer.value.style.transform = `scale(${scale.value})`;
+        }
+    }
+};
+
+onMounted(() => {
+    pdfContainer.value.addEventListener('gesturechange', handlePinchZoom);
+});
   </script>
   
   <style scoped>
@@ -122,7 +143,15 @@
   .pdf-container {
     width: 100%;
     height: 100%;
-  }
+    overflow: auto; /* Re-enabled scrolling */
+    touch-action: auto; /* Restored default touch behavior for scrolling */
+    position: relative;
+}
+
+.pdf-container img, .pdf-container canvas {
+    transform-origin: center;
+    transition: transform 0.55s ease-out;
+}
   
   .pdf-pagination {
     flex: 1;

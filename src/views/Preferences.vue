@@ -269,10 +269,15 @@ ion-icon {
 
 .loyalty-card {
   background: var(--ion-color-light);
-  margin: 16px;
+  margin-top: 16px;
+  margin-right: 16px;
+  margin-left: 16px;
   padding: 16px;
   border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border-style: solid;
+  border-width: 1px;
+  border-color: var(--ion-color-light-shade);
+  /* box-shadow: 0 2px 4px rgba(0,0,0,0.1); */
 }
 
 .loyalty-label {

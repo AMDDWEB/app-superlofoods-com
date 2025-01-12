@@ -11,7 +11,7 @@
               color="medium"
             ></ion-icon>
           </h3>
-          <p class="app-list-subheading">Don't miss out on these amazing deals!</p>
+          <p class="app-list-subheading">Unlock exclusive savings – limited time only!</p>
         </ion-text>
       </ion-item>
     </ion-list>

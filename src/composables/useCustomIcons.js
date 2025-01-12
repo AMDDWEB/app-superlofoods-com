@@ -45,6 +45,11 @@ import callstoreRegularIcon from '../icons/regular/phone-flip-regular.svg';
 import notificationsRegularIcon from '../icons/regular/bell-exclamation-regular.svg';
 import nonotificationsRegularIcon from '../icons/regular/regular-bell-slash.svg';
 import barcodecouponRegularIcon from '../icons/regular/regular-barcode-read-circle-dollar.svg';
+import myaccountRegularIcon from '../icons/regular/square-user-regular.svg';
+import recipeServingsRegularIcon from '../icons/regular/user-group-simple-regular.svg';
+import recipePrepTimeRegularIcon from '../icons/regular/clock-regular.svg';
+import recipeCookTimeRegularIcon from '../icons/regular/temperature-three-quarters-regular.svg';
+import recipeTotalTimeRegularIcon from '../icons/regular/regular-plate-utensils-clock.svg';
 
 //Duotone icons
 import handwaveDuotoneIcon from '../icons/duotone/hand-wave-duotone-regular.svg';
@@ -92,6 +97,11 @@ const customIcons = {
   'call-store-regular': callstoreRegularIcon,
   'no-notifications-regular': nonotificationsRegularIcon,
   'barcode-coupon-regular': barcodecouponRegularIcon,
+  'my-account-regular': myaccountRegularIcon,
+  'recipe-servings-regular': recipeServingsRegularIcon,
+  'recipe-prep-time-regular': recipePrepTimeRegularIcon,
+  'recipe-cook-time-regular': recipeCookTimeRegularIcon,
+  'recipe-total-time-regular': recipeTotalTimeRegularIcon,
 
   // Duotone icons are below 
   'hand-wave-duotone': handwaveDuotoneIcon,

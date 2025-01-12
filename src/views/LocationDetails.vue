@@ -24,14 +24,15 @@
       <div v-else-if="locationData">
         <ion-item lines="none" class="ion-margin-top">
           <ion-label>
-            <h1>{{ locationData.name }}</h1>
+            <h1 class="location-heading">{{ locationData.name }}</h1>
+            <h2 class="location-subheading">{{ locationData.location_banner[0]?.banner_name }}</h2>
           </ion-label>
         </ion-item>
 
         <ion-item lines="none">
           <ion-label>
             <p class="" style="color: var(--ion-color-dark);">
-              {{ locationData.address }}<br>
+              {{ locationData.street_number }} {{ locationData.street_name }}<br>
               {{ locationData.city }}, {{ locationData.state_short }} {{ locationData.post_code }}
             </p>
           </ion-label>
@@ -545,6 +546,15 @@ ion-button ion-icon {
 .button-container ion-button {
   flex: 1;
   margin: 0 5px;
+}
+
+.location-heading {
+  font-weight: 800;
+}
+
+.location-subheading {
+  font-weight: 600;
+  color: var(--ion-color-primary);
 }
 </style>
 

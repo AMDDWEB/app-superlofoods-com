@@ -86,12 +86,12 @@ http://ionicframework.com/docs/theming/ */
 	--ion-color-recipe-cook-time-shade: #de5746;
 	--ion-color-recipe-cook-time-tint: #fc7362;
 
-	--ion-color-recipe-cook-time: #41D298;
-	--ion-color-recipe-cook-time-rgb: 65,210,152;
-	--ion-color-recipe-cook-time-contrast: #f7f7f7;
-	--ion-color-recipe-cook-time-contrast-rgb: 247,247,247;
-	--ion-color-recipe-cook-time-shade: #39b986;
-	--ion-color-recipe-cook-time-tint: #54d7a2;
+	--ion-color-recipe-total-time: #41D298;
+	--ion-color-recipe-total-time-rgb: 65,210,152;
+	--ion-color-recipe-total-time-contrast: #f7f7f7;
+	--ion-color-recipe-total-time-contrast-rgb: 247,247,247;
+	--ion-color-recipe-total-time-shade: #39b986;
+	--ion-color-recipe-total-time-tint: #54d7a2;
 }
 
 .app-custom-toolbar {
@@ -193,6 +193,14 @@ http://ionicframework.com/docs/theming/ */
 	-webkit-line-clamp: 1;
 	max-width: 90%;
   }
+
+  .truncate-characters {
+	display: inline-block;
+    white-space: nowrap;            /* Prevents wrapping */
+    overflow: hidden;               /* Hides overflow content */
+    text-overflow: ellipsis;        /* Adds ellipsis (...) when content overflows */
+    max-width: 20ch;                /* Limits to approximately 20 characters */
+}
   
   .truncate-multiline {
 	display: -webkit-box;
@@ -202,3 +210,39 @@ http://ionicframework.com/docs/theming/ */
 	line-height: 1.2em;
 	max-height: 3.6em;
   }
+
+  .ion-color-recipe-servings {
+	--ion-color-base: var(--ion-color-recipe-servings);
+	--ion-color-base-rgb: var(--ion-color-recipe-servings-rgb);
+	--ion-color-contrast: var(--ion-color-recipe-servings-contrast);
+	--ion-color-contrast-rgb: var(--ion-color-recipe-servings-contrast-rgb);
+	--ion-color-shade: var(--ion-color-recipe-servings-shade);
+	--ion-color-tint: var(--ion-color-recipe-servings-tint);
+}
+
+.ion-color-recipe-prep-time {
+	--ion-color-base: var(--ion-color-recipe-prep-time);
+	--ion-color-base-rgb: var(--ion-color-recipe-prep-time-rgb);
+	--ion-color-contrast: var(--ion-color-recipe-prep-time-contrast);
+	--ion-color-contrast-rgb: var(--ion-color-recipe-prep-time-contrast-rgb);
+	--ion-color-shade: var(--ion-color-recipe-prep-time-shade);
+	--ion-color-tint: var(--ion-color-recipe-prep-time-tint);
+}
+
+.ion-color-recipe-cook-time {
+	--ion-color-base: var(--ion-color-recipe-cook-time);
+	--ion-color-base-rgb: var(--ion-color-recipe-cook-time-rgb);
+	--ion-color-contrast: var(--ion-color-recipe-cook-time-contrast);
+	--ion-color-contrast-rgb: var(--ion-color-recipe-cook-time-contrast-rgb);
+	--ion-color-shade: var(--ion-color-recipe-cook-time-shade);
+	--ion-color-tint: var(--ion-color-recipe-cook-time-tint);
+}
+
+.ion-color-recipe-total-time {
+	--ion-color-base: var(--ion-color-recipe-total-time);
+	--ion-color-base-rgb: var(--ion-color-recipe-total-time-rgb);
+	--ion-color-contrast: var(--ion-color-recipe-total-time-contrast);
+	--ion-color-contrast-rgb: var(--ion-color-recipe-total-time-contrast-rgb);
+	--ion-color-shade: var(--ion-color-recipe-total-time-shade);
+	--ion-color-tint: var(--ion-color-recipe-total-time-tint);
+}

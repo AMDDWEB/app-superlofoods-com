@@ -3,7 +3,7 @@
     <ion-header>
       <!-- All/Clipped Toggle First -->
       <ion-toolbar>
-        <ion-segment v-model="selectedView" style="margin: 0 auto; width: 200px;">
+        <ion-segment class="coupon-toggle" v-model="selectedView" style="margin: 0 auto; width: 200px;">
           <ion-segment-button value="all">
             <ion-label>All</ion-label>
           </ion-segment-button>
@@ -18,10 +18,10 @@
         <ion-segment
           mode="ios"
           scrollable
-          class="ion-padding-start ion-no-margin"
+          class="ion-padding-start coupon-categories coupon-categories-ion-segment"
           :value="selectedCategory"
         >
-          <ion-segment-button
+          <ion-segment-button class="coupon-categories-ion-segment-button"
             v-for="category in sortedCategories"
             :key="category"
             :value="category"
@@ -36,7 +36,7 @@
     <ion-content :fullscreen="true">
       <div class="coupon-grid">
         <div v-if="loading" class="loading-container">
-          <ion-spinner></ion-spinner>
+          <ion-spinner name="crescent" class="app-loading-spinner"></ion-spinner>
         </div>
         
         <div v-else-if="displayedCoupons.length === 0" class="no-coupons">
@@ -152,35 +152,36 @@ onUnmounted(() => {
 
 <style scoped>
 .coupon-grid {
-  padding: 16px;
+  padding-top: 20px;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .coupon-container {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  row-gap: 14px;
+  column-gap: 6px;
 }
 
-ion-segment {
+.coupon-categories-ion-segment {
   --background: var(--ion-color-light);
 }
-
-ion-segment-button::before {
+.coupon-categories-ion-segment-button::before {
   content: none;
 }
-
-ion-segment-button {
+.coupon-categories-ion-segment-button {
   border: none;
   text-transform: capitalize;
   margin-bottom: 8px;
 }
-
-ion-segment-button.segment-button-checked {
+.coupon-categories-ion-segment-button.segment-button-checked {
   background: var(--ion-color-primary) !important;
   color: #fff;
+  /* height: 24px; */
+  /* border-radius: 20px; */
 }
-
-ion-segment-button::part(indicator-background) {
+.coupon-categories-ion-segment-button::part(indicator-background) {
   height: 0px;
 }
 
@@ -209,15 +210,5 @@ ion-segment-button::part(indicator-background) {
   }
 }
 
-ion-segment {
-  min-height: 48px;
-  display: flex;
-  overflow-x: auto;
-}
 
-ion-segment-button {
-  min-width: fit-content;
-  --padding-start: 16px;
-  --padding-end: 16px;
-}
 </style> 
