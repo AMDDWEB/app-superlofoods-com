@@ -2,6 +2,11 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
+        <ion-buttons slot="end" class="barcode-button-container">
+          <ion-button @click="presentPopover" class="barcode-button">
+            <ion-icon :icon="barcodeOutline" color="primary" size="large"></ion-icon>
+          </ion-button>
+        </ion-buttons>
         <ion-img class="app-toolbar-image" :src="logoUrl"></ion-img>
       </ion-toolbar>
     </ion-header>
@@ -78,6 +83,10 @@ import CouponsCarousel from '@/components/CouponsCarousel.vue';
 import { IonPage, IonHeader, IonToolbar, IonContent } from '@ionic/vue';
 import { useRouter } from 'vue-router';
 import { Capacitor } from '@capacitor/core';
+import { popoverController } from '@ionic/vue';
+import BarcodePopover from '@/components/BarcodePopover.vue';
+import { useSignupModal } from '@/composables/useSignupModal';
+import { barcodeOutline } from 'ionicons/icons';
 
 // Initialize all refs at the top
 const sliders = ref([]);
@@ -107,6 +116,9 @@ const isLocationModalOpen = ref(false);
 
 // Add router to imports if not already present
 const router = useRouter();
+
+// Add these to your existing setup
+const { getCardNumber } = useSignupModal();
 
 // Lifecycle hooks
 onMounted(async () => {
@@ -290,11 +302,65 @@ const handleNotificationRequest = async () => {
   }
 };
 
+const presentPopover = async (e) => {
+  const popover = await popoverController.create({
+    component: BarcodePopover,
+    breakpoints: [0, 0.5],
+    initialBreakpoint: 0.5,
+    cssClass: 'barcode-sheet-modal',
+    showBackdrop: true,
+    backdropDismiss: true,
+    translucent: true,
+    side: 'bottom'
+  });
+  return popover.present();
+};
+
 </script>
 
 <style scoped>
-ion-grid {
-  --ion-grid-columns: 3 !important;
-  --ion-grid-column-padding: 1px;
+.barcode-button-container {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.barcode-button {
+  height: 100%;
+  margin: 0;
+  padding-right: 16px;
+}
+
+:global(.barcode-popover) {
+  --width: 90%;
+  --max-width: 400px;
+  --height: auto;
+  --border-radius: 8px;
+}
+
+:global(.popover-viewport.barcode-popover) {
+  background: white;
+}
+
+:global(.barcode-sheet-modal) {
+  --width: 100%;
+  --height: auto;
+  align-items: flex-end;
+  --backdrop-opacity: 0.4;
+}
+
+:global(.barcode-sheet-modal .popover-viewport) {
+  background: white;
+  border-radius: 16px 16px 0 0;
+}
+
+:global(.barcode-sheet-modal::part(content)) {
+  top: auto;
+  bottom: 0;
+  transform-origin: bottom;
 }
 </style>
