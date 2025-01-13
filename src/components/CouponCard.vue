@@ -41,13 +41,15 @@
         </ion-segment-button>
       </ion-segment>
 
+      
       <div class="coupon-details-card" v-if="selectedSegment === 'details'">
         <span class="coupon-details-label">{{ coupon.title }} on {{ coupon.subtitle }}</span><br>
         <span class="coupon-details-text">{{ coupon.description }}</span>
       </div>
+      <ion-img v-if="coupon.encoded_img, selectedSegment === 'details'" class="coupon-details-image" :src="coupon.encoded_img"></ion-img>
 
       <div class="coupon-details-card" v-if="selectedSegment === 'terms'">
-        <span class="coupon-details-label">Terms & Conditions</span><br>
+        <span class="coupon-details-label">Coupon Expires on {{ formatExpDate(coupon.to_date) }}</span><br>
         <span class="coupon-details-text">{{ coupon.disclaimer }}</span>
       </div>
     </ion-content>
@@ -203,5 +205,14 @@ ion-icon {
   color: var(--ion-color-dark);
   font-size: 16px;
   font-weight: 600;
+}
+
+.coupon-details-image {
+  height: auto;
+  width: 65%;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 25px;
 }
 </style>
