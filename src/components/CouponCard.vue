@@ -11,7 +11,7 @@
     </div>
 
     <!-- Text Content -->
-    <span class="coupon-brand">{{ coupon.subtitle }}</span>
+    <span class="coupon-brand truncate">{{ coupon.subtitle }}</span>
     <ion-card-title class="coupon-value ion-text-center truncate">{{ coupon.title }}</ion-card-title>
     <span class="coupon-description truncate-multiline">{{ coupon.description }}</span>
     <span class="coupon-expiration ion-text-center">Expires {{ formatExpDate(coupon.to_date) }}</span>
@@ -25,21 +25,56 @@
       :disabled="isCouponClipped(coupon.id)"
       @click.stop="handleClipClick"
     >
-      <ion-icon 
-        slot="start" 
-        :icon="cut">
-      </ion-icon>
+      <ion-icon slot="start" :icon="cut"></ion-icon>
       {{ isCouponClipped(coupon.id) ? 'Clipped' : 'Clip Coupon' }}
     </ion-button>
   </ion-card>
-  
+
+ 
+<!-- Coupon Modal -->
+<ion-modal 
+    :is-open="showCouponModal" 
+    @didDismiss="closeCouponModal" 
+    :presenting-element="presentingElement"
+    :initial-breakpoint="1" 
+    :breakpoints="[0, 1]"
+>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Coupon Details</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    
+    <ion-content>
+      <ion-segment class="coupon-details-segment" v-model="selectedSegment">
+        <ion-segment-button value="details">
+          <ion-label>Details</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="terms">
+          <ion-label>Terms</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+
+      <div class="coupon-details-card" v-if="selectedSegment === 'details'">
+        <span class="coupon-details-label">{{ coupon.title }} on {{ coupon.subtitle }}</span><br>
+        <span class="coupon-details-text">{{ coupon.description }}</span>
+      </div>
+      
+      <div class="coupon-details-card" v-if="selectedSegment === 'terms'">
+        <span class="coupon-details-label">Terms & Conditions</span><br>
+        <span class="coupon-details-text">{{ coupon.disclaimer }}</span>
+      </div>
+    </ion-content>
+</ion-modal>
+
+  <!-- Signup Modal -->
   <SignupModal />
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { format } from 'date-fns';
-import { IonCard, IonImg, IonIcon, IonButton, IonText, IonSpinner } from '@ionic/vue';
+import { IonCard, IonImg, IonIcon, IonButton, IonText, IonSpinner, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonContent, IonSegment, IonSegmentButton, IonLabel } from '@ionic/vue';
 import { cut } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import { useSignupModal } from '@/composables/useSignupModal';
@@ -59,19 +94,24 @@ const emit = defineEmits(['clip']);
 const { openSignupModal, SignupModal } = useSignupModal();
 const { isCouponClipped, addClippedCoupon } = useClippedCoupons();
 const isClipping = ref(false);
+const showCouponModal = ref(false);
+const selectedSegment = ref('details');
 
 const formatExpDate = (date) => format(new Date(date), 'MM/dd/yyyy');
 
 const handleCardClick = () => {
-  router.push(`/coupons/${props.coupon.id}`);
+  showCouponModal.value = true;
+};
+
+const closeCouponModal = () => {
+  showCouponModal.value = false;  // Resets the modal state properly after close
 };
 
 const handleClipClick = async (event) => {
   event.stopPropagation(); // Prevent the card click event
-  
+
   if (!TokenStorage.hasTokens()) {
-    console.log('User not authenticated, opening signup modal');
-    openSignupModal();
+    openSignupModal({ presentationStyle: 'popover' });
     return;
   }
   
@@ -91,6 +131,7 @@ const handleClipClick = async (event) => {
 </script>
 
 <style scoped>
+/* Styles maintained as requested */
 ion-card {
   padding-top: 10px;
   margin: 0 4px;
@@ -149,4 +190,32 @@ ion-icon {
   margin-right: 4px;
   font-size: 12px;
 }
-</style> 
+
+.coupon-details-segment {
+  margin-left: auto;
+  margin-right: auto;
+  width: 60%;
+  margin-top: 20px;
+  align-items: center;
+}
+
+.coupon-details-card {
+  background: var(--ion-color-light);
+  margin: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.coupon-details-label {
+  color: var(--ion-color-medium);
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.coupon-details-text {
+  color: var(--ion-color-dark);
+  font-size: 16px;
+  font-weight: 600;
+}
+</style>
