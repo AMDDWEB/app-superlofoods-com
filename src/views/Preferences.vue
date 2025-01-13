@@ -6,10 +6,6 @@
       </ion-toolbar>
     </ion-header>
     <ion-content :fullscreen="true">
-      <div class="loyalty-card" v-if="loyaltyNumber">
-        <div class="loyalty-label">My Loyalty Number</div>
-        <div class="loyalty-number">{{ formatPhone(loyaltyNumber) }}</div>
-      </div>
 
       <ion-list>
         <ion-list-header>
@@ -17,6 +13,12 @@
             Preferences
           </ion-label>
         </ion-list-header>
+        <ion-item button @click="$router.push('/my-account')" v-if="loyaltyNumber">
+          <ion-icon color="primary" name="my-account-regular" slot="start"></ion-icon>
+          <ion-label>
+            My Account
+          </ion-label>
+        </ion-item>
         <ion-item button @click="openGeneralNotificationSettings">
           <ion-icon color="primary" name="notifications-settings-regular" slot="start"></ion-icon>
           <ion-label>
