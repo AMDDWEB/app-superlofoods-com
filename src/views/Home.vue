@@ -158,7 +158,7 @@ async function fetchLocationData() {
         localStorage.setItem('selectedLocation', JSON.stringify(selectedLocation.value));
       }
     } catch (error) {
-      console.error('Error fetching location data:', error);
+      // Handle error silently
     }
   }
 }
@@ -192,7 +192,7 @@ async function getData() {
     recipes.value = Array.isArray(recipesResponse) ? recipesResponse : [];
     spotlights.value = Array.isArray(spotlightsResponse) ? spotlightsResponse : [];
   } catch (err) {
-    console.error('[Home] Error fetching data:', err);
+    // Handle error silently
   }
 }
 

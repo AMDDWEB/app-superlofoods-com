@@ -80,7 +80,6 @@ const fetchNotifications = async (isRefreshing = false) => {
         const response = await apiNotifications.getNotifications();
         const readNotifications = JSON.parse(localStorage.getItem('readNotifications')) || [];
 
-        // ✅ Corrected: Ensure existing `isRead` state persists without overwriting the array
         const updatedNotifications = response.data.map(notification => {
             const alreadyRead = readNotifications.includes(notification.id);
             const existingNotification = notifications.value.find(n => n.id === notification.id);
@@ -90,7 +89,6 @@ const fetchNotifications = async (isRefreshing = false) => {
             };
         });
 
-        // ✅ Only replace the array when not refreshing to avoid reactive issues
         if (isRefreshing) {
             notifications.value = [...updatedNotifications];
         } else {
@@ -98,7 +96,7 @@ const fetchNotifications = async (isRefreshing = false) => {
         }
 
     } catch (error) {
-        console.error('Error fetching notifications:', error);
+        // Handle error silently or show user feedback
     } finally {
         loading.value = false;
     }

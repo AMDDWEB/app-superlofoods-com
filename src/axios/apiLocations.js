@@ -18,30 +18,28 @@ class LocationsApi {
 
   async getLocations({ page = 1, perPage = 150 } = {}) {
     try {
-        const response = await locations.get('/wp-json/iproweb/v1/locations', {
-            params: { page, perPage }
-        });
+      const response = await locations.get('/wp-json/iproweb/v1/locations', {
+        params: { page, perPage }
+      });
 
-        // Simplified: Filter and sort in one step
-        return response.data
-            .filter(location => location?.title) // Ensure title exists
-            .sort((a, b) => a.title > b.title ? 1 : -1) // Basic alphabetical sorting
-            .slice(0, 150); // Limit to 150 items
+      // Simplified: Filter and sort in one step
+      return response.data
+        .filter(location => location?.title) // Ensure title exists
+        .sort((a, b) => a.title > b.title ? 1 : -1) // Basic alphabetical sorting
+        .slice(0, 150); // Limit to 150 items
     } catch (error) {
-        console.error('Error fetching locations:', error);
-        return [];
+      return [];
     }
-}
+  }
 
   async getLocationById(id) {
     try {
-        const response = await this.getLocations();
-        return response.find(location => location.id.toString() === id.toString());
+      const response = await this.getLocations();
+      return response.find(location => location.id.toString() === id.toString());
     } catch (error) {
-        console.error('Error fetching location by ID:', error);
-        return null;
+      return null;
     }
-}
+  }
 }
 
 export default new LocationsApi();

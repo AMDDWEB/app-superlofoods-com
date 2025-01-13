@@ -118,25 +118,18 @@ onMounted(() => {
 
 // Open app general notification settings for testing
 async function openGeneralNotificationSettings() {
-  console.log('Attempting to open settings');
   try {
     if (Capacitor.getPlatform() === 'ios') {
-      console.log('Detected iOS platform');
       await NativeSettings.openIOS({
         option: IOSSettings.App
       });
     } else if (Capacitor.getPlatform() === 'android') {
-      console.log('Detected Android platform');
       await NativeSettings.openAndroid({
         option: AndroidSettings.ApplicationDetails
       });
-    } else {
-      console.warn('Settings are not available on this platform.');
     }
-    console.log('Settings opened successfully');
   } catch (error) {
-    console.error('Failed to open settings:', error);
-    // Optionally, show a user-friendly error message
+    // Handle error silently
   }
 }
 // Open website in browser
@@ -165,20 +158,17 @@ async function openFacebook() {
       presentationStyle: 'popover'
     });
   } catch (error) {
-    console.error('Failed to open Facebook URL:', error);
-    // Optionally, you can handle the error here (e.g., show an alert to the user)
+    // Handle error silently
   }
 }
 
 // Open location modal
 function openLocationModal() {
-  console.log('Opening location modal');
   isLocationModalOpen.value = true;
 }
 
 // Handle location selection
 function handleLocationSelected(location) {
-  console.log('Location selected:', location);
   localStorage.setItem('selectedLocation', JSON.stringify(location));
   currentLocation.value = location;
 
@@ -209,28 +199,22 @@ const handleVersionClick = () => {
       // Clear the timer
       clearTimeout(clickTimer.value);
 
-      // 1. Log what's in storage before clearing
-      console.log('Before clearing:', { ...localStorage });
-
-      // 2. Clear everything in localStorage
+      // Clear everything in localStorage
       window.localStorage.clear();
 
-      // 3. Double check specific items are removed
+      // Remove specific items
       window.localStorage.removeItem('selectedLocation');
       window.localStorage.removeItem('currentLocation');
       window.localStorage.removeItem('refresh_token');
 
-      // 4. Reset the reactive ref
+      // Reset the reactive ref
       currentLocation.value = null;
 
-      // 5. Log storage after clearing
-      console.log('After clearing:', { ...localStorage });
-
-      // 6. Force a complete page reload
+      // Force a complete page reload
       window.location.href = '/';
 
     } catch (error) {
-      console.error('Failed to clear storage:', error);
+      // Handle error silently
     }
   }
 };

@@ -5,11 +5,7 @@
         <ion-text>
           <h3 class="app-list-heading">
             Clip & Save Coupons
-            <ion-icon
-              style="font-size: 16px;"
-              name="chevron-right"
-              color="medium"
-            ></ion-icon>
+            <ion-icon style="font-size: 16px;" name="chevron-right" color="medium"></ion-icon>
           </h3>
           <p class="app-list-subheading">Unlock exclusive savings – limited time only!</p>
         </ion-text>
@@ -19,11 +15,7 @@
     <div v-if="!loading">
       <swiper @swiper="onSwiper" :slides-per-view="2.5" :space-between="1" loop>
         <swiper-slide v-for="coupon in displayCoupons" :key="coupon.id">
-          <CouponCard 
-            :coupon="coupon"
-            @click="goToCouponDetails(coupon.id)"
-            @clip="handleClipCoupon(coupon.id)"
-          />
+          <CouponCard :coupon="coupon" @click="goToCouponDetails(coupon.id)" @clip="handleClipCoupon(coupon.id)" />
         </swiper-slide>
       </swiper>
     </div>
@@ -79,7 +71,6 @@ const handleClipCoupon = async (couponId) => {
     // Refresh coupons after successful clip
     await fetchCoupons({ limit: props.limit, offset: 0 });
   } catch (error) {
-    console.error('Error clipping coupon:', error);
   }
 };
 
@@ -133,4 +124,4 @@ ion-note {
     font-size: 12px;
   }
 }
-</style> 
+</style>

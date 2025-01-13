@@ -1,3 +1,10 @@
+// Declare cordova on window object for TypeScript
+declare global {
+  interface Window {
+    cordova: any;
+  }
+}
+
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router';
@@ -36,6 +43,8 @@ import './theme/variables.css';
 
 /* Custom icons */
 import { registerCustomIcons } from './composables/useCustomIcons';
+import { useNotifications } from './composables/useNotifications';
+
 registerCustomIcons(); // Call the registerCustomIcons function earlier
 
 /* One Signal push notification integration  */
@@ -45,15 +54,22 @@ const app = createApp(App)
   .use(IonicVue)
   .use(router);
 
+// Provide the notification permission function
+const { requestNotificationPermission } = useNotifications();
+app.provide('requestNotificationPermission', requestNotificationPermission);
+
 router.isReady().then(() => {
   app.mount('#app');
   
-  // Initialize OneSignal with the environment variable
-  OneSignal.initialize(import.meta.env.VITE_ONESIGNAL_APP_ID); // Use the environment variable for the App ID
-  
-  // Request permission for notifications
-  OneSignal.Notifications.requestPermission()
-    .then((response) => {
-      console.log('Push notification permission response:', response);
+  // Only initialize OneSignal in a Cordova environment
+  if (window.cordova) {
+    // Wait for the device to be ready before initializing OneSignal
+    document.addEventListener('deviceready', () => {
+      try {
+        // Initialize OneSignal with the environment variable
+        OneSignal.initialize(import.meta.env.VITE_ONESIGNAL_APP_ID);
+      } catch (error) {
+      }
     });
+  }
 });

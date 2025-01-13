@@ -14,9 +14,9 @@ export function useSpotlightDetails() {
 
     // Get the first spotlight group (assuming we only show one group at a time)
     const spotlightGroup = data[0];
-    
+
     // Transform each product in the products array
-    return spotlightGroup.products.map((product, idx) => 
+    return spotlightGroup.products.map((product, idx) =>
       transformSpotlightData(product, `spotlight-${idx}`)
     );
   };

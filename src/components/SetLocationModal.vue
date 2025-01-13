@@ -1,10 +1,5 @@
 <template>
-  <ion-modal
-    :is-open="isOpen"
-    @didDismiss="closeModal"
-    :swipe-to-close="false"
-    :backdropDismiss="false"
-  >
+  <ion-modal :is-open="isOpen" @didDismiss="closeModal" :swipe-to-close="false" :backdropDismiss="false">
     <ion-header>
       <ion-toolbar>
         <ion-title>Select My Store</ion-title>
@@ -16,16 +11,13 @@
     <ion-content>
       <ion-list>
         <ion-item v-for="location in locations" :key="location.id">
-            <ion-icon name="location-dot" color="primary" slot="start"></ion-icon>
+          <ion-icon name="location-dot" color="primary" slot="start"></ion-icon>
           <ion-label>
             <h2>{{ location.name }}</h2>
             <p class="app-text-overflow">{{ location.address }}</p>
           </ion-label>
-          <ion-toggle
-            slot="end"
-            :checked="selectedLocation && selectedLocation.id === location.id"
-            @ionChange="toggleLocation(location)"
-          ></ion-toggle>
+          <ion-toggle slot="end" :checked="selectedLocation && selectedLocation.id === location.id"
+            @ionChange="toggleLocation(location)"></ion-toggle>
         </ion-item>
       </ion-list>
     </ion-content>
@@ -85,7 +77,7 @@ function toggleLocation(location) {
     selectedLocation.value = null;
     localStorage.removeItem('selectedLocation');
     emit('location-selected', null);
-    
+
     // Dispatch the locationChanged event with null
     window.dispatchEvent(new CustomEvent('locationChanged', {
       detail: null
@@ -95,13 +87,13 @@ function toggleLocation(location) {
     selectedLocation.value = location;
     localStorage.setItem('selectedLocation', JSON.stringify(location));
     emit('location-selected', location);
-    
+
     // Dispatch the locationChanged event
     window.dispatchEvent(new CustomEvent('locationChanged', {
       detail: location
     }));
   }
-  
+
   // Close the modal after selection/deselection
   closeModal();
 }

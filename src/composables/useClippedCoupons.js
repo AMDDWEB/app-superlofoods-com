@@ -13,7 +13,6 @@ export function useClippedCoupons() {
   const addClippedCoupon = (couponId) => {
     if (!clippedCoupons.value.has(couponId)) {
       clippedCoupons.value = new Set([...clippedCoupons.value, couponId]);
-      console.log(`Coupon ${couponId} clipped successfully`);
     }
   };
 

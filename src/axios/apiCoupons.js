@@ -27,11 +27,11 @@ class CouponsApi {
     return response.data;
   }
 
-  async getCoupons({ 
-    limit = 1000, 
-    offset = 0, 
+  async getCoupons({
+    limit = 1000,
+    offset = 0,
     category = null,
-    sortBy = 'newest' 
+    sortBy = 'newest'
   } = {}) {
     const params = {
       merchant_id: import.meta.env.VITE_COUPONS_MERCHANT_ID,
@@ -80,7 +80,7 @@ class CouponsApi {
 
   async clipCoupon(offerId) {
     const refreshToken = TokenStorage.getRefreshToken();
-    
+
     if (!refreshToken) {
       throw new Error('No refresh token found');
     }
@@ -98,7 +98,7 @@ class CouponsApi {
 
   async getCouponById(id) {
     const refreshToken = TokenStorage.getRefreshToken();
-    
+
     return await couponsInstance({
       url: '/get-offer-by-id',
       method: 'GET',

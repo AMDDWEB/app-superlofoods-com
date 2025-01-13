@@ -120,10 +120,8 @@ const formatExpDate = (date) => format(new Date(date), 'MM/dd/yyyy');
 
 const fetchCouponDetails = async () => {
   try {
-    console.log('Fetching coupon with ID:', props.id);
     loading.value = true;
     const response = await CouponsApi.getCouponById(props.id);
-    console.log('API Response:', response);
     
     // Fix: The API returns an array, so we need to get the first item
     if (response.data && Array.isArray(response.data)) {
@@ -131,15 +129,8 @@ const fetchCouponDetails = async () => {
     } else if (response.data?.data && Array.isArray(response.data.data)) {
       coupon.value = response.data.data[0];  // Get first item from nested array
     }
-    
-    console.log('Processed coupon value:', coupon.value);
-
   } catch (error) {
-    console.error('Error fetching coupon:', error);
-    if (error.response) {
-      console.error('Response data:', error.response.data);
-      console.error('Response status:', error.response.status);
-    }
+    // Handle error silently
   } finally {
     loading.value = false;
   }
@@ -158,7 +149,7 @@ const handleClipClick = async () => {
     await CouponsApi.clipCoupon(props.id);
     addClippedCoupon(props.id);
   } catch (error) {
-    console.error('Error clipping coupon:', error);
+    // Handle error silently
   } finally {
     isClipping.value = false;
   }

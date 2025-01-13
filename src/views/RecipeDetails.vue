@@ -175,7 +175,7 @@ const shareRecipe = async () => {
         url: fullUrl,
       });
     } catch (error) {
-      console.error('Error sharing recipe:', error);
+      // Handle error silently or show user feedback
     }
   }
 };
@@ -188,7 +188,7 @@ const openSourceUrl = async () => {
         presentationStyle: 'popover'
       });
     } catch (error) {
-      console.error('Error opening source URL:', error);
+      // Handle error silently or show user feedback
     }
   }
 };
@@ -277,15 +277,10 @@ onMounted(() => {
 .recipe-ingredients-end {
   float: right;
   text-transform: capitalize;
-  display: inline-block;
   white-space: nowrap;
-  /* Prevents wrapping */
   overflow: hidden;
-  /* Hides overflow content */
   text-overflow: ellipsis;
-  /* Adds ellipsis (...) when content overflows */
   max-width: 10ch;
-  /* Limits to approximately 20 characters */
 }
 
 .recipe-steps {

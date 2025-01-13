@@ -1,7 +1,7 @@
 import { ref, computed, h } from 'vue';
 import CouponsApi from '../axios/apiCoupons';
 import { TokenStorage } from '../utils/tokenStorage';
-import { 
+import {
   IonModal,
   IonContent,
   IonItem,
@@ -25,9 +25,9 @@ export function useSignupModal() {
   const isAuthenticated = ref(CouponsApi.isAuthenticated());
   const router = useRouter();
   const loyaltyNumber = ref('');
-  
+
   const stepTitle = computed(() => {
-    switch(currentStep.value) {
+    switch (currentStep.value) {
       case 1:
         return 'Enter Your Phone Number';
       case 2:
@@ -40,7 +40,7 @@ export function useSignupModal() {
   });
 
   const stepDescription = computed(() => {
-    switch(currentStep.value) {
+    switch (currentStep.value) {
       case 1:
         return "We'll send you a text message with your verification code.";
       case 2:
@@ -54,7 +54,7 @@ export function useSignupModal() {
 
   const formatPhone = (phone) => {
     const cleaned = phone.replace(/\D/g, '');
-    return `(${cleaned.slice(0,3)}) ${cleaned.slice(3,6)}-${cleaned.slice(6)}`;
+    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
   };
 
   const validatePhoneNumber = (value) => {
@@ -97,7 +97,7 @@ export function useSignupModal() {
 
   const submitPhoneNumber = async () => {
     const cleanPhone = phoneNumber.value.replace(/\D/g, '');
-    
+
     if (!validatePhoneNumber(cleanPhone)) {
       errorMessage.value = 'Please enter a valid phone number.';
       return;
@@ -112,7 +112,6 @@ export function useSignupModal() {
       }
     } catch (err) {
       errorMessage.value = 'Failed to send code. Please try again.';
-      console.error('Signup error:', err);
     } finally {
       isLoading.value = false;
     }
@@ -132,7 +131,7 @@ export function useSignupModal() {
         IsoCountryCode: "US",
         merchantId: import.meta.env.VITE_COUPONS_MERCHANT_ID
       });
-      
+
       const tokens = {
         access: response.data.access_token,
         refresh: response.data.refresh_token
@@ -141,16 +140,16 @@ export function useSignupModal() {
       if (tokens.access && tokens.refresh) {
         // Store tokens
         TokenStorage.setTokens(tokens.access, tokens.refresh);
-        
+
         // Store loyalty number (phone number)
         loyaltyNumber.value = phoneNumber.value;
         localStorage.setItem('loyaltyNumber', phoneNumber.value);
-        
+
         // Update authentication state
         isAuthenticated.value = true;
         currentStep.value = 3;
         errorMessage.value = '';
-        
+
         // Dispatch a custom event with the loyalty number
         window.dispatchEvent(new CustomEvent('userSignedUp', {
           detail: { loyaltyNumber: phoneNumber.value }
@@ -159,7 +158,6 @@ export function useSignupModal() {
         throw new Error('Missing tokens in response');
       }
     } catch (err) {
-      console.error('Verification Error:', err);
       errorMessage.value = 'Invalid code. Please try again.';
     } finally {
       isLoading.value = false;
@@ -169,10 +167,7 @@ export function useSignupModal() {
   const checkAuthStatus = () => {
     isAuthenticated.value = CouponsApi.isAuthenticated();
     if (isAuthenticated.value) {
-      console.log('User is authenticated');
       CouponsApi.logStoredTokens(); // Log the stored tokens
-    } else {
-      console.log('User is not authenticated');
     }
     return isAuthenticated.value;
   };
@@ -187,7 +182,6 @@ export function useSignupModal() {
       const response = await CouponsApi.clipCoupon(offerId);
       return response.status === 200;
     } catch (error) {
-      console.error('Error clipping coupon:', error);
       return false;
     }
   };
@@ -209,15 +203,15 @@ export function useSignupModal() {
           h('div', { class: 'modal-content' }, [
             // Progress Steps
             h('div', { class: 'progress-steps' }, [
-              h('div', { 
+              h('div', {
                 class: `step ${currentStep.value === 1 ? 'active' : currentStep.value > 1 ? 'completed' : ''}`,
               }, '1'),
               h('div', { class: 'step-line' }),
-              h('div', { 
+              h('div', {
                 class: `step ${currentStep.value === 2 ? 'active' : currentStep.value > 2 ? 'completed' : ''}`,
               }, '2'),
               h('div', { class: 'step-line' }),
-              h('div', { 
+              h('div', {
                 class: `step ${currentStep.value === 3 ? 'active' : ''}`,
               }, '3')
             ]),
@@ -231,10 +225,10 @@ export function useSignupModal() {
 
             // Header with contextual emoji
             h('div', { class: 'header-section' }, [
-              h('div', { class: 'emoji-wrapper' }, 
-                currentStep.value === 1 ? '👋' : 
-                currentStep.value === 2 ? '📱' : 
-                '🎉'
+              h('div', { class: 'emoji-wrapper' },
+                currentStep.value === 1 ? '👋' :
+                  currentStep.value === 2 ? '📱' :
+                    '🎉'
               ),
               h('h1', stepTitle.value),
               h('p', { class: 'subtitle' }, stepDescription.value)
@@ -294,7 +288,7 @@ export function useSignupModal() {
                     router.push('/tabs/coupons');
                   }
                 }, 'View Coupons'),
-                
+
                 h(IonButton, {
                   expand: 'block',
                   fill: 'outline',
@@ -305,10 +299,10 @@ export function useSignupModal() {
                   }
                 }, 'Manage Preferences')
               ]),
-              
+
               h('p', { class: 'preferences-note' }, [
                 'Want to update your preferences or unsubscribe? ',
-                h('a', { 
+                h('a', {
                   href: '#',
                   onClick: (e) => {
                     e.preventDefault();

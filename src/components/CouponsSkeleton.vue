@@ -1,36 +1,24 @@
 <template>
   <ion-card class="ion-no-margin ion-no-padding" v-for="i in count" :key="i">
     <div class="ion-padding-top skeleton-image-container">
-      <ion-skeleton-text 
-        animated 
-        class="skeleton-image">
+      <ion-skeleton-text animated class="skeleton-image">
       </ion-skeleton-text>
     </div>
-    
+
     <div class="skeleton-content">
-      <ion-skeleton-text 
-        animated 
-        class="skeleton-brand">
+      <ion-skeleton-text animated class="skeleton-brand">
       </ion-skeleton-text>
 
-      <ion-skeleton-text 
-        animated 
-        class="skeleton-title">
+      <ion-skeleton-text animated class="skeleton-title">
       </ion-skeleton-text>
 
-      <ion-skeleton-text 
-        animated 
-        class="skeleton-description">
+      <ion-skeleton-text animated class="skeleton-description">
       </ion-skeleton-text>
 
-      <ion-skeleton-text 
-        animated 
-        class="skeleton-expiration">
+      <ion-skeleton-text animated class="skeleton-expiration">
       </ion-skeleton-text>
 
-      <ion-skeleton-text 
-        animated 
-        class="skeleton-button">
+      <ion-skeleton-text animated class="skeleton-button">
       </ion-skeleton-text>
     </div>
   </ion-card>
@@ -102,4 +90,4 @@ ion-skeleton-text {
   height: 32px;
   margin: 5px 0;
 }
-</style> 
+</style>

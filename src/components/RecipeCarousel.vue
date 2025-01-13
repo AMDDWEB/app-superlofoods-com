@@ -5,11 +5,7 @@
         <ion-text>
           <h3 class="app-list-heading">
             Featured Recipes
-            <ion-icon
-              style="font-size: 16px;"
-              name="chevron-right"
-              color="medium"
-            ></ion-icon>
+            <ion-icon style="font-size: 16px;" name="chevron-right" color="medium"></ion-icon>
           </h3>
           <p class="app-list-subheading">Get inspired by our handpicked recipes.</p>
         </ion-text>
@@ -18,15 +14,9 @@
 
     <div v-if="recipes.length > 0">
       <swiper @swiper="onSwiper" :slides-per-view="2.5">
-        <swiper-slide
-          v-for="(recipe, index) in recipes.slice(0, 10)"
-          :key="recipe.id || index"
-        >
+        <swiper-slide v-for="(recipe, index) in recipes.slice(0, 10)" :key="recipe.id || index">
           <div class="recipe-card" @click="goToRecipeSingle(recipe.id)">
-            <div
-              class="image-container"
-              :style="{ backgroundImage: 'url(' + recipe.image_url + ')' }"
-            >
+            <div class="image-container" :style="{ backgroundImage: 'url(' + recipe.image_url + ')' }">
               <div class="overlay"></div>
             </div>
             <h3 class="recipe-title">{{ recipe.name }}</h3>
@@ -60,7 +50,12 @@ const fetchRecipes = async () => {
   try {
     loading.value = true;
     const response = await apiRecipes.getRecipes();
-    recipes.value = Array.isArray(response) ? response.map(transformRecipe) : [];
+    recipes.value = Array.isArray(response)
+      ? response
+        .filter(recipe => recipe.status === 'publish')
+        .map(transformRecipe)
+        .slice(0, 10)
+      : [];
   } catch (error) {
     recipes.value = [];
   } finally {
@@ -90,6 +85,7 @@ ion-note {
   color: #000;
   font-weight: bold;
 }
+
 ion-text {
   font-size: 14px;
 }
@@ -108,7 +104,8 @@ ion-text {
 .swiper-slide {
   display: flex;
   flex-direction: column;
-  align-items: center; /* Center align items */
+  align-items: center;
+  /* Center align items */
 }
 
 .recipe-card {
@@ -120,7 +117,8 @@ ion-text {
   overflow: hidden;
   padding: 4px;
   box-sizing: border-box;
-  cursor: pointer; /* Indicate clickable */
+  cursor: pointer;
+  /* Indicate clickable */
 }
 
 .image-container {
@@ -145,7 +143,8 @@ ion-text {
 .recipe-title {
   margin-top: 5px;
   font-size: 14px;
-  text-align: left; /* Center align title */
+  text-align: left;
+  /* Center align title */
   display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: hidden;

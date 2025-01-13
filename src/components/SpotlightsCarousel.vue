@@ -12,10 +12,7 @@
     <div v-if="!loading">
       <swiper v-if="spotlights.length > 0" @swiper="onSwiper" slides-per-view="1.5" loop>
         <swiper-slide v-for="(item, index) in spotlights.slice(0, 10)" :key="index">
-          <div
-            class="spotlight-card"
-            :style="{ backgroundImage: 'url(' + item.image_url + ')' }"
-          >
+          <div class="spotlight-card" :style="{ backgroundImage: 'url(' + item.image_url + ')' }">
             <div class="overlay"></div>
             <h3>{{ item.price }}</h3>
             <p>{{ item.description }}</p>
@@ -54,9 +51,7 @@ const fetchSpotlights = async () => {
     const response = await apiSpotlights.getSpotlights();
     const transformedData = transformAllSpotlights(response);
     spotlights.value = transformedData;
-    console.log('Spotlights:', spotlights.value);
   } catch (error) {
-    console.error('Error fetching spotlights:', error);
     spotlights.value = [];
   } finally {
     loading.value = false;
@@ -180,4 +175,4 @@ const onSwiper = (swiper) => {
   color: var(--ion-color-medium);
   font-size: 14px;
 }
-</style> 
+</style>

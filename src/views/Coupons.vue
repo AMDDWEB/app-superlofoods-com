@@ -88,14 +88,11 @@ const selectedView = ref('all');
 const selectedCategory = ref('All Coupons');
 
 const sortedCategories = computed(() => {
-  console.log('Available categories:', availableCategories.value);
   const filteredCategories = availableCategories.value
     .filter(category => category !== 'All Coupons')
     .sort((a, b) => a.localeCompare(b));
   
-  const result = ['All Coupons', ...filteredCategories];
-  console.log('Sorted categories:', result);
-  return result;
+  return ['All Coupons', ...filteredCategories];
 });
 
 const displayedCoupons = computed(() => {

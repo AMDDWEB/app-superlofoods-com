@@ -12,19 +12,19 @@ import myStoreIcon from '../icons/solid/cart-circle-check-solid.svg';
 import rewardsIcon from '../icons/solid/circle-dollar-to-slot-solid.svg';
 import notificationsIcon from '../icons/solid/bell-exclamation-solid.svg';
 import setLocationIcon from '../icons/solid/solid-circle-location-arrow-user.svg';
-import visitWebsiteIcon from  '../icons/solid/globe-pointer-solid.svg';
-import phoneIcon from  '../icons/solid/phone-flip-solid.svg';
-import getDirectionsIcon from  '../icons/solid/diamond-turn-right-solid.svg';
-import shareIcon from  '../icons/solid/arrow-up-from-bracket-solid.svg';
-import backButtonIcon from  '../icons/solid/arrow-left-solid.svg';
-import servingSizeIcon from  '../icons/solid/user-group-simple-solid.svg';
-import prepTimeIcon from  '../icons/solid/clock-solid.svg';
-import cookTimeIcon from  '../icons/solid/temperature-three-quarters-solid.svg';
-import totalTimeIcon from  '../icons/solid/plate-utensils-solid.svg';
+import visitWebsiteIcon from '../icons/solid/globe-pointer-solid.svg';
+import phoneIcon from '../icons/solid/phone-flip-solid.svg';
+import getDirectionsIcon from '../icons/solid/diamond-turn-right-solid.svg';
+import shareIcon from '../icons/solid/arrow-up-from-bracket-solid.svg';
+import backButtonIcon from '../icons/solid/arrow-left-solid.svg';
+import servingSizeIcon from '../icons/solid/user-group-simple-solid.svg';
+import prepTimeIcon from '../icons/solid/clock-solid.svg';
+import cookTimeIcon from '../icons/solid/temperature-three-quarters-solid.svg';
+import totalTimeIcon from '../icons/solid/plate-utensils-solid.svg';
 import loadingIcon from '../icons/solid/circle-notch-solid.svg';
 import chevronRightIcon from '../icons/solid/chevron-right-solid.svg'
 import moneyBillIcon from '../icons/solid/money-bill-solid.svg';
-import facebookIcon from  '../icons/brands/facebook-f-brands-solid.svg';
+import facebookIcon from '../icons/brands/facebook-f-brands-solid.svg';
 
 //Regular icons
 import homeRegularIcon from '../icons/regular/house-regular.svg';
@@ -77,17 +77,17 @@ const customIcons = {
   'app-loading': loadingIcon,
   'chevron-right': chevronRightIcon,
   'money-bill': moneyBillIcon,
-  
+
   // Regular icons are below 
   'home-regular': homeRegularIcon,
   'locations-regular': locationDotRegularIcon,
   'coupons-regular': scissorsRegularIcon,
   'recipes-regular': plateUtensilsRegularIcon,
   'more-regular': moreRegularIcon,
-  'ads-regular' : adsRegularIcon,
-  'rewards-regular' : rewardsRegularIcon,
-  'sales-regular' : salesRegularIcon,
-  'set-location-regular' : setlocationRegularIcon,
+  'ads-regular': adsRegularIcon,
+  'rewards-regular': rewardsRegularIcon,
+  'sales-regular': salesRegularIcon,
+  'set-location-regular': setlocationRegularIcon,
   'notifications-regular': notificationsRegularIcon,
   'notifications-settings-regular': notificationsettingsRegularIcon,
   'my-notifications-regular': mynotificationsRegularIcon,

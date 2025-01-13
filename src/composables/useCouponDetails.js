@@ -26,7 +26,7 @@ export function useCouponDetails() {
         });
 
         tempCoupons.push(...response.items);
-        
+
         if (response.items.length < batchSize) {
           allLoaded = true;
         } else {
@@ -36,7 +36,6 @@ export function useCouponDetails() {
 
       return tempCoupons;
     } catch (error) {
-      console.error('Error loading all coupons:', error);
       return [];
     } finally {
       loading.value = false;
@@ -47,7 +46,7 @@ export function useCouponDetails() {
     try {
       // Load all coupons first
       const allLoadedCoupons = await loadAllCoupons();
-      
+
       // Store all coupons for filtering
       allCoupons.value = allLoadedCoupons.map(coupon => ({
         ...coupon,
@@ -68,19 +67,18 @@ export function useCouponDetails() {
         .sort();
 
       categories.value = ['All Coupons', ...uniqueCategories];
-      
+
       // Initialize coupons with all available coupons
       coupons.value = allCoupons.value;
     } catch (error) {
-      console.error('Error fetching categories:', error);
       categories.value = ['All Coupons'];
     }
   };
 
-  const fetchCoupons = async ({ 
+  const fetchCoupons = async ({
     limit = 1000,
-    offset = 0, 
-    category = null 
+    offset = 0,
+    category = null
   } = {}) => {
     loading.value = true;
     try {
@@ -106,7 +104,6 @@ export function useCouponDetails() {
         return allCoupons.value.length;
       }
     } catch (error) {
-      console.error('Error fetching coupons:', error);
       return 0;
     } finally {
       loading.value = false;

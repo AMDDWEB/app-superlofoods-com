@@ -2,7 +2,7 @@ export function useLocationDetails() {
   const transformLocationData = (location) => {
     // Helper function to find ad by type
     const findAdByType = (ads, typeName) => {
-      return ads?.find(ad => 
+      return ads?.find(ad =>
         ad.file_url && ad.ad_type?.some(type => type.type_name === typeName)
       );
     };
