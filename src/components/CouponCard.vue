@@ -1,11 +1,7 @@
 <template>
   <ion-card @click="handleCardClick">
     <!-- Image Container -->
-    <ion-img 
-      v-if="coupon.encoded_img" 
-      class="coupon-image-container" 
-      :src="coupon.encoded_img"
-    ></ion-img>
+    <ion-img v-if="coupon.encoded_img" class="coupon-image-container" :src="coupon.encoded_img"></ion-img>
     <div v-else class="coupon-image-container">
       <ion-spinner name="lines"></ion-spinner>
     </div>
@@ -15,36 +11,26 @@
     <ion-card-title class="coupon-value ion-text-center truncate">{{ coupon.title }}</ion-card-title>
     <span class="coupon-description truncate-multiline">{{ coupon.description }}</span>
     <span class="coupon-expiration ion-text-center">Expires {{ formatExpDate(coupon.to_date) }}</span>
-    
+
     <!-- Button -->
-    <ion-button 
-      size="small" 
-      :color="isCouponClipped(coupon.id) ? 'success' : 'danger'" 
-      fill="solid"
-      style="display: flex; align-items: center; width: 90%;"
-      :disabled="isCouponClipped(coupon.id)"
-      @click.stop="handleClipClick"
-    >
+    <ion-button size="small" :color="isCouponClipped(coupon.id) ? 'success' : 'danger'" fill="solid"
+      style="display: flex; align-items: center; width: 90%;" :disabled="isCouponClipped(coupon.id)"
+      @click.stop="handleClipClick">
       <ion-icon slot="start" :icon="cut"></ion-icon>
       {{ isCouponClipped(coupon.id) ? 'Clipped' : 'Clip Coupon' }}
     </ion-button>
   </ion-card>
 
- 
-<!-- Coupon Modal -->
-<ion-modal 
-    :is-open="showCouponModal" 
-    @didDismiss="closeCouponModal" 
-    :presenting-element="presentingElement"
-    :initial-breakpoint="1" 
-    :breakpoints="[0, 1]"
->
+
+  <!-- Coupon Modal -->
+  <ion-modal :is-open="showCouponModal" @didDismiss="closeCouponModal" :presenting-element="presentingElement"
+    :initial-breakpoint="1" :breakpoints="[0, 1]">
     <ion-header>
       <ion-toolbar>
         <ion-title>Coupon Details</ion-title>
       </ion-toolbar>
     </ion-header>
-    
+
     <ion-content>
       <ion-segment class="coupon-details-segment" v-model="selectedSegment">
         <ion-segment-button value="details">
@@ -59,13 +45,13 @@
         <span class="coupon-details-label">{{ coupon.title }} on {{ coupon.subtitle }}</span><br>
         <span class="coupon-details-text">{{ coupon.description }}</span>
       </div>
-      
+
       <div class="coupon-details-card" v-if="selectedSegment === 'terms'">
         <span class="coupon-details-label">Terms & Conditions</span><br>
         <span class="coupon-details-text">{{ coupon.disclaimer }}</span>
       </div>
     </ion-content>
-</ion-modal>
+  </ion-modal>
 
   <!-- Signup Modal -->
   <SignupModal />
@@ -114,9 +100,9 @@ const handleClipClick = async (event) => {
     openSignupModal({ presentationStyle: 'popover' });
     return;
   }
-  
+
   if (isClipping.value || isCouponClipped(props.coupon.id)) return;
-  
+
   isClipping.value = true;
   try {
     await CouponsApi.clipCoupon(props.coupon.id);
@@ -204,7 +190,7 @@ ion-icon {
   margin: 16px;
   padding: 16px;
   border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .coupon-details-label {
