@@ -3,6 +3,7 @@
         <ion-header>
             <ion-toolbar>
                 <ion-buttons slot="start">
+                    <!-- Back button to navigate back one page -->
                     <ion-button @click="$router.go(-1)">
                         <ion-icon slot="icon-only" color="primary" name="back-button" class="toolbar-icon"></ion-icon>
                     </ion-button>
@@ -11,228 +12,95 @@
             </ion-toolbar>
         </ion-header>
         <ion-content :fullscreen="true">
+            <!-- Display loyalty number if it exists -->
             <div class="loyalty-card" v-if="loyaltyNumber">
                 <div class="loyalty-label">My Loyalty Number</div>
                 <div class="loyalty-number">{{ formatPhone(loyaltyNumber) }}</div>
             </div>
 
+            <!-- Button to open the contact form, visible only if loyalty number exists -->
             <ion-button @click="openContactForm" expand="block" fill="outline" color="danger"
                 class="close-account-button" v-if="loyaltyNumber">Close My Account</ion-button>
-
         </ion-content>
-
-        <!-- Location Modal -->
     </ion-page>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
-import { IonPage, IonHeader, IonToolbar, IonContent, IonList, IonListHeader, IonItem, IonLabel, IonIcon, IonImg } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonContent, IonButtons, IonButton, IonIcon } from '@ionic/vue';
 import { Browser } from '@capacitor/browser';
-import { NativeSettings, AndroidSettings, IOSSettings } from 'capacitor-native-settings';
-import SetLocationModal from '@/components/SetLocationModal.vue';
-import { Capacitor } from '@capacitor/core';
 import { useSignupModal } from '@/composables/useSignupModal';
 
-// Store environment variables in reactive variables
-const storeName = import.meta.env.VITE_STORE_NAME; // Store name from .env
-const appVersion = import.meta.env.VITE_APP_VERSION; // Store name from .env
-const facebookPageID = import.meta.env.VITE_FACEBOOK_PAGE_ID; // Store name from .env
-const facebookURL = import.meta.env.VITE_FACEBOOK_URL; // Store name from .env
-
-
-// Reactive references
-const isLocationModalOpen = ref(false);
-const currentLocation = ref(null);
-const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
-const clickCount = ref(0);
-const clickTimer = ref(null);
+// Importing method to fetch loyalty number from a composable
 const { getLoyaltyNumber } = useSignupModal();
 const loyaltyNumber = ref('');
 
-// Lifecycle hooks
+// Set loyalty number on component mount and add event listener
 onMounted(() => {
-    // Load stored location on component mount
-    const storedLocation = localStorage.getItem('selectedLocation');
-    if (storedLocation) {
-        currentLocation.value = JSON.parse(storedLocation);
-    }
-
-    // Set initial loyalty number
     loyaltyNumber.value = getLoyaltyNumber();
 
-    // Listen for signup event
+    // Update loyalty number if a 'userSignedUp' event is emitted
     window.addEventListener('userSignedUp', (event) => {
         loyaltyNumber.value = event.detail.loyaltyNumber;
     });
 });
 
-// Open app general notification settings for testing
-async function openGeneralNotificationSettings() {
-    try {
-        if (Capacitor.getPlatform() === 'ios') {
-            await NativeSettings.openIOS({
-                option: IOSSettings.App
-            });
-        } else if (Capacitor.getPlatform() === 'android') {
-            await NativeSettings.openAndroid({
-                option: AndroidSettings.ApplicationDetails
-            });
-        }
-    } catch (error) {
-        // Handle error silently
-    }
-}
-// Open website in browser
-async function openWebsite() {
-    await Browser.open({
-        url: import.meta.env.VITE_SITE_URL,
-        presentationStyle: 'popover'
-    });
-}
-
-// Open rewards points checker in browser
-async function openMyPoints() {
-    await Browser.open({
-        url: import.meta.env.VITE_SITE_URL + '/points',
-        presentationStyle: 'popover'
-    });
-}
-
-// Open website contact form in browser
-async function openContactForm() {
-    await Browser.open({
-        url: import.meta.env.VITE_CONTACT_URL,
-        presentationStyle: 'popover'
-    });
-}
-
-// Open Facebook page in browser popover
-async function openFacebook() {
-    const facebookUrl = import.meta.env.VITE_FACEBOOK_URL;  // Facebook URL from .env
-
-    try {
-        await Browser.open({
-            url: facebookUrl,
-            presentationStyle: 'popover'
-        });
-    } catch (error) {
-        // Handle error silently
-    }
-}
-
-// Open location modal
-function openLocationModal() {
-    isLocationModalOpen.value = true;
-}
-
-// Handle location selection
-function handleLocationSelected(location) {
-    localStorage.setItem('selectedLocation', JSON.stringify(location));
-    currentLocation.value = location;
-
-    // Emit a custom event to notify other components about the location change
-    window.dispatchEvent(new CustomEvent('locationChanged', { detail: location }));
-}
-
-// Add the handler function
-const handleVersionClick = () => {
-    clickCount.value++;
-
-    // Clear existing timer if it exists
-    if (clickTimer.value) {
-        clearTimeout(clickTimer.value);
-    }
-
-    // Set new timer to reset clicks after 2 seconds
-    clickTimer.value = setTimeout(() => {
-        clickCount.value = 0;
-    }, 2000);
-
-    // Only proceed if we've reached 5 clicks
-    if (clickCount.value === 5) {
-        try {
-            // Reset click count
-            clickCount.value = 0;
-
-            // Clear the timer
-            clearTimeout(clickTimer.value);
-
-            // Clear everything in localStorage
-            window.localStorage.clear();
-
-            // Remove specific items
-            window.localStorage.removeItem('selectedLocation');
-            window.localStorage.removeItem('currentLocation');
-            window.localStorage.removeItem('refresh_token');
-
-            // Reset the reactive ref
-            currentLocation.value = null;
-
-            // Force a complete page reload
-            window.location.href = '/';
-
-        } catch (error) {
-            // Handle error silently
-        }
-    }
-};
-
-// Add cleanup
+// Clean up event listener on component unmount
 onUnmounted(() => {
-    if (clickTimer.value) {
-        clearTimeout(clickTimer.value);
-    }
-    // Remove event listener
     window.removeEventListener('userSignedUp', (event) => {
         loyaltyNumber.value = event.detail.loyaltyNumber;
     });
 });
 
+// Function to open the contact form URL in a browser popover
+const openContactForm = async () => {
+    await Browser.open({
+        url: import.meta.env.VITE_CONTACT_URL,
+        presentationStyle: 'popover'
+    });
+};
+
+// Function to format phone numbers to a standard format
 const formatPhone = (phone) => {
     if (!phone) return '';
     const cleaned = phone.replace(/\D/g, '');
     return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
 };
-
 </script>
 
 <style scoped>
+/* Styling for the back button icon */
 .toolbar-icon {
     font-size: 20px !important;
 }
 
+/* Styling for the loyalty card */
 .loyalty-card {
     background: var(--ion-color-light);
-    margin-top: 16px;
-    margin-right: 16px;
-    margin-left: 16px;
+    margin: 16px;
     padding: 16px;
     border-radius: 12px;
-    border-style: solid;
-    border-width: 1px;
-    border-color: var(--ion-color-light-shade);
-    /* box-shadow: 0 2px 4px rgba(0,0,0,0.1); */
+    border: 1px solid var(--ion-color-light-shade);
 }
 
+/* Styling for the loyalty label text */
 .loyalty-label {
     color: var(--ion-color-medium);
     font-size: 14px;
     margin-bottom: 4px;
 }
 
+/* Styling for the loyalty number text */
 .loyalty-number {
     color: var(--ion-color-dark);
     font-size: 18px;
     font-weight: 600;
 }
 
+/* Styling for the close account button */
 .close-account-button {
     margin-top: 65px;
-    margin-right: 0;
-    margin-left: 0;
     max-width: 95%;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 65px auto 0 auto;
 }
 </style>
