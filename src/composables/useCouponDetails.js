@@ -1,6 +1,5 @@
 import { ref, computed } from 'vue'
 import CouponsApi from '@/axios/apiCoupons'
-import { TokenStorage } from '../utils/tokenStorage'
 
 const coupons = ref([]);
 const loading = ref(false);
@@ -71,6 +70,7 @@ export function useCouponDetails() {
       // Initialize coupons with all available coupons
       coupons.value = allCoupons.value;
     } catch (error) {
+      console.error('Error in fetchCategories:', error);
       categories.value = ['All Coupons'];
     }
   };
@@ -117,11 +117,6 @@ export function useCouponDetails() {
     loading,
     fetchCoupons,
     fetchCategories,
-    availableCategories,
-    changeSort: async (newSort) => {
-      selectedSort.value = newSort;
-      await loadAllCoupons(); // Reload all coupons with new sort
-      return fetchCoupons({ limit: 100, offset: 0 });
-    }
+    availableCategories
   };
 } 

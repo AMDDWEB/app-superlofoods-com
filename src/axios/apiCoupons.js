@@ -110,6 +110,25 @@ class CouponsApi {
     });
   }
 
+  async getCustomerInfo() {
+    const refreshToken = TokenStorage.getRefreshToken();
+
+    if (!refreshToken) {
+      throw new Error('No refresh token found');
+    }
+
+    const response = await couponsInstance({
+      url: '/customer',
+      method: 'GET',
+      params: {
+        merchant_id: import.meta.env.VITE_COUPONS_MERCHANT_ID,
+        refresh_token: refreshToken
+      }
+    });
+
+    return response.data;
+  }
+
   isAuthenticated() {
     return TokenStorage.hasTokens();
   }

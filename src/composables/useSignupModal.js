@@ -25,6 +25,7 @@ export function useSignupModal() {
   const isAuthenticated = ref(CouponsApi.isAuthenticated());
   const router = useRouter();
   const loyaltyNumber = ref('');
+  const cardNumber = ref('');
 
   const stepTitle = computed(() => {
     switch (currentStep.value) {
@@ -141,18 +142,27 @@ export function useSignupModal() {
         // Store tokens
         TokenStorage.setTokens(tokens.access, tokens.refresh);
 
-        // Store loyalty number (phone number)
+        // Get customer info to get the card number
+        const customerInfo = await CouponsApi.getCustomerInfo();
+        const customerCardNumber = customerInfo.CardNumber;
+
+        // Store loyalty number and card number
         loyaltyNumber.value = phoneNumber.value;
+        cardNumber.value = customerCardNumber;
         localStorage.setItem('loyaltyNumber', phoneNumber.value);
+        localStorage.setItem('cardNumber', customerCardNumber);
 
         // Update authentication state
         isAuthenticated.value = true;
         currentStep.value = 3;
         errorMessage.value = '';
 
-        // Dispatch a custom event with the loyalty number
+        // Dispatch a custom event with both numbers
         window.dispatchEvent(new CustomEvent('userSignedUp', {
-          detail: { loyaltyNumber: phoneNumber.value }
+          detail: { 
+            loyaltyNumber: phoneNumber.value,
+            cardNumber: customerCardNumber
+          }
         }));
       } else {
         throw new Error('Missing tokens in response');
@@ -189,6 +199,11 @@ export function useSignupModal() {
   const getLoyaltyNumber = () => {
     // Try to get from ref first, then localStorage
     return loyaltyNumber.value || localStorage.getItem('loyaltyNumber') || '';
+  };
+
+  const getCardNumber = () => {
+    // Try to get from ref first, then localStorage
+    return cardNumber.value || localStorage.getItem('cardNumber') || '';
   };
 
   // Create the modal component within the composable
@@ -588,5 +603,7 @@ export function useSignupModal() {
     clipCoupon,
     SignupModal,
     getLoyaltyNumber,
+    getCardNumber,
+    cardNumber,
   };
 } 
