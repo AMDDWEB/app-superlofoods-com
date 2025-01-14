@@ -129,6 +129,41 @@ class CouponsApi {
     return response.data;
   }
 
+  async updateUserProfile(userProfile, refreshToken) {
+    const data = {
+      mini_site_additional_data: {
+        Name: {
+          "First Name": userProfile.firstName || '',
+          "Last Name": userProfile.lastName || ''
+        },
+        Email: userProfile.email || '',
+        Birthday: userProfile.birthday || '',
+        "Address (full)": {
+          Country: userProfile.country || '',
+          State: userProfile.state || '',
+          City: userProfile.city || '',
+          Zip: userProfile.zipCode || '',
+          Address1: userProfile.address1 || '',
+          Address2: userProfile.address2 || ''
+        }
+      },
+      opt_out_promotion: userProfile.optOutPromotion || false,
+      do_not_sell_my_data: userProfile.doNotSellMyData || false
+    };
+
+    const response = await couponsInstance({
+      url: '/customer',
+      method: 'PUT',
+      data,
+      params: {
+        merchant_id: import.meta.env.VITE_COUPONS_MERCHANT_ID,
+        refresh_token: refreshToken
+      }
+    });
+
+    return response.data;
+  }
+
   isAuthenticated() {
     return TokenStorage.hasTokens();
   }

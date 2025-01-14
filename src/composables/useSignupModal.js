@@ -26,6 +26,58 @@ export function useSignupModal() {
   const router = useRouter();
   const loyaltyNumber = ref('');
   const cardNumber = ref('');
+  const customerInfo = ref(null);
+
+  const userProfile = ref({
+    firstName: '',
+    lastName: '',
+    birthday: '',
+    email: '',
+    zipCode: ''
+  });
+
+  const fetchCustomerInfo = async () => {
+    try {
+      const info = await CouponsApi.getCustomerInfo();
+      customerInfo.value = info;
+
+      if (!info.Email) {
+        await promptUserInfoUpdate();
+      } else {
+        userProfile.value = {
+          firstName: info.FirstName || '',
+          lastName: info.LastName || '',
+          birthday: info.Birthday || '',
+          email: info.Email || '',
+          zipCode: info.Zip || ''
+        };
+      }
+    } catch (error) {
+      console.error('Failed to fetch customer info:', error);
+      errorMessage.value = 'Failed to retrieve customer information.';
+    }
+  };
+
+  const promptUserInfoUpdate = async () => {
+    const updatedInfo = {
+      firstName: '',
+      lastName: '',
+      email: '',
+      birthday: '',
+      country: '',
+      state: '',
+      city: '',
+      zip: '',
+      address1: '',
+      address2: '',
+      optOutPromotion: false,
+      doNotSellMyData: false
+    };
+
+    updatedInfo = await showUserInfoForm(updatedInfo);
+
+    await CouponsApi.updateUserProfile(updatedInfo, TokenStorage.getRefreshToken());
+  };
 
   const stepTitle = computed(() => {
     switch (currentStep.value) {
@@ -34,7 +86,9 @@ export function useSignupModal() {
       case 2:
         return 'Verify Your Number';
       case 3:
-        return 'Start Saving Today';
+        return 'Review information and confirm';
+      case 4:
+        return 'Start Saving Today!';
       default:
         return '';
     }
@@ -47,6 +101,8 @@ export function useSignupModal() {
       case 2:
         return `Enter the 4-digit code sent to ${formatPhone(phoneNumber.value)}`;
       case 3:
+        return "Review your information and confirm to start saving today!.";
+      case 4:
         return "You're all set to start saving! Your account has been created successfully.";
       default:
         return '';
@@ -66,7 +122,7 @@ export function useSignupModal() {
     return value.match(/^\d{4}$/);
   };
 
-  const openSignupModal = () => {
+  const openSignupModal = async () => {
     showModal.value = true;
     currentStep.value = 1;
     phoneNumber.value = '';
@@ -118,6 +174,11 @@ export function useSignupModal() {
     }
   };
 
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return '';
+    return dateString.replace(/\//g, '-');
+  };
+
   const submitVerification = async () => {
     if (!validatePinCode(pinCode.value)) {
       errorMessage.value = 'Please enter a valid 4-digit code.';
@@ -139,29 +200,31 @@ export function useSignupModal() {
       };
 
       if (tokens.access && tokens.refresh) {
-        // Store tokens
         TokenStorage.setTokens(tokens.access, tokens.refresh);
 
-        // Get customer info to get the card number
         const customerInfo = await CouponsApi.getCustomerInfo();
-        const customerCardNumber = customerInfo.CardNumber;
 
-        // Store loyalty number and card number
+        userProfile.value = {
+          firstName: customerInfo.FirstName || userProfile.value.firstName,
+          lastName: customerInfo.LastName || userProfile.value.lastName,
+          birthday: formatDateForInput(customerInfo.Birthday) || userProfile.value.birthday,
+          email: customerInfo.Email || userProfile.value.email,
+          zipCode: customerInfo.Zip || userProfile.value.zipCode
+        };
+
         loyaltyNumber.value = phoneNumber.value;
-        cardNumber.value = customerCardNumber;
+        cardNumber.value = customerInfo.CardNumber;
         localStorage.setItem('loyaltyNumber', phoneNumber.value);
-        localStorage.setItem('cardNumber', customerCardNumber);
+        localStorage.setItem('cardNumber', customerInfo.CardNumber);
 
-        // Update authentication state
         isAuthenticated.value = true;
         currentStep.value = 3;
         errorMessage.value = '';
 
-        // Dispatch a custom event with both numbers
         window.dispatchEvent(new CustomEvent('userSignedUp', {
-          detail: { 
+          detail: {
             loyaltyNumber: phoneNumber.value,
-            cardNumber: customerCardNumber
+            cardNumber: customerInfo.CardNumber
           }
         }));
       } else {
@@ -174,12 +237,23 @@ export function useSignupModal() {
     }
   };
 
-  const checkAuthStatus = () => {
-    isAuthenticated.value = CouponsApi.isAuthenticated();
-    if (isAuthenticated.value) {
-      CouponsApi.logStoredTokens(); // Log the stored tokens
+  const submitUserProfile = async () => {
+    isLoading.value = true;
+    try {
+      const refreshToken = TokenStorage.getRefreshToken();
+      if (!refreshToken) {
+        throw new Error('No refresh token found');
+      }
+
+      const response = await CouponsApi.updateUserProfile(userProfile.value, refreshToken);
+      console.log('Profile updated successfully:', response);
+      currentStep.value = 4;
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      errorMessage.value = 'Failed to update profile. Please try again.';
+    } finally {
+      isLoading.value = false;
     }
-    return isAuthenticated.value;
   };
 
   const clipCoupon = async (offerId) => {
@@ -197,16 +271,132 @@ export function useSignupModal() {
   };
 
   const getLoyaltyNumber = () => {
-    // Try to get from ref first, then localStorage
     return loyaltyNumber.value || localStorage.getItem('loyaltyNumber') || '';
   };
 
   const getCardNumber = () => {
-    // Try to get from ref first, then localStorage
     return cardNumber.value || localStorage.getItem('cardNumber') || '';
   };
 
-  // Create the modal component within the composable
+  const renderPreviewStep = () => {
+    return h('div', { class: 'form-section fade-in' }, [
+      h('h1', 'Account Information Preview'),
+      h('p', `First Name: ${userProfile.value.firstName}`),
+      h('p', `Last Name: ${userProfile.value.lastName}`),
+      h('p', `Birthday: ${userProfile.value.birthday}`),
+      h('p', `Email: ${userProfile.value.email}`),
+      h('p', `Zip Code: ${userProfile.value.zipCode}`),
+      h(IonButton, {
+        expand: 'block',
+        class: 'submit-button',
+        onClick: submitUserProfile,
+        disabled: isLoading.value
+      }, () => isLoading.value ? h(IonSpinner, { name: 'crescent' }) : 'Confirm Information')
+    ]);
+  };
+
+  const renderUserInfoStep = () => {
+    return h('div', { class: 'form-section fade-in' }, [
+      h('h1', 'User Information'),
+      h(IonItem, { class: 'custom-input' }, [
+        h(IonLabel, { position: 'stacked' }, 'First Name'),
+        h(IonInput, {
+          type: 'text',
+          modelValue: userProfile.value.firstName,
+          'onUpdate:modelValue': (value) => userProfile.value.firstName = value,
+          placeholder: 'First Name',
+          class: 'user-input',
+          disabled: isLoading.value
+        })
+      ]),
+      h(IonItem, { class: 'custom-input' }, [
+        h(IonLabel, { position: 'stacked' }, 'Last Name'),
+        h(IonInput, {
+          type: 'text',
+          modelValue: userProfile.value.lastName,
+          'onUpdate:modelValue': (value) => userProfile.value.lastName = value,
+          placeholder: 'Last Name',
+          class: 'user-input',
+          disabled: isLoading.value
+        })
+      ]),
+      h(IonItem, { class: 'custom-input' }, [
+        h(IonLabel, { position: 'stacked' }, 'Birthday'),
+        h(IonInput, {
+          type: 'date',
+          modelValue: userProfile.value.birthday,
+          'onUpdate:modelValue': (value) => userProfile.value.birthday = value,
+          placeholder: 'Birthday',
+          class: 'user-input'
+        })
+      ]),
+      h(IonItem, { class: 'custom-input' }, [
+        h(IonLabel, { position: 'stacked' }, 'Email'),
+        h(IonInput, {
+          type: 'email',
+          modelValue: userProfile.value.email,
+          'onUpdate:modelValue': (value) => userProfile.value.email = value,
+          placeholder: 'Email',
+          class: 'user-input'
+        })
+      ]),
+      h(IonItem, { class: 'custom-input' }, [
+        h(IonLabel, { position: 'stacked' }, 'Zip Code'),
+        h(IonInput, {
+          type: 'number',
+          modelValue: userProfile.value.zipCode,
+          'onUpdate:modelValue': (value) => userProfile.value.zipCode = value,
+          placeholder: 'Zip Code',
+          maxlength: 5,
+          class: 'user-input'
+        })
+      ]),
+      h(IonButton, {
+        expand: 'block',
+        class: 'submit-button',
+        onClick: submitUserProfile,
+        disabled: isLoading.value
+      }, () => isLoading.value ? h(IonSpinner, { name: 'crescent' }) : 'Submit')
+    ]);
+  };
+
+  const renderStep4 = () => {
+    return h('div', { class: 'form-section fade-in success-section' }, [
+      h('div', { class: 'success-actions' }, [
+        h(IonButton, {
+          expand: 'block',
+          class: 'action-button primary',
+          onClick: () => {
+            closeSignupModal();
+            router.push('/tabs/coupons');
+          }
+        }, 'View Coupons'),
+
+        h(IonButton, {
+          expand: 'block',
+          fill: 'outline',
+          class: 'action-button secondary',
+          onClick: () => {
+            closeSignupModal();
+            router.push('/tabs/preferences');
+          }
+        }, 'Manage Preferences')
+      ]),
+
+      h('p', { class: 'preferences-note' }, [
+        'Want to update your preferences or unsubscribe? ',
+        h('a', {
+          href: '#',
+          onClick: (e) => {
+            e.preventDefault();
+            closeSignupModal();
+            router.push('/tabs/preferences');
+          }
+        }, 'Visit your account settings')
+      ])
+    ]);
+  };
+
   const SignupModal = defineComponent({
     setup() {
       return () => h(IonModal, {
@@ -216,7 +406,6 @@ export function useSignupModal() {
       }, [
         h(IonContent, { class: 'ion-padding modal-content-wrapper' }, [
           h('div', { class: 'modal-content' }, [
-            // Progress Steps
             h('div', { class: 'progress-steps' }, [
               h('div', {
                 class: `step ${currentStep.value === 1 ? 'active' : currentStep.value > 1 ? 'completed' : ''}`,
@@ -227,29 +416,31 @@ export function useSignupModal() {
               }, '2'),
               h('div', { class: 'step-line' }),
               h('div', {
-                class: `step ${currentStep.value === 3 ? 'active' : ''}`,
-              }, '3')
+                class: `step ${currentStep.value === 3 ? 'active' : currentStep.value > 3 ? 'completed' : ''}`,
+              }, '3'),
+              h('div', { class: 'step-line' }),
+              h('div', {
+                class: `step ${currentStep.value === 4 ? 'active' : ''}`,
+              }, '4')
             ]),
 
-            // Close Button (only show on steps 1 and 2)
-            currentStep.value < 3 && h(IonButton, {
+            currentStep.value < 4 && h(IonButton, {
               fill: 'clear',
               class: 'close-button',
               onClick: closeSignupModal
             }, () => h(IonIcon, { icon: closeOutline })),
 
-            // Header with contextual emoji
             h('div', { class: 'header-section' }, [
               h('div', { class: 'emoji-wrapper' },
                 currentStep.value === 1 ? '👋' :
                   currentStep.value === 2 ? '📱' :
-                    '🎉'
+                    currentStep.value === 3 ? '✍️' :
+                      '🎉'
               ),
               h('h1', stepTitle.value),
               h('p', { class: 'subtitle' }, stepDescription.value)
             ]),
 
-            // Phone Input Step
             currentStep.value === 1 && h('div', { class: 'form-section fade-in' }, [
               h(IonItem, { class: 'custom-input' }, [
                 h(IonLabel, { position: 'stacked' }, 'Phone Number'),
@@ -270,7 +461,6 @@ export function useSignupModal() {
               }, () => isLoading.value ? h(IonSpinner, { name: 'crescent' }) : 'Continue')
             ]),
 
-            // Verification Step
             currentStep.value === 2 && h('div', { class: 'form-section fade-in' }, [
               h(IonItem, { class: 'custom-input' }, [
                 h(IonLabel, { position: 'stacked' }, 'Verification Code'),
@@ -292,49 +482,15 @@ export function useSignupModal() {
               }, () => isLoading.value ? h(IonSpinner, { name: 'crescent' }) : 'Verify')
             ]),
 
-            // Success Step
-            currentStep.value === 3 && h('div', { class: 'form-section fade-in success-section' }, [
-              h('div', { class: 'success-actions' }, [
-                h(IonButton, {
-                  expand: 'block',
-                  class: 'action-button primary',
-                  onClick: () => {
-                    closeSignupModal();
-                    router.push('/tabs/coupons');
-                  }
-                }, 'View Coupons'),
+            currentStep.value === 3 && renderUserInfoStep(),
 
-                h(IonButton, {
-                  expand: 'block',
-                  fill: 'outline',
-                  class: 'action-button secondary',
-                  onClick: () => {
-                    closeSignupModal();
-                    router.push('/tabs/preferences');
-                  }
-                }, 'Manage Preferences')
-              ]),
+            currentStep.value === 4 && renderStep4(),
 
-              h('p', { class: 'preferences-note' }, [
-                'Want to update your preferences or unsubscribe? ',
-                h('a', {
-                  href: '#',
-                  onClick: (e) => {
-                    e.preventDefault();
-                    closeSignupModal();
-                    router.push('/tabs/preferences');
-                  }
-                }, 'Visit your account settings')
-              ])
-            ]),
-
-            // Error Message
             errorMessage.value && h('div', { class: 'error-container' }, [
               h(IonIcon, { icon: alertCircleOutline, color: 'danger' }),
               h('p', errorMessage.value)
             ]),
 
-            // Footer
             h('div', { class: 'footer-section' }, [
               h('p', { class: 'terms-text' }, [
                 'By continuing, you agree to our ',
@@ -349,7 +505,6 @@ export function useSignupModal() {
     }
   });
 
-  // Enhanced styles
   const style = document.createElement('style');
   style.textContent = `
     .auth-modal {
@@ -421,12 +576,12 @@ export function useSignupModal() {
 
     .header-section {
       text-align: center;
-      margin-bottom: 40px;
+      margin-bottom: 20px;
     }
 
     .emoji-wrapper {
       font-size: 48px;
-      margin-bottom: 16px;
+      margin-bottom: 8px;
       animation: bounce 0.6s ease;
     }
 
@@ -434,7 +589,7 @@ export function useSignupModal() {
       font-size: 28px;
       font-weight: 700;
       color: var(--ion-color-dark);
-      margin-bottom: 12px;
+      margin-bottom: 8px;
       line-height: 1.2;
     }
 
@@ -442,10 +597,12 @@ export function useSignupModal() {
       font-size: 16px;
       color: var(--ion-color-medium);
       line-height: 1.6;
+      margin-bottom: 8px;
     }
 
     .form-section {
-      margin-bottom: 32px;
+      margin-bottom: 20px;
+      padding-top: 0px;
     }
 
     .custom-input {
@@ -453,7 +610,7 @@ export function useSignupModal() {
       --border-color: var(--ion-color-light-shade);
       --border-radius: 8px;
       --border-width: 2px;
-      margin-bottom: 24px;
+      margin-bottom: 10px;
       --highlight-height: 2px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     }
@@ -468,7 +625,7 @@ export function useSignupModal() {
     }
 
     .submit-button {
-      margin-top: 24px;
+      margin-top: 16px;
       height: 52px;
       font-size: 16px;
       font-weight: 600;
@@ -512,38 +669,6 @@ export function useSignupModal() {
       text-decoration: none;
     }
 
-    .fade-in {
-      animation: fadeIn 0.3s ease-out;
-    }
-
-    @keyframes bounce {
-      0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
-      }
-      40% {
-        transform: translateY(-20px);
-      }
-      60% {
-        transform: translateY(-10px);
-      }
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      25% { transform: translateX(-4px); }
-      75% { transform: translateX(4px); }
-    }
 
     .step.completed {
       background: var(--ion-color-success);
