@@ -20,7 +20,7 @@
             </ion-toolbar>
         </ion-header>
         <ion-content :fullscreen="true">
-            <h1 class="user-welcome-heading ion-padding">Hi, User!</h1>
+            <h1 class="user-welcome-heading ion-padding">Hi, {{ formattedUserName }}!</h1>
             <!-- Display loyalty number if it exists -->
             <div class="loyalty-card" v-if="loyaltyNumber">
                 <div class="loyalty-label">My Loyalty Number</div>
@@ -54,12 +54,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { IonPage, IonHeader, IonToolbar, IonContent, IonButtons, IonButton, IonIcon, IonImg } from '@ionic/vue';
 import { Browser } from '@capacitor/browser';
 import { useSignupModal } from '@/composables/useSignupModal';
 import UserProfileDetailsModal from '@/components/UserProfileDetailsModal.vue';
 import VueBarcode from '@chenfengyuan/vue-barcode';
+import CouponsApi from '@/axios/apiCoupons'; // Import CouponsApi
 
 // Importing method to fetch loyalty number from a composable
 const { getLoyaltyNumber, getCardNumber } = useSignupModal();
@@ -67,17 +68,34 @@ const loyaltyNumber = ref('');
 const cardNumber = ref('');
 const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
 const showUserProfileModal = ref(false);
+const userName = ref(''); // Initialize as an empty string
+
+// Computed property to capitalize the first letter of the user's name
+const formattedUserName = computed(() => {
+    if (!userName.value) return '';
+    return userName.value.charAt(0).toUpperCase() + userName.value.slice(1);
+});
 
 const presentUserProfileModal = () => {
     showUserProfileModal.value = true;
 };
 
 // Set loyalty number on component mount and add event listener
-onMounted(() => {
+onMounted(async () => {
     loyaltyNumber.value = getLoyaltyNumber();
     cardNumber.value = getCardNumber();
 
     console.log('Initial Card Number:', cardNumber.value);
+
+    // Fetch customer info
+    try {
+        const customerInfo = await CouponsApi.getCustomerInfo();
+        console.log('Customer Info:', customerInfo);
+        userName.value = customerInfo.FirstName || ''; // Set userName after fetching
+        console.log('User Name:', userName.value);
+    } catch (error) {
+        console.error('Failed to fetch customer info:', error);
+    }
 
     // Update loyalty number if a 'userSignedUp' event is emitted
     window.addEventListener('userSignedUp', (event) => {
