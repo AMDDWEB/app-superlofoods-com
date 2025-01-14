@@ -16,7 +16,7 @@
     <ion-button size="small" :color="isCouponClipped(coupon.id) ? 'success' : 'danger'" fill="solid"
       style="display: flex; align-items: center; width: 90%;" :disabled="isCouponClipped(coupon.id)"
       @click.stop="handleClipClick">
-      <ion-icon slot="start" :icon="cut"></ion-icon>
+      <ion-icon slot="start" name="coupons-regular"></ion-icon>
       {{ isCouponClipped(coupon.id) ? 'Clipped' : 'Clip Coupon' }}
     </ion-button>
   </ion-card>
@@ -27,6 +27,9 @@
     :initial-breakpoint="1" :breakpoints="[0, 1]">
     <ion-header>
       <ion-toolbar>
+        <ion-buttons slot="end">
+          <ion-button @click="closeCouponModal">Close</ion-button>
+        </ion-buttons>
         <ion-title>Coupon Details</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -78,6 +81,7 @@ const props = defineProps({
   }
 });
 
+//const presentingElement = ref(document.querySelector('ion-router-outlet'));
 const emit = defineEmits(['clip']);
 const { openSignupModal, SignupModal } = useSignupModal();
 const { isCouponClipped, addClippedCoupon } = useClippedCoupons();

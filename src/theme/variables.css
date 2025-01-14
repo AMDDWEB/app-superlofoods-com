@@ -104,12 +104,14 @@ http://ionicframework.com/docs/theming/ */
 }
 
 .app-toolbar-image {
-	height: 35px;
+	height: 30px;
 	/* Set the desired height for your image */
-	margin-left: auto;
-	margin-right: auto;
+	/* margin-left: auto;
+	margin-right: auto; */
+    /* justify-content: center;
+    align-items: center;
 	/* Center the image horizontally */
-	display: block;
+	display: flex; */
 	/* Make it a block-level element */
 	padding-bottom: 5px;
 }

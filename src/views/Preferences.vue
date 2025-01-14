@@ -1,10 +1,17 @@
 <template>
   <ion-page>
     <ion-header>
-      <ion-toolbar>
-        <ion-img class="app-toolbar-image" :src="logoUrl"></ion-img>
-      </ion-toolbar>
-    </ion-header>
+            <ion-toolbar>
+                <ion-buttons slot="end">
+
+                    <ion-button @click="presentBarcodeModal" v-if="loyaltyNumber">
+                        <ion-icon color="primary" name="my-barcode-regular" size="medium"></ion-icon>
+                    </ion-button>
+                </ion-buttons>
+                
+               <ion-title><ion-img class="app-toolbar-image" :src="logoUrl"></ion-img></ion-title>
+            </ion-toolbar>
+        </ion-header>
     <ion-content :fullscreen="true">
 
       <ion-list>
@@ -51,12 +58,12 @@
             Visit Our Website
           </ion-label>
         </ion-item>
-        <ion-item button @click="openMyPoints">
+        <!-- <ion-item button @click="openMyPoints">
           <ion-icon name="rewards-regular" color="primary" slot="start"></ion-icon>
           <ion-label>
             Check My Points
           </ion-label>
-        </ion-item>
+        </ion-item> -->
         <ion-item button @click="openFacebook">
           <ion-icon name=facebook color="primary" slot="start"></ion-icon>
           <ion-label>
@@ -73,6 +80,7 @@
     <!-- Location Modal -->
     <SetLocationModal :is-open="isLocationModalOpen" @update:is-open="isLocationModalOpen = $event"
       @location-selected="handleLocationSelected" />
+      <BarcodeModal :isOpen="showBarcodeModal" @update:isOpen="showBarcodeModal = $event" />
   </ion-page>
 </template>
 
@@ -84,6 +92,7 @@ import { NativeSettings, AndroidSettings, IOSSettings } from 'capacitor-native-s
 import SetLocationModal from '@/components/SetLocationModal.vue';
 import { Capacitor } from '@capacitor/core';
 import { useSignupModal } from '@/composables/useSignupModal';
+import BarcodeModal from '@/components/BarcodeModal.vue';
 
 // Store environment variables in reactive variables
 const storeName = import.meta.env.VITE_STORE_NAME; // Store name from .env
@@ -100,6 +109,11 @@ const clickCount = ref(0);
 const clickTimer = ref(null);
 const { getLoyaltyNumber } = useSignupModal();
 const loyaltyNumber = ref('');
+const showBarcodeModal = ref(false);
+
+const presentBarcodeModal = () => {
+  showBarcodeModal.value = true;
+};
 
 // Lifecycle hooks
 onMounted(() => {

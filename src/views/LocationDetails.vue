@@ -4,13 +4,13 @@
       <ion-toolbar>
         <ion-buttons slot="start">
           <ion-button @click="$router.go(-1)">
-            <ion-icon slot="icon-only" color="primary" name="back-button" class="toolbar-icon"></ion-icon>
+            <ion-icon slot="icon-only" color="primary" name="back-button" size="small"></ion-icon>
           </ion-button>
         </ion-buttons>
         <ion-title v-if="locationData">{{ locationData.name }}</ion-title>
         <ion-buttons slot="end">
           <ion-button @click="shareLocation">
-            <ion-icon slot="icon-only" color="primary" name="share" class="toolbar-icon"></ion-icon>
+            <ion-icon slot="icon-only" color="primary" name="share" size="small"></ion-icon>
           </ion-button>
         </ion-buttons>
       </ion-toolbar>

@@ -5,13 +5,22 @@
                 <ion-buttons slot="start">
                     <!-- Back button to navigate back one page -->
                     <ion-button @click="$router.go(-1)">
-                        <ion-icon slot="icon-only" color="primary" name="back-button" class="toolbar-icon"></ion-icon>
+                        <ion-icon color="primary" name="back-button" size="small"></ion-icon>
                     </ion-button>
                 </ion-buttons>
-                <ion-title>My Account</ion-title>
+
+                <ion-buttons slot="end">
+                    <!-- Back button to navigate back one page -->
+                    <ion-button @click="presentUserProfileModal" v-if="loyaltyNumber">
+                        <ion-icon color="primary" name="my-account-regular" size="small"></ion-icon>
+                    </ion-button>
+                </ion-buttons>
+
+                <ion-title><ion-img class="app-toolbar-image" :src="logoUrl"></ion-img></ion-title>
             </ion-toolbar>
         </ion-header>
         <ion-content :fullscreen="true">
+            <h1 class="user-welcome-heading ion-padding">Hi, User!</h1>
             <!-- Display loyalty number if it exists -->
             <div class="loyalty-card" v-if="loyaltyNumber">
                 <div class="loyalty-label">My Loyalty Number</div>
@@ -20,49 +29,54 @@
 
             <!-- Display card number if it exists -->
             <div class="loyalty-card" v-if="cardNumber">
-                <div class="loyalty-label">My Card Number</div>
-                <div class="loyalty-number">{{ cardNumber }}</div>
+                <div class="loyalty-card-details"><!--{{ cardNumber }}-->Please present this card to the cashier to
+                    redeem your coupons.</div>
                 <div class="barcode-container ion-margin-top">
-                    <vue-barcode
-                        :value="cardNumber"
-                        :options="{
-                            format: 'UPC',
-                            width: 2,
-                            height: 100,
-                            displayValue: true,
-                            background: '#ffffff',
-                            lineColor: '#000000',
-                            margin: 10
-                        }"
-                        @render="onBarcodeRender"
-                    ></vue-barcode>
+                    <vue-barcode :value="cardNumber" :options="{
+                        format: 'CODE128',
+                        width: 2.5,
+                        height: 50,
+                        displayValue: false,
+                        background: '#f7f7f7',
+                        lineColor: '#000000',
+                        margin: 10
+                    }" @render="onBarcodeRender"></vue-barcode>
                 </div>
             </div>
 
             <!-- Button to open the contact form, visible only if loyalty number exists -->
-            <ion-button @click="openContactForm" expand="block" fill="outline" color="danger"
-                class="close-account-button" v-if="loyaltyNumber">Close My Account</ion-button>
+            <ion-button @click="openContactForm" expand="block" color="danger" class="close-account-button"
+                v-if="loyaltyNumber">Close My Account</ion-button>
+
+            <UserProfileDetailsModal :isOpen="showUserProfileModal" @update:isOpen="showUserProfileModal = $event" />
         </ion-content>
     </ion-page>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
-import { IonPage, IonHeader, IonToolbar, IonContent, IonButtons, IonButton, IonIcon } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonContent, IonButtons, IonButton, IonIcon, IonImg } from '@ionic/vue';
 import { Browser } from '@capacitor/browser';
 import { useSignupModal } from '@/composables/useSignupModal';
+import UserProfileDetailsModal from '@/components/UserProfileDetailsModal.vue';
 import VueBarcode from '@chenfengyuan/vue-barcode';
 
 // Importing method to fetch loyalty number from a composable
 const { getLoyaltyNumber, getCardNumber } = useSignupModal();
 const loyaltyNumber = ref('');
 const cardNumber = ref('');
+const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
+const showUserProfileModal = ref(false);
+
+const presentUserProfileModal = () => {
+    showUserProfileModal.value = true;
+};
 
 // Set loyalty number on component mount and add event listener
 onMounted(() => {
     loyaltyNumber.value = getLoyaltyNumber();
     cardNumber.value = getCardNumber();
-    
+
     console.log('Initial Card Number:', cardNumber.value);
 
     // Update loyalty number if a 'userSignedUp' event is emitted
@@ -120,11 +134,6 @@ defineOptions({
 </script>
 
 <style scoped>
-/* Styling for the back button icon */
-.toolbar-icon {
-    font-size: 20px !important;
-}
-
 /* Styling for the loyalty card */
 .loyalty-card {
     background: var(--ion-color-light);
@@ -148,6 +157,12 @@ defineOptions({
     font-weight: 600;
 }
 
+.loyalty-card-details {
+    color: var(--ion-color-medium);
+    font-size: 18px;
+    font-weight: 600;
+}
+
 /* Styling for the close account button */
 .close-account-button {
     margin-top: 65px;
@@ -156,12 +171,12 @@ defineOptions({
 }
 
 /* Add some spacing between the cards */
-.loyalty-card + .loyalty-card {
+.loyalty-card+.loyalty-card {
     margin-top: 8px;
 }
 
 .barcode-container {
-    background: white;
+    /* background: white; */
     padding: 10px;
     border-radius: 8px;
     margin-top: 10px;
@@ -170,11 +185,7 @@ defineOptions({
     align-items: center;
 }
 
-/* Make sure the barcode SVG is visible */
-::v-deep svg {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    margin: 0 auto;
+.user-welcome-heading {
+  font-weight: 800;
 }
 </style>

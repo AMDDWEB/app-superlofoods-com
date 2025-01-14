@@ -2,12 +2,18 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-buttons slot="end" class="barcode-button-container">
-          <ion-button @click="presentPopover" class="barcode-button">
-            <ion-icon :icon="barcodeOutline" color="primary" size="large"></ion-icon>
+        <ion-buttons slot="end">
+
+          <ion-button @click="$router.push('/notifications')" v-if="notificationsAvailable" class="ion-padding-end-small">
+            <ion-icon color="danger" name="notifications-regular" size="medium"></ion-icon>
+          </ion-button>
+
+          <ion-button @click="presentBarcodeModal" v-if="loyaltyNumber">
+            <ion-icon color="primary" name="my-barcode-regular" size="medium"></ion-icon>
           </ion-button>
         </ion-buttons>
-        <ion-img class="app-toolbar-image" :src="logoUrl"></ion-img>
+
+        <ion-title><ion-img class="app-toolbar-image" :src="logoUrl"></ion-img></ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -56,13 +62,9 @@
         @location-selected="handleLocationSelected" />
 
       <!-- Pdf Viewer Modal -->
-      <PdfViewerModal 
-        :is-open="pdfModalState.isOpen"
-        :pdf-url="pdfModalState.url"
-        :ad-type="pdfModalState.type"
-        :start-date="pdfModalState.startDate"
-        @update:is-open="closePdfModal"
-      />
+      <PdfViewerModal :is-open="pdfModalState.isOpen" :pdf-url="pdfModalState.url" :ad-type="pdfModalState.type"
+        :start-date="pdfModalState.startDate" @update:is-open="closePdfModal" />
+      <BarcodeModal :isOpen="showBarcodeModal" @update:isOpen="showBarcodeModal = $event" />
     </ion-content>
   </ion-page>
 </template>
@@ -84,9 +86,16 @@ import { IonPage, IonHeader, IonToolbar, IonContent } from '@ionic/vue';
 import { useRouter } from 'vue-router';
 import { Capacitor } from '@capacitor/core';
 import { popoverController } from '@ionic/vue';
-import BarcodePopover from '@/components/BarcodePopover.vue';
 import { useSignupModal } from '@/composables/useSignupModal';
-import { barcodeOutline } from 'ionicons/icons';
+import BarcodeModal from '@/components/BarcodeModal.vue';
+import apiNotifications from '../axios/apiNotifications.js'; // Import your API for notifactions
+import { onIonViewDidEnter } from '@ionic/vue';
+
+const showBarcodeModal = ref(false);
+
+const presentBarcodeModal = () => {
+  showBarcodeModal.value = true;
+};
 
 // Initialize all refs at the top
 const sliders = ref([]);
@@ -97,6 +106,9 @@ const locations = ref([]);
 const loading = ref(true);
 const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
 const { transformAllSliders } = useSliderDetails();
+const { getLoyaltyNumber } = useSignupModal();
+const loyaltyNumber = ref('');
+const notificationsAvailable = ref(false);
 
 // Add a loading state
 const isLoading = ref(false);
@@ -302,65 +314,34 @@ const handleNotificationRequest = async () => {
   }
 };
 
-const presentPopover = async (e) => {
-  const popover = await popoverController.create({
-    component: BarcodePopover,
-    breakpoints: [0, 0.5],
-    initialBreakpoint: 0.5,
-    cssClass: 'barcode-sheet-modal',
-    showBackdrop: true,
-    backdropDismiss: true,
-    translucent: true,
-    side: 'bottom'
-  });
-  return popover.present();
+// Set initial loyalty number
+loyaltyNumber.value = getLoyaltyNumber();
+
+// Listen for signup event
+window.addEventListener('userSignedUp', (event) => {
+  loyaltyNumber.value = event.detail.loyaltyNumber;
+});
+
+// Fetch notifications
+const fetchNotifications = async () => {
+  try {
+    const response = await apiNotifications.getNotifications();
+    notificationsAvailable.value = response.data.length > 0;  // Ensure `.data` is used here
+  } catch (error) {
+    notificationsAvailable.value = false;
+    console.error('Error fetching notifications:', error);
+  }
 };
+
+// Fetch notifications on component mount
+onIonViewDidEnter(fetchNotifications);
 
 </script>
 
+
 <style scoped>
-.barcode-button-container {
-  height: 100%;
-  padding: 0;
-  margin: 0;
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.barcode-button {
-  height: 100%;
-  margin: 0;
-  padding-right: 16px;
-}
-
-:global(.barcode-popover) {
-  --width: 90%;
-  --max-width: 400px;
-  --height: auto;
-  --border-radius: 8px;
-}
-
-:global(.popover-viewport.barcode-popover) {
-  background: white;
-}
-
-:global(.barcode-sheet-modal) {
-  --width: 100%;
-  --height: auto;
-  align-items: flex-end;
-  --backdrop-opacity: 0.4;
-}
-
-:global(.barcode-sheet-modal .popover-viewport) {
-  background: white;
-  border-radius: 16px 16px 0 0;
-}
-
-:global(.barcode-sheet-modal::part(content)) {
-  top: auto;
-  bottom: 0;
-  transform-origin: bottom;
+ion-grid {
+  --ion-grid-columns: 3 !important;
+  --ion-grid-column-padding: 1px;
 }
 </style>
