@@ -20,7 +20,7 @@
             </ion-toolbar>
         </ion-header>
         <ion-content :fullscreen="true">
-            <h1 class="user-welcome-heading ion-padding">Hi, {{ formattedUserName }}!</h1>
+            <h1 class="user-welcome-heading ion-padding">Hi, {{ userName || "Shopper" }}!</h1>
             <!-- Display loyalty number if it exists -->
             <div class="loyalty-card" v-if="loyaltyNumber">
                 <div class="loyalty-label">My Loyalty Number</div>
@@ -70,11 +70,11 @@ const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
 const showUserProfileModal = ref(false);
 const userName = ref(''); // Initialize as an empty string
 
-// Computed property to capitalize the first letter of the user's name
-const formattedUserName = computed(() => {
-    if (!userName.value) return '';
-    return userName.value.charAt(0).toUpperCase() + userName.value.slice(1);
-});
+// // Computed property to capitalize the first letter of the user's name
+// const formattedUserName = computed(() => {
+//     if (!userName.value) return '';
+//     return userName.value.charAt(0).toUpperCase() + userName.value.slice(1);
+// });
 
 const presentUserProfileModal = () => {
     showUserProfileModal.value = true;
@@ -205,5 +205,6 @@ defineOptions({
 
 .user-welcome-heading {
   font-weight: 800;
+  text-transform: capitalize;
 }
 </style>

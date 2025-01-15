@@ -101,7 +101,7 @@ export function useSignupModal() {
       case 2:
         return `Enter the 4-digit code sent to ${formatPhone(phoneNumber.value)}`;
       case 3:
-        return "Review your information and confirm to start saving today!.";
+        return "Review your information and confirm to start saving today.";
       case 4:
         return "You're all set to start saving! Your account has been created successfully.";
       default:
@@ -228,7 +228,7 @@ export function useSignupModal() {
           }
         }));
       } else {
-        throw new Error('Missing tokens in response');
+        throw new Error('Missing tokens in response.');
       }
     } catch (err) {
       errorMessage.value = 'Invalid code. Please try again.';
@@ -537,7 +537,7 @@ export function useSignupModal() {
     .step {
       width: 32px;
       height: 32px;
-      border-radius: 50%;
+      border-radius: 100%;
       background: var(--ion-color-medium-tint);
       color: var(--ion-color-light);
       display: flex;
@@ -558,7 +558,7 @@ export function useSignupModal() {
 
     .step-line {
       height: 2px;
-      width: 60px;
+      width: 40px;
       background: var(--ion-color-medium-tint);
       margin: 0 8px;
       margin-top: 40px;
@@ -586,7 +586,7 @@ export function useSignupModal() {
     }
 
     .header-section h1 {
-      font-size: 28px;
+      font-size: 32px;
       font-weight: 700;
       color: var(--ion-color-dark);
       margin-bottom: 8px;
@@ -594,7 +594,8 @@ export function useSignupModal() {
     }
 
     .subtitle {
-      font-size: 16px;
+      font-size: 18px;
+      font-weight: 600;
       color: var(--ion-color-medium);
       line-height: 1.6;
       margin-bottom: 8px;
@@ -626,6 +627,7 @@ export function useSignupModal() {
 
     .submit-button {
       margin-top: 16px;
+      margin-bottom: 50px;
       height: 52px;
       font-size: 16px;
       font-weight: 600;
@@ -706,10 +708,7 @@ export function useSignupModal() {
     }
 
     .preferences-note {
-      margin-top: 32px;
-      font-size: 14px;
-      color: var(--ion-color-medium);
-      line-height: 1.6;
+      display: none !important;
     }
 
     .preferences-note a {

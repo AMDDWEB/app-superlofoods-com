@@ -269,12 +269,12 @@ const openPdfModal = (type) => {
   switch (type) {
     case 'weekly':
       modalData.url = selectedLocation.value.weekly_ad_url;
-      modalData.type = 'Weekly Ad';
+      modalData.type = selectedLocation.value.weekly_ad_type;
       modalData.startDate = selectedLocation.value.weekly_ad_start_date;
       break;
     case 'rewards':
       modalData.url = selectedLocation.value.rewards_url;
-      modalData.type = 'Rewards';
+      modalData.type = selectedLocation.value.rewards_type;
       modalData.startDate = selectedLocation.value.rewards_start_date;
       break;
   }

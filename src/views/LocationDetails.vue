@@ -412,10 +412,9 @@ const openPdfModal = (type) => {
       modalData.startDate = locationData.value.rewards_start_date;
       break;
     case 'sale':
-      const saleAd = locationData.value.ads?.find(ad => ad.type === 'Sale');
       modalData.url = locationData.value.sale_url;
-      modalData.type = 'Sale';
-      modalData.startDate = saleAd?.start_date || '';
+      modalData.type = locationData.value.sale_type;
+      modalData.startDate = locationData.value.sale_start_date;
       break;
   }
 
