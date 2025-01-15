@@ -2,11 +2,15 @@
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-buttons slot="end">
 
-          <ion-button @click="$router.push('/notifications')" v-if="notificationsAvailable" class="ion-padding-end-small">
+        <ion-buttons slot="start">
+
+          <ion-button @click="$router.push('/notifications')" v-if="notificationsAvailable"
+            class="ion-padding-end-small">
             <ion-icon color="danger" name="notifications-regular" size="medium"></ion-icon>
           </ion-button>
+        </ion-buttons>
+        <ion-buttons slot="end">
 
           <ion-button @click="presentBarcodeModal" v-if="loyaltyNumber">
             <ion-icon color="primary" name="my-barcode-regular" size="medium"></ion-icon>
