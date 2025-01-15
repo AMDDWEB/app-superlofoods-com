@@ -59,7 +59,7 @@ export function useSignupModal() {
   };
 
   const promptUserInfoUpdate = async () => {
-    const updatedInfo = {
+    let updatedInfo = {
       firstName: '',
       lastName: '',
       email: '',
