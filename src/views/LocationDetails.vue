@@ -45,7 +45,7 @@
             <ion-col>
               <ion-button expand="block" size="small" @click="gotoStore">
                 <ion-icon slot="start" name="get-directions-regular"></ion-icon>
-               Directions
+                Directions
               </ion-button>
             </ion-col>
             <ion-col>
@@ -55,15 +55,11 @@
               </ion-button>
             </ion-col>
             <ion-col>
-              <ion-button
-  expand="block" 
-  size="small" 
-  @click="setAsMyStore"
-  :color="isSelectedLocation ? 'primary' : 'medium'"
->
-  <ion-icon slot="start" name="set-location-regular"></ion-icon>
-  {{ isSelectedLocation ? 'My Store' : 'Set as Store' }}
-</ion-button>
+              <ion-button expand="block" size="small" @click="setAsMyStore"
+                :color="isSelectedLocation ? 'primary' : 'medium'">
+                <ion-icon slot="start" name="set-location-regular"></ion-icon>
+                {{ isSelectedLocation ? 'My Store' : 'Set as Store' }}
+              </ion-button>
             </ion-col>
           </ion-row>
         </ion-grid>
@@ -116,13 +112,8 @@
     </ion-content>
 
     <!-- Single PDF Modal -->
-    <PdfViewerModal 
-      :is-open="pdfModalState.isOpen"
-      :pdf-url="pdfModalState.url"
-      :ad-type="pdfModalState.type"
-      :start-date="pdfModalState.startDate"
-      @update:is-open="closePdfModal"
-    />
+    <PdfViewerModal :is-open="pdfModalState.isOpen" :pdf-url="pdfModalState.url" :ad-type="pdfModalState.type"
+      :start-date="pdfModalState.startDate" @update:is-open="closePdfModal" />
   </ion-page>
 </template>
 
@@ -211,7 +202,7 @@ const loadLocationData = async () => {
       loading.value = true;
       const data = await apiLocations.getLocationById(id);
       locationData.value = transformLocationData(data);
-      
+
       if (locationData.value.hours) {
         storeHours.value = locationData.value.hours;
       }
@@ -241,7 +232,7 @@ watch(() => locationData.value, () => {
 const shareLocation = async () => {
   const siteUrl = import.meta.env.VITE_SITE_URL;
   const storeName = import.meta.env.VITE_STORE_NAME;
-  
+
   if (locationData.value) {
     const fullUrl = `${siteUrl}/location/${locationData.value.id}/`;
     await Share.share({
@@ -288,7 +279,7 @@ const checkIfSelectedLocation = () => {
   const storedLocation = localStorage.getItem('selectedLocation');
   if (storedLocation && locationData.value) {
     const parsed = JSON.parse(storedLocation);
-    isSelectedLocation.value = parsed.id === locationData.value.id;
+    isSelectedLocation.value = Number(parsed.id) === Number(locationData.value.id);
   }
 };
 
@@ -556,4 +547,3 @@ ion-button ion-icon {
   color: var(--ion-color-primary);
 }
 </style>
-

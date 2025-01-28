@@ -13,11 +13,11 @@
         <ion-item v-for="location in locations" :key="location.id">
           <ion-icon name="location-dot" color="primary" slot="start"></ion-icon>
           <ion-label>
-            <h2>{{ location.name }}</h2>
-            <p class="app-text-overflow">{{ location.address }}</p>
+            <h2>{{ location.title }}</h2>
+            <p class="app-text-overflow">{{ location.address?.address }}</p>
           </ion-label>
-          <ion-toggle slot="end" :checked="selectedLocation && selectedLocation.id === location.id"
-            @ionChange="toggleLocation(location)"></ion-toggle>
+          <ion-toggle slot="end" :checked="isLocationSelected(location)"
+            @ionChange="() => toggleLocation(location)"></ion-toggle>
         </ion-item>
       </ion-list>
     </ion-content>
@@ -28,82 +28,124 @@
 import { ref, onMounted, watch } from 'vue';
 import { IonModal, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonToggle, IonButtons, IonButton } from '@ionic/vue';
 import apiLocations from '../axios/apiLocations';
-import { useLocationDetails } from '@/composables/useLocationDetails';
 
-// Props and emits
-const props = defineProps(['isOpen']);
+const props = defineProps({
+  isOpen: Boolean,
+  currentLocation: Object
+});
+
 const emit = defineEmits(['update:is-open', 'location-selected']);
 
-// Reactive references
 const locations = ref([]);
 const selectedLocation = ref(null);
 
-// Lifecycle hooks
+// Initialize on mount
 onMounted(async () => {
   await fetchLocations();
+  await initializeSelectedLocation();
 });
 
-// Watch for changes in isOpen prop
-watch(() => props.isOpen, async (newValue) => {
-  if (newValue) {
+// Watch for modal opening
+watch(() => props.isOpen, async (newIsOpen) => {
+  if (newIsOpen) {
     await fetchLocations();
+    await initializeSelectedLocation();
   }
 });
 
-// Fetch locations from API
+// Watch for current location changes
+watch(() => props.currentLocation, async (newLocation) => {
+  if (newLocation) {
+    selectedLocation.value = newLocation;
+  } else {
+    await initializeSelectedLocation();
+  }
+}, { deep: true });
+
+async function initializeSelectedLocation() {
+  // First check props
+  if (props.currentLocation) {
+    selectedLocation.value = props.currentLocation;
+  } else {
+    // Then check localStorage
+    const storedLocation = localStorage.getItem('selectedLocation');
+    if (storedLocation) {
+      const parsedLocation = JSON.parse(storedLocation);
+      // Verify the location still exists in our list
+      const locationExists = locations.value.some(loc => loc.id === parsedLocation.id);
+      if (locationExists) {
+        selectedLocation.value = parsedLocation;
+      }
+    }
+  }
+}
+
 async function fetchLocations() {
   try {
     const response = await apiLocations.getLocations();
-    locations.value = response.map(transformLocationData);
-    loadSelectedLocation();
+    locations.value = response;
   } catch (error) {
-    // Error handling without logging
+    console.error('Error fetching locations:', error);
     locations.value = [];
   }
 }
 
-// Load previously selected location from localStorage
-function loadSelectedLocation() {
-  const storedLocation = localStorage.getItem('selectedLocation');
-  if (storedLocation) {
-    selectedLocation.value = JSON.parse(storedLocation);
-  }
+function isLocationSelected(location) {
+  return selectedLocation.value?.id === location.id;
 }
 
-// Toggle location selection
-function toggleLocation(location) {
-  // If clicking the currently selected location, deselect it
-  if (selectedLocation.value && selectedLocation.value.id === location.id) {
-    selectedLocation.value = null;
-    localStorage.removeItem('selectedLocation');
-    emit('location-selected', null);
-
-    // Dispatch the locationChanged event with null
-    window.dispatchEvent(new CustomEvent('locationChanged', {
-      detail: null
-    }));
-  } else {
-    // Select the new location
+async function toggleLocation(location) {
+  if (!location) return;
+  
+  try {
+    // Get fresh location data before storing
+    const freshLocation = await apiLocations.getLocationById(location.id);
+    if (freshLocation) {
+      // Update both the selected location and localStorage with fresh data
+      selectedLocation.value = freshLocation;
+      localStorage.setItem('selectedLocation', JSON.stringify(freshLocation));
+      
+      // Emit events with fresh location data
+      emit('location-selected', freshLocation);
+      window.dispatchEvent(new CustomEvent('locationChanged', {
+        detail: freshLocation
+      }));
+    } else {
+      // Fallback to original location if fresh data fetch fails
+      selectedLocation.value = location;
+      localStorage.setItem('selectedLocation', JSON.stringify(location));
+      emit('location-selected', location);
+      window.dispatchEvent(new CustomEvent('locationChanged', {
+        detail: location
+      }));
+    }
+  } catch (error) {
+    console.error('Error fetching fresh location data:', error);
+    // Fallback to original location if API call fails
     selectedLocation.value = location;
     localStorage.setItem('selectedLocation', JSON.stringify(location));
     emit('location-selected', location);
-
-    // Dispatch the locationChanged event
     window.dispatchEvent(new CustomEvent('locationChanged', {
       detail: location
     }));
   }
-
-  // Close the modal after selection/deselection
-  closeModal();
+  
+  // Small delay to ensure events are processed before closing
+  setTimeout(() => {
+    closeModal();
+  }, 100);
 }
 
-// Close the modal
 function closeModal() {
+  // Ensure one final check of selected location before closing
+  const storedLocation = localStorage.getItem('selectedLocation');
+  if (storedLocation) {
+    const parsedLocation = JSON.parse(storedLocation);
+    selectedLocation.value = parsedLocation;
+  }
+  
   emit('update:is-open', false);
 }
-
-const { transformLocationData } = useLocationDetails();
 </script>
 
 <style scoped>

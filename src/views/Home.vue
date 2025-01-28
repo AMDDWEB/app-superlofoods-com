@@ -32,12 +32,12 @@
         <ion-row>
           <ion-col>
             <ion-button expand="block" size="small" @click="handleWeeklyAdClick"
-              :color="selectedLocation && selectedLocation.weekly_ad_url ? 'primary' : 'medium'">
+              :color="hasWeeklyAd ? 'primary' : 'medium'">
               <ion-icon slot="start" name="ads-regular"></ion-icon>
               Weekly Ad
             </ion-button>
           </ion-col>
-          <ion-col v-if="selectedLocation && selectedLocation.rewards_url">
+          <ion-col v-if="hasRewards">
             <ion-button expand="block" size="small" @click="handleRewardsClick" color="primary">
               <ion-icon slot="start" name="rewards-regular"></ion-icon>
               Rewards
@@ -93,7 +93,7 @@ import { popoverController } from '@ionic/vue';
 import { useSignupModal } from '@/composables/useSignupModal';
 import BarcodeModal from '@/components/BarcodeModal.vue';
 import apiNotifications from '../axios/apiNotifications.js'; // Import your API for notifactions
-import { onIonViewDidEnter } from '@ionic/vue';
+import { onIonViewDidEnter, onIonViewWillEnter } from '@ionic/vue';
 
 const showBarcodeModal = ref(false);
 
@@ -136,58 +136,79 @@ const router = useRouter();
 // Add these to your existing setup
 const { getCardNumber } = useSignupModal();
 
-// Lifecycle hooks
+// Add a watch for debugging
+watch(selectedLocation, (newVal) => {
+  console.log('selectedLocation changed:', newVal);
+  console.log('weekly_ad_url:', newVal?.weekly_ad_url);
+  console.log('rewards_url:', newVal?.rewards_url);
+}, { deep: true });
+
+// Update the computed properties
+const hasWeeklyAd = computed(() => {
+  const weeklyAd = selectedLocation.value?.ads?.find(ad =>
+    ad.ad_type.some(type => type.type_name === "Weekly Ad")
+  );
+  return Boolean(weeklyAd);
+});
+
+const hasRewards = computed(() => {
+  const rewardsAd = selectedLocation.value?.ads?.find(ad =>
+    ad.ad_type.some(type => type.type_name === "Reward")
+  );
+  return Boolean(rewardsAd);
+});
+
+// Add event listener for force refresh
 onMounted(async () => {
   await checkSelectedLocation();
-  await fetchLocationData(); // Fetch location data on mount
+  await fetchLocationData();
   await getData();
   window.addEventListener('locationChanged', handleLocationChange);
+  window.addEventListener('forceAppRefresh', handleForceRefresh);
   await requestNotificationPermission();
 });
 
 onUnmounted(() => {
-  // Remove event listener on component unmount
+  // Remove event listeners on component unmount
   window.removeEventListener('locationChanged', handleLocationChange);
+  window.removeEventListener('forceAppRefresh', handleForceRefresh);
 });
 
-// Watch for changes in selected location
-watch(selectedLocation, async (newLocation) => {
-  if (newLocation) {
-    isLoading.value = true; // Set loading state
-    await fetchLocationData(); // Fetch latest location data
-    isLoading.value = false; // Reset loading state
-  }
-});
-
-// Handle location change event
-function handleLocationChange(event) {
-  selectedLocation.value = event.detail;
-  getData(); // Refresh data with the new location
+// Add force refresh handler
+async function handleForceRefresh() {
+  await checkSelectedLocation();
+  await fetchLocationData();
+  await getData();
 }
 
-// Check for selected location in localStorage
-async function checkSelectedLocation() {
-  const storedLocation = localStorage.getItem('selectedLocation');
-  if (storedLocation) {
-    selectedLocation.value = JSON.parse(storedLocation);
+// Enhance location change handler
+async function handleLocationChange(event) {
+  if (event.detail?.id) {
+    selectedLocation.value = event.detail;
+    await fetchLocationData();
+    await getData();
   }
 }
 
-// Fetch location data
+// Enhance fetchLocationData
 async function fetchLocationData() {
-  if (selectedLocation.value) {
+  console.log('Fetching location data for ID:', selectedLocation.value?.id);
+  if (selectedLocation.value?.id) {
     try {
-      const response = await apiLocations.getLocations();
-      locations.value = response;
-      const updatedLocation = locations.value.find(loc => loc.id === selectedLocation.value.id);
-      // Update selectedLocation with the latest data
-      if (updatedLocation) {
-        selectedLocation.value = { ...selectedLocation.value, ...updatedLocation };
-        localStorage.setItem('selectedLocation', JSON.stringify(selectedLocation.value));
+      const freshLocationData = await apiLocations.getLocationById(selectedLocation.value.id);
+      console.log('API Response - Fresh location data:', freshLocationData);
+      if (freshLocationData) {
+        selectedLocation.value = freshLocationData;
+        localStorage.setItem('selectedLocation', JSON.stringify(freshLocationData));
+        console.log('Updated selectedLocation:', selectedLocation.value);
+      } else {
+        console.log('No location data returned from API');
       }
     } catch (error) {
-      // Handle error silently
+      console.error('Error fetching location data:', error);
     }
+  } else {
+    console.log('No selected location ID available');
   }
 }
 
@@ -197,10 +218,12 @@ function openLocationModal() {
 }
 
 // Handle location selection
-function handleLocationSelected(location) {
+async function handleLocationSelected(location) {
+  console.log('Location selected:', location);
   selectedLocation.value = location;
   localStorage.setItem('selectedLocation', JSON.stringify(location));
-  getData();
+  await fetchLocationData();
+  await getData();
 }
 
 // Fetch data from APIs
@@ -224,42 +247,7 @@ async function getData() {
   }
 }
 
-// Update handleWeeklyAdClick function
-const handleWeeklyAdClick = () => {
-  if (selectedLocation.value?.weekly_ad_url) {
-    openPdfModal('weekly');
-  } else {
-    openLocationModal();
-  }
-};
-
-// Update handleRewardsClick function
-const handleRewardsClick = () => {
-  if (selectedLocation.value?.rewards_url) {
-    openPdfModal('rewards');
-  } else {
-    openLocationModal();
-  }
-};
-
-// Open my store location
-async function handleMyStoreClick() {
-  if (selectedLocation.value) {
-    // Close any open modals first
-    pdfModalState.value = {
-      isOpen: false,
-      url: '',
-      type: '',
-      startDate: ''
-    };
-    // Then navigate
-    router.push(`/locations/${selectedLocation.value.id}`);
-  } else {
-    await openLocationModal();
-  }
-}
-
-// Add openPdfModal function
+// PDF Modal handling
 const openPdfModal = (type) => {
   if (!selectedLocation.value) return;
 
@@ -272,21 +260,30 @@ const openPdfModal = (type) => {
 
   switch (type) {
     case 'weekly':
-      modalData.url = selectedLocation.value.weekly_ad_url;
-      modalData.type = selectedLocation.value.weekly_ad_type;
-      modalData.startDate = selectedLocation.value.weekly_ad_start_date;
+      const weeklyAd = selectedLocation.value.ads?.find(ad =>
+        ad.ad_type.some(type => type.type_name === "Weekly Ad")
+      );
+      if (weeklyAd) {
+        modalData.url = weeklyAd.file_url;
+        modalData.type = "Weekly Ad";
+        modalData.startDate = weeklyAd.ad_start_date;
+      }
       break;
     case 'rewards':
-      modalData.url = selectedLocation.value.rewards_url;
-      modalData.type = selectedLocation.value.rewards_type;
-      modalData.startDate = selectedLocation.value.rewards_start_date;
+      const rewardsAd = selectedLocation.value.ads?.find(ad =>
+        ad.ad_type.some(type => type.type_name === "Reward")
+      );
+      if (rewardsAd) {
+        modalData.url = rewardsAd.file_url;
+        modalData.type = "Reward";
+        modalData.startDate = rewardsAd.ad_start_date;
+      }
       break;
   }
 
   pdfModalState.value = modalData;
 };
 
-// Add closePdfModal function
 const closePdfModal = (isOpen) => {
   if (!isOpen) {
     pdfModalState.value = {
@@ -295,6 +292,34 @@ const closePdfModal = (isOpen) => {
       type: '',
       startDate: ''
     };
+  }
+};
+
+// Update the click handlers
+const handleWeeklyAdClick = () => {
+  console.log('Weekly Ad Click - hasWeeklyAd:', hasWeeklyAd.value);
+  if (hasWeeklyAd.value) {
+    openPdfModal('weekly');
+  } else if (selectedLocation.value) {
+    // If we have a location but no weekly ad, we can show a message or handle differently
+    console.log('No weekly ad available for this location');
+  } else {
+    openLocationModal();
+  }
+};
+
+const handleRewardsClick = () => {
+  console.log('Rewards Click - hasRewards:', hasRewards.value);
+  if (hasRewards.value) {
+    openPdfModal('rewards');
+  }
+};
+
+const handleMyStoreClick = async () => {
+  if (selectedLocation.value) {
+    router.push(`/locations/${selectedLocation.value.id}`);
+  } else {
+    await openLocationModal();
   }
 };
 
@@ -339,6 +364,19 @@ const fetchNotifications = async () => {
 
 // Fetch notifications on component mount
 onIonViewDidEnter(fetchNotifications);
+
+// Add ionViewWillEnter hook at the top level of the script
+onIonViewWillEnter(async () => {
+  const storedLocation = localStorage.getItem('selectedLocation');
+  if (storedLocation) {
+    const parsedLocation = JSON.parse(storedLocation);
+    if (parsedLocation?.id !== selectedLocation.value?.id) {
+      selectedLocation.value = parsedLocation;
+      await fetchLocationData();
+      await getData();
+    }
+  }
+});
 
 </script>
 

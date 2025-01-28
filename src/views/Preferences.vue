@@ -1,17 +1,17 @@
 <template>
   <ion-page>
     <ion-header>
-            <ion-toolbar>
-                <ion-buttons slot="end">
+      <ion-toolbar>
+        <ion-buttons slot="end">
 
-                    <ion-button @click="presentBarcodeModal" v-if="loyaltyNumber">
-                        <ion-icon color="primary" name="my-barcode-regular" size="medium"></ion-icon>
-                    </ion-button>
-                </ion-buttons>
-                
-               <ion-title><ion-img class="app-toolbar-image" :src="logoUrl"></ion-img></ion-title>
-            </ion-toolbar>
-        </ion-header>
+          <ion-button @click="presentBarcodeModal" v-if="loyaltyNumber">
+            <ion-icon color="primary" name="my-barcode-regular" size="medium"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+
+        <ion-title><ion-img class="app-toolbar-image" :src="logoUrl"></ion-img></ion-title>
+      </ion-toolbar>
+    </ion-header>
     <ion-content :fullscreen="true">
 
       <ion-list>
@@ -80,7 +80,7 @@
     <!-- Location Modal -->
     <SetLocationModal :is-open="isLocationModalOpen" @update:is-open="isLocationModalOpen = $event"
       @location-selected="handleLocationSelected" />
-      <BarcodeModal :isOpen="showBarcodeModal" @update:isOpen="showBarcodeModal = $event" />
+    <BarcodeModal :isOpen="showBarcodeModal" @update:isOpen="showBarcodeModal = $event" />
   </ion-page>
 </template>
 
@@ -122,10 +122,10 @@ onMounted(() => {
   if (storedLocation) {
     currentLocation.value = JSON.parse(storedLocation);
   }
-  
+
   // Set initial loyalty number
   loyaltyNumber.value = getLoyaltyNumber();
-  
+
   // Listen for signup event
   window.addEventListener('userSignedUp', (event) => {
     loyaltyNumber.value = event.detail.loyaltyNumber;
@@ -195,7 +195,7 @@ function handleLocationSelected(location) {
 // Add the handler function
 const handleVersionClick = () => {
   clickCount.value++;
-  
+
   // Clear existing timer if it exists
   if (clickTimer.value) {
     clearTimeout(clickTimer.value);
@@ -211,7 +211,7 @@ const handleVersionClick = () => {
     try {
       // Reset click count
       clickCount.value = 0;
-      
+
       // Clear the timer
       clearTimeout(clickTimer.value);
 
@@ -249,7 +249,7 @@ onUnmounted(() => {
 const formatPhone = (phone) => {
   if (!phone) return '';
   const cleaned = phone.replace(/\D/g, '');
-  return `(${cleaned.slice(0,3)}) ${cleaned.slice(3,6)}-${cleaned.slice(6)}`;
+  return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
 };
 
 </script>
