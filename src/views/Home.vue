@@ -158,7 +158,32 @@ const hasRewards = computed(() => {
   return Boolean(rewardsAd);
 });
 
-// Add event listener for force refresh
+// Add checkSelectedLocation function at the script level
+async function checkSelectedLocation() {
+  const storedLocation = localStorage.getItem('selectedLocation');
+  if (storedLocation) {
+    try {
+      const parsedLocation = JSON.parse(storedLocation);
+      // Always fetch fresh data from the API
+      const freshLocationData = await apiLocations.getLocationById(parsedLocation.id);
+      if (freshLocationData) {
+        selectedLocation.value = freshLocationData;
+        localStorage.setItem('selectedLocation', JSON.stringify(freshLocationData));
+      }
+    } catch (error) {
+      console.error('Error refreshing location data:', error);
+    }
+  }
+}
+
+// Update onIonViewDidEnter to always refresh data
+onIonViewDidEnter(async () => {
+  await checkSelectedLocation();
+  await fetchLocationData();
+  await getData();
+  await fetchNotifications();
+});
+
 onMounted(async () => {
   await checkSelectedLocation();
   await fetchLocationData();
@@ -169,7 +194,6 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  // Remove event listeners on component unmount
   window.removeEventListener('locationChanged', handleLocationChange);
   window.removeEventListener('forceAppRefresh', handleForceRefresh);
 });
@@ -297,14 +321,11 @@ const closePdfModal = (isOpen) => {
 
 // Update the click handlers
 const handleWeeklyAdClick = () => {
-  console.log('Weekly Ad Click - hasWeeklyAd:', hasWeeklyAd.value);
   if (hasWeeklyAd.value) {
     openPdfModal('weekly');
-  } else if (selectedLocation.value) {
-    // If we have a location but no weekly ad, we can show a message or handle differently
-    console.log('No weekly ad available for this location');
   } else {
-    openLocationModal();
+    // If no weekly ad, show the location modal
+    isLocationModalOpen.value = true;
   }
 };
 
@@ -361,9 +382,6 @@ const fetchNotifications = async () => {
     console.error('Error fetching notifications:', error);
   }
 };
-
-// Fetch notifications on component mount
-onIonViewDidEnter(fetchNotifications);
 
 // Add ionViewWillEnter hook at the top level of the script
 onIonViewWillEnter(async () => {
