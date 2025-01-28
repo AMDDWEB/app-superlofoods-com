@@ -85,7 +85,6 @@ async function fetchLocations() {
     const response = await apiLocations.getLocations();
     locations.value = response;
   } catch (error) {
-    console.error('Error fetching locations:', error);
     locations.value = [];
   }
 }
@@ -120,7 +119,6 @@ async function toggleLocation(location) {
       }));
     }
   } catch (error) {
-    console.error('Error fetching fresh location data:', error);
     // Fallback to original location if API call fails
     selectedLocation.value = location;
     localStorage.setItem('selectedLocation', JSON.stringify(location));

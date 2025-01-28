@@ -86,7 +86,7 @@ import SpotlightsCarousel from '@/components/SpotlightsCarousel.vue';
 import SetLocationModal from '@/components/SetLocationModal.vue';
 import PdfViewerModal from '@/components/PdfViewerModal.vue';
 import CouponsCarousel from '@/components/CouponsCarousel.vue';
-import { IonPage, IonHeader, IonToolbar, IonContent } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonContent, IonButtons, IonButton, IonIcon, IonTitle, IonImg, IonGrid, IonRow, IonCol } from '@ionic/vue';
 import { useRouter } from 'vue-router';
 import { Capacitor } from '@capacitor/core';
 import { popoverController } from '@ionic/vue';
@@ -96,9 +96,13 @@ import apiNotifications from '../axios/apiNotifications.js'; // Import your API 
 import { onIonViewDidEnter, onIonViewWillEnter } from '@ionic/vue';
 
 const showBarcodeModal = ref(false);
+const { getLoyaltyNumber, getCardNumber } = useSignupModal();
+const loyaltyNumber = ref(getLoyaltyNumber());
 
 const presentBarcodeModal = () => {
-  showBarcodeModal.value = true;
+  if (loyaltyNumber.value && getCardNumber()) {
+    showBarcodeModal.value = true;
+  }
 };
 
 // Initialize all refs at the top
@@ -110,8 +114,6 @@ const locations = ref([]);
 const loading = ref(true);
 const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
 const { transformAllSliders } = useSliderDetails();
-const { getLoyaltyNumber } = useSignupModal();
-const loyaltyNumber = ref('');
 const notificationsAvailable = ref(false);
 
 // Add a loading state
@@ -133,14 +135,8 @@ const isLocationModalOpen = ref(false);
 // Add router to imports if not already present
 const router = useRouter();
 
-// Add these to your existing setup
-const { getCardNumber } = useSignupModal();
-
 // Add a watch for debugging
 watch(selectedLocation, (newVal) => {
-  console.log('selectedLocation changed:', newVal);
-  console.log('weekly_ad_url:', newVal?.weekly_ad_url);
-  console.log('rewards_url:', newVal?.rewards_url);
 }, { deep: true });
 
 // Update the computed properties
@@ -171,7 +167,7 @@ async function checkSelectedLocation() {
         localStorage.setItem('selectedLocation', JSON.stringify(freshLocationData));
       }
     } catch (error) {
-      console.error('Error refreshing location data:', error);
+      // Error handling silently
     }
   }
 }
@@ -185,11 +181,15 @@ onIonViewDidEnter(async () => {
 });
 
 onMounted(async () => {
+  loyaltyNumber.value = getLoyaltyNumber();
   await checkSelectedLocation();
   await fetchLocationData();
   await getData();
   window.addEventListener('locationChanged', handleLocationChange);
   window.addEventListener('forceAppRefresh', handleForceRefresh);
+  window.addEventListener('userSignedUp', (event) => {
+    loyaltyNumber.value = event.detail.loyaltyNumber;
+  });
   await requestNotificationPermission();
 });
 
@@ -216,23 +216,16 @@ async function handleLocationChange(event) {
 
 // Enhance fetchLocationData
 async function fetchLocationData() {
-  console.log('Fetching location data for ID:', selectedLocation.value?.id);
   if (selectedLocation.value?.id) {
     try {
       const freshLocationData = await apiLocations.getLocationById(selectedLocation.value.id);
-      console.log('API Response - Fresh location data:', freshLocationData);
       if (freshLocationData) {
         selectedLocation.value = freshLocationData;
         localStorage.setItem('selectedLocation', JSON.stringify(freshLocationData));
-        console.log('Updated selectedLocation:', selectedLocation.value);
-      } else {
-        console.log('No location data returned from API');
       }
     } catch (error) {
-      console.error('Error fetching location data:', error);
+      // Error handling silently
     }
-  } else {
-    console.log('No selected location ID available');
   }
 }
 
@@ -243,7 +236,6 @@ function openLocationModal() {
 
 // Handle location selection
 async function handleLocationSelected(location) {
-  console.log('Location selected:', location);
   selectedLocation.value = location;
   localStorage.setItem('selectedLocation', JSON.stringify(location));
   await fetchLocationData();
@@ -330,7 +322,6 @@ const handleWeeklyAdClick = () => {
 };
 
 const handleRewardsClick = () => {
-  console.log('Rewards Click - hasRewards:', hasRewards.value);
   if (hasRewards.value) {
     openPdfModal('rewards');
   }
@@ -364,14 +355,6 @@ const handleNotificationRequest = async () => {
   }
 };
 
-// Set initial loyalty number
-loyaltyNumber.value = getLoyaltyNumber();
-
-// Listen for signup event
-window.addEventListener('userSignedUp', (event) => {
-  loyaltyNumber.value = event.detail.loyaltyNumber;
-});
-
 // Fetch notifications
 const fetchNotifications = async () => {
   try {
@@ -379,12 +362,14 @@ const fetchNotifications = async () => {
     notificationsAvailable.value = response.data.length > 0;  // Ensure `.data` is used here
   } catch (error) {
     notificationsAvailable.value = false;
-    console.error('Error fetching notifications:', error);
   }
 };
 
 // Add ionViewWillEnter hook at the top level of the script
 onIonViewWillEnter(async () => {
+  // Refresh loyalty number and card number
+  loyaltyNumber.value = getLoyaltyNumber();
+  
   const storedLocation = localStorage.getItem('selectedLocation');
   if (storedLocation) {
     const parsedLocation = JSON.parse(storedLocation);

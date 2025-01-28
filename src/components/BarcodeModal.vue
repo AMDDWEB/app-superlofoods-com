@@ -32,26 +32,50 @@
 </template>
 
 <script setup>
-import { IonContent, IonModal } from '@ionic/vue';
+import { IonContent, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton } from '@ionic/vue';
 import VueBarcode from '@chenfengyuan/vue-barcode';
 import { useSignupModal } from '@/composables/useSignupModal';
-import { ref, watchEffect } from 'vue';
+import { ref, watchEffect, onMounted, watch } from 'vue';
 
 // Props and Events
-// const presentingElement = ref(document.querySelector('ion-router-outlet'));
+const presentingElement = ref(null);
 const props = defineProps({
   isOpen: Boolean
+});
+
+// Watch for modal open and refresh card number
+watch(() => props.isOpen, (newValue) => {
+  if (newValue) {
+    const number = getCardNumber();
+    if (number) {
+      cardNumber.value = number;
+      console.log('Card number refreshed on modal open:', number);
+    }
+  }
+});
+
+onMounted(() => {
+  presentingElement.value = document.querySelector('ion-router-outlet');
 });
 
 defineEmits(['update:isOpen']);
 
 // Barcode Data Handling
 const { getCardNumber } = useSignupModal();
-const cardNumber = ref(getCardNumber()); // Ensuring reactivity if card number updates
+const cardNumber = ref('');
+
+// Watch for changes in card number and update immediately
+watchEffect(() => {
+  const number = getCardNumber();
+  if (number) {
+    cardNumber.value = number;
+    console.log('Card number updated:', number);
+  }
+});
 
 // Debugging Output
 const onBarcodeRender = () => {
-  console.log('Barcode rendered successfully');
+  console.log('Barcode rendered successfully with value:', cardNumber.value);
 };
 </script>
 
