@@ -20,14 +20,9 @@ export function useClippedCoupons() {
     return clippedCoupons.value.has(couponId);
   };
 
-  const getClippedCount = () => {
-    return clippedCoupons.value.size;
-  };
-
   return {
     clippedCoupons,
     addClippedCoupon,
-    isCouponClipped,
-    getClippedCount
+    isCouponClipped
   };
 } 

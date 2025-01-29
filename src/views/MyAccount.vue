@@ -27,6 +27,18 @@
                 <div class="loyalty-number">{{ formatPhone(loyaltyNumber) }}</div>
             </div>
 
+            <!-- Stats Grid -->
+            <div class="stats-grid" v-if="offerStats">
+                <div class="stat-card">
+                    <div class="stat-label">Total Saved</div>
+                    <div class="stat-value">${{ offerStats.totalSaved.toFixed(2) }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Clipped</div>
+                    <div class="stat-value">{{ offerStats.totalClippedCount }}</div>
+                </div>
+            </div>
+
             <!-- Display card number if it exists -->
             <div class="loyalty-card" v-if="cardNumber">
                 <div class="loyalty-card-details"><!--{{ cardNumber }}-->Please present this card to the cashier to
@@ -69,12 +81,7 @@ const cardNumber = ref('');
 const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
 const showUserProfileModal = ref(false);
 const userName = ref(''); // Initialize as an empty string
-
-// // Computed property to capitalize the first letter of the user's name
-// const formattedUserName = computed(() => {
-//     if (!userName.value) return '';
-//     return userName.value.charAt(0).toUpperCase() + userName.value.slice(1);
-// });
+const offerStats = ref(null);
 
 const presentUserProfileModal = () => {
     showUserProfileModal.value = true;
@@ -85,23 +92,23 @@ onMounted(async () => {
     loyaltyNumber.value = getLoyaltyNumber();
     cardNumber.value = getCardNumber();
 
-    console.log('Initial Card Number:', cardNumber.value);
-
-    // Fetch customer info
+    // Fetch customer info and offer details
     try {
-        const customerInfo = await CouponsApi.getCustomerInfo();
-        console.log('Customer Info:', customerInfo);
-        userName.value = customerInfo.FirstName || ''; // Set userName after fetching
-        console.log('User Name:', userName.value);
+        const [customerInfo, offerDetails] = await Promise.all([
+            CouponsApi.getCustomerInfo(),
+            CouponsApi.getOfferDetails()
+        ]);
+
+        userName.value = customerInfo.FirstName || '';
+        offerStats.value = offerDetails;
     } catch (error) {
-        console.error('Failed to fetch customer info:', error);
+        console.error('Failed to fetch data:', error);
     }
 
     // Update loyalty number if a 'userSignedUp' event is emitted
     window.addEventListener('userSignedUp', (event) => {
         loyaltyNumber.value = event.detail.loyaltyNumber;
         cardNumber.value = event.detail.cardNumber;
-        console.log('Updated Card Number:', cardNumber.value);
     });
 });
 
@@ -131,7 +138,6 @@ const formatPhone = (phone) => {
 const isBarcodeDisplayed = ref(false);
 
 const showBarcode = () => {
-    console.log('Opening barcode');
     isBarcodeDisplayed.value = true;
 };
 
@@ -140,7 +146,7 @@ const closeBarcode = () => {
 };
 
 const onBarcodeRender = () => {
-    console.log('Barcode rendered successfully');
+    // Barcode render callback
 };
 
 // Register the component
@@ -204,7 +210,34 @@ defineOptions({
 }
 
 .user-welcome-heading {
-  font-weight: 800;
-  text-transform: capitalize;
+    font-weight: 800;
+    text-transform: capitalize;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 16px;
+}
+
+.stat-card {
+    background: var(--ion-color-light);
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid var(--ion-color-light-shade);
+    text-align: center;
+}
+
+.stat-label {
+    color: var(--ion-color-medium);
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    color: var(--ion-color-dark);
+    font-size: 18px;
+    font-weight: 600;
 }
 </style>

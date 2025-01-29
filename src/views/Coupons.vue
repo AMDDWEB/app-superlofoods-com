@@ -8,7 +8,7 @@
             <ion-label>All</ion-label>
           </ion-segment-button>
           <ion-segment-button value="clipped">
-            <ion-label>Clipped ({{ getClippedCount() }})</ion-label>
+            <ion-label>Clipped</ion-label>
           </ion-segment-button>
         </ion-segment>
       </ion-toolbar>
@@ -79,7 +79,7 @@ import { IonPage, IonHeader, IonToolbar, IonContent, IonSegment, IonSegmentButto
 const router = useRouter();
 const { coupons, loading, fetchCoupons, availableCategories, fetchCategories } = useCouponDetails();
 const { isAuthenticated, openSignupModal, SignupModal } = useSignupModal();
-const { clippedCoupons, isCouponClipped, getClippedCount } = useClippedCoupons();
+const { clippedCoupons, isCouponClipped } = useClippedCoupons();
 
 const offset = ref(0);
 const limit = 100;

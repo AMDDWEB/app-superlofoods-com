@@ -164,6 +164,24 @@ class CouponsApi {
     return response.data;
   }
 
+  async getOfferDetails() {
+    const refreshToken = TokenStorage.getRefreshToken();
+
+    if (!refreshToken) {
+      throw new Error('No refresh token found');
+    }
+
+    const response = await couponsInstance({
+      url: '/offer-details',
+      method: 'GET',
+      params: {
+        refresh_token: refreshToken
+      }
+    });
+
+    return response.data;
+  }
+
   isAuthenticated() {
     return TokenStorage.hasTokens();
   }
