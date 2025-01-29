@@ -1,5 +1,5 @@
 <template>
-  <ion-modal :is-open="isOpen" @didDismiss="$emit('update:isOpen', false)" :presenting-element="presentingElement"
+  <ion-modal :is-open="isOpen" @didDismiss="$emit('update:isOpen', false)"
     :initial-breakpoint="0.5" :breakpoints="[0, 0.5, 1]" :swipe-to-close="false" :backdropDismiss="false">
     <ion-header>
       <ion-toolbar>
@@ -35,10 +35,9 @@
 import { IonContent, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton } from '@ionic/vue';
 import VueBarcode from '@chenfengyuan/vue-barcode';
 import { useSignupModal } from '@/composables/useSignupModal';
-import { ref, watchEffect, onMounted, watch } from 'vue';
+import { ref, watchEffect, watch } from 'vue';
 
 // Props and Events
-const presentingElement = ref(null);
 const props = defineProps({
   isOpen: Boolean
 });
@@ -52,10 +51,6 @@ watch(() => props.isOpen, (newValue) => {
       console.log('Card number refreshed on modal open:', number);
     }
   }
-});
-
-onMounted(() => {
-  presentingElement.value = document.querySelector('ion-router-outlet');
 });
 
 defineEmits(['update:isOpen']);
