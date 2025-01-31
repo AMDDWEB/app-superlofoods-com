@@ -59,7 +59,7 @@
   </ion-modal>
 
   <!-- Signup Modal -->
-  <SignupModal />
+  <SignupModal v-if="hasAppCardCoupons" />
 </template>
 
 <script setup>
@@ -88,6 +88,7 @@ const { isCouponClipped, addClippedCoupon } = useClippedCoupons();
 const isClipping = ref(false);
 const showCouponModal = ref(false);
 const selectedSegment = ref('details');
+const hasAppCardCoupons = ref(import.meta.env.VITE_HAS_APPCARD_COUPONS === "true");
 
 const formatExpDate = (date) => format(new Date(date), 'MM/dd/yyyy');
 
