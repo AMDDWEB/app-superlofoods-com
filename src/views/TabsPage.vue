@@ -43,3 +43,9 @@ export default {
   }
 };
 </script>
+
+<style lang="css" scoped>
+ion-tab-button ion-icon {
+  padding: 4px; /* Adjust as needed */
+}
+</style>

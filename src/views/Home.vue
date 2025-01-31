@@ -12,7 +12,7 @@
         </ion-buttons>
         <ion-buttons slot="end">
 
-          <ion-button @click="presentBarcodeModal" v-if="loyaltyNumber">
+          <ion-button @click="presentBarcodeModal" v-if="hasAppCardCoupons && loyaltyNumber">
             <ion-icon color="primary" name="my-barcode-regular" size="medium"></ion-icon>
           </ion-button>
         </ion-buttons>
@@ -113,6 +113,7 @@ const selectedLocation = ref(null);
 const locations = ref([]);
 const loading = ref(true);
 const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
+const hasAppCardCoupons = ref(import.meta.env.VITE_HAS_APPCARD_COUPONS === "true");
 const { transformAllSliders } = useSliderDetails();
 const notificationsAvailable = ref(false);
 

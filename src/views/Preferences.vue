@@ -4,7 +4,7 @@
       <ion-toolbar>
         <ion-buttons slot="end">
 
-          <ion-button @click="presentBarcodeModal" v-if="loyaltyNumber">
+          <ion-button @click="presentBarcodeModal" v-if="hasAppCardCoupons && loyaltyNumber">
             <ion-icon color="primary" name="my-barcode-regular" size="medium"></ion-icon>
           </ion-button>
         </ion-buttons>
@@ -64,10 +64,34 @@
             Check My Points
           </ion-label>
         </ion-item> -->
-        <ion-item button @click="openFacebook">
-          <ion-icon name=facebook color="primary" slot="start"></ion-icon>
+        <ion-item v-if="facebookUrl" button @click="openFacebook">
+          <ion-icon name="facebook" color="primary" slot="start"></ion-icon>
           <ion-label>
             Find Us on Facebook
+          </ion-label>
+        </ion-item>
+        <ion-item v-if="instagramUrl" button @click="openInstagram">
+          <ion-icon name="instagram" color="primary" slot="start"></ion-icon>
+          <ion-label>
+            Follow Us on Instagram
+          </ion-label>
+        </ion-item>
+        <ion-item v-if="twitterUrl" button @click="openTwitter">
+          <ion-icon name="twitter" color="primary" slot="start"></ion-icon>
+          <ion-label>
+            Follow Us on Twitter
+          </ion-label>
+        </ion-item>
+        <ion-item v-if="pinterestUrl" button @click="openPinterest">
+          <ion-icon name="pinterest" color="primary" slot="start"></ion-icon>
+          <ion-label>
+            Pin Us on Pinterest
+          </ion-label>
+        </ion-item>
+        <ion-item v-if="youtubeUrl" button @click="openYouTube">
+          <ion-icon name="youtube" color="primary" slot="start"></ion-icon>
+          <ion-label>
+            Watch Us on YouTube
           </ion-label>
         </ion-item>
       </ion-list>
@@ -97,8 +121,13 @@ import BarcodeModal from '@/components/BarcodeModal.vue';
 // Store environment variables in reactive variables
 const storeName = import.meta.env.VITE_STORE_NAME; // Store name from .env
 const appVersion = import.meta.env.VITE_APP_VERSION; // Store name from .env
-const facebookPageID = import.meta.env.VITE_FACEBOOK_PAGE_ID; // Store name from .env
-const facebookURL = import.meta.env.VITE_FACEBOOK_URL; // Store name from .env
+const hasAppCardCoupons = ref(import.meta.env.VITE_HAS_APPCARD_COUPONS === "true");
+const facebookUrl = ref(import.meta.env.VITE_FACEBOOK_URL || '');
+const instagramUrl = ref(import.meta.env.VITE_INSTAGRAM_URL || '');
+const tiktokUrl = ref(import.meta.env.VITE_TIKTOK_URL || '');
+const pinterestUrl = ref(import.meta.env.VITE_PINTEREST_URL || '');
+const twitterUrl = ref(import.meta.env.VITE_TWITTER_URL || '');
+const youtubeUrl = ref(import.meta.env.VITE_YOUTUBE_URL || '');
 
 
 // Reactive references
@@ -171,6 +200,76 @@ async function openFacebook() {
   try {
     await Browser.open({
       url: facebookUrl,
+      presentationStyle: 'popover'
+    });
+  } catch (error) {
+    // Handle error silently
+  }
+}
+
+// Open Instagram page in browser popover
+async function openInstagram() {
+  const instagramUrl = import.meta.env.VITE_INSTAGRAM_URL; // Instagram URL from .env
+
+  try {
+    await Browser.open({
+      url: instagramUrl,
+      presentationStyle: 'popover'
+    });
+  } catch (error) {
+    // Handle error silently
+  }
+}
+
+// Open TikTok page in browser popover
+async function openTikTok() {
+  const tiktokUrl = import.meta.env.VITE_TIKTOK_URL; // TikTok URL from .env
+
+  try {
+    await Browser.open({
+      url: tiktokUrl,
+      presentationStyle: 'popover'
+    });
+  } catch (error) {
+    // Handle error silently
+  }
+}
+
+// Open Pinterest page in browser popover
+async function openPinterest() {
+  const pinterestUrl = import.meta.env.VITE_PINTEREST_URL; // Pinterest URL from .env
+
+  try {
+    await Browser.open({
+      url: pinterestUrl,
+      presentationStyle: 'popover'
+    });
+  } catch (error) {
+    // Handle error silently
+  }
+}
+
+// Open Twitter (X) page in browser popover
+async function openTwitter() {
+  const twitterUrl = import.meta.env.VITE_TWITTER_URL; // Twitter URL from .env
+
+  try {
+    await Browser.open({
+      url: twitterUrl,
+      presentationStyle: 'popover'
+    });
+  } catch (error) {
+    // Handle error silently
+  }
+}
+
+// Open YouTube channel in browser popover
+async function openYouTube() {
+  const youtubeUrl = import.meta.env.VITE_YOUTUBE_URL; // YouTube URL from .env
+
+  try {
+    await Browser.open({
+      url: youtubeUrl,
       presentationStyle: 'popover'
     });
   } catch (error) {

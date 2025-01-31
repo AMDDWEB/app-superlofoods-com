@@ -25,6 +25,11 @@ import loadingIcon from '../icons/solid/circle-notch-solid.svg';
 import chevronRightIcon from '../icons/solid/chevron-right-solid.svg'
 import moneyBillIcon from '../icons/solid/money-bill-solid.svg';
 import facebookIcon from '../icons/brands/facebook-f-brands-solid.svg';
+import instagramIcon from '../icons/brands/instagram-brands-solid.svg';
+import twitterIcon from '../icons/brands/x-twitter-brands-solid.svg';
+import tiktokIcon from '../icons/brands/tiktok-brands-solid.svg';
+import youtubeIcon from '../icons/brands/youtube-brands-solid.svg';
+import pinterestIcon from '../icons/brands/pinterest-brands-solid.svg';
 
 //Regular icons
 import homeRegularIcon from '../icons/regular/house-regular.svg';
@@ -67,6 +72,11 @@ const customIcons = {
   'set-location': setLocationIcon,
   'website': visitWebsiteIcon,
   'facebook': facebookIcon,
+  'instagram': instagramIcon,
+  'twitter': twitterIcon,
+  'tiktok': tiktokIcon,
+  'youtube': youtubeIcon,
+  'pinterest': pinterestIcon,
   'phone': phoneIcon,
   'get-directions': getDirectionsIcon,
   'share': shareIcon,

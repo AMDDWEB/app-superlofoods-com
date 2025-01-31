@@ -86,9 +86,9 @@ export function useSignupModal() {
       case 2:
         return 'Verify Your Number';
       case 3:
-        return 'Review information and confirm';
+        return 'Review Information and Confirm';
       case 4:
-        return 'Start Saving Today!';
+        return 'Start Saving Today';
       default:
         return '';
     }

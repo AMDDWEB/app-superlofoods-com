@@ -28,19 +28,19 @@
             </div>
 
             <!-- Stats Grid -->
-            <div class="stats-grid" v-if="offerStats">
-                <div class="stat-card">
-                    <div class="stat-label">Total Saved</div>
-                    <div class="stat-value">${{ offerStats.totalSaved.toFixed(2) }}</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Total Clipped</div>
-                    <div class="stat-value">{{ offerStats.totalClippedCount }}</div>
-                </div>
-            </div>
+            <div class="stats-grid" v-if="hasAppCardCoupons && offerStats">
+    <div class="stat-card">
+        <div class="stat-label">Total Saved</div>
+        <div class="stat-value">${{ offerStats.totalSaved.toFixed(2) }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Total Clipped</div>
+        <div class="stat-value">{{ offerStats.totalClippedCount }}</div>
+    </div>
+</div>
 
             <!-- Display card number if it exists -->
-            <div class="loyalty-card" v-if="cardNumber">
+            <div class="loyalty-card" v-if="hasAppCardCoupons && cardNumber">
                 <div class="loyalty-card-details"><!--{{ cardNumber }}-->Please present this card to the cashier to
                     redeem your coupons.</div>
                 <div class="barcode-container ion-margin-top">
@@ -82,6 +82,7 @@ const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
 const showUserProfileModal = ref(false);
 const userName = ref(''); // Initialize as an empty string
 const offerStats = ref(null);
+const hasAppCardCoupons = ref(import.meta.env.VITE_HAS_APPCARD_COUPONS === "true");
 
 const presentUserProfileModal = () => {
     showUserProfileModal.value = true;
