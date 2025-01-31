@@ -29,15 +29,15 @@
 
             <!-- Stats Grid -->
             <div class="stats-grid" v-if="hasAppCardCoupons && offerStats">
-    <div class="stat-card">
-        <div class="stat-label">Total Saved</div>
-        <div class="stat-value">${{ offerStats.totalSaved.toFixed(2) }}</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-label">Total Clipped</div>
-        <div class="stat-value">{{ offerStats.totalClippedCount }}</div>
-    </div>
-</div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Saved</div>
+                    <div class="stat-value">${{ offerStats.totalSaved.toFixed(2) }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Clipped</div>
+                    <div class="stat-value">{{ offerStats.totalClippedCount }}</div>
+                </div>
+            </div>
 
             <!-- Display card number if it exists -->
             <div class="loyalty-card" v-if="hasAppCardCoupons && cardNumber">
