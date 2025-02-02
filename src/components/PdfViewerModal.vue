@@ -118,15 +118,22 @@ let currentY = 0;
 // Handle Pinch Zoom
 const handlePinchZoom = (event) => {
   if (event.scale) {
-    let newScale = scale.value * event.scale;
+    const ZOOM_SPEED = 0.1; // Adjust speed (higher = slower, lower = faster)
+    let newScale = scale.value + (event.scale - 1) * ZOOM_SPEED;
     if (newScale < MIN_SCALE) newScale = MIN_SCALE;
     if (newScale > MAX_SCALE) newScale = MAX_SCALE;
 
     scale.value = newScale;
 
     if (pdfContainer.value) {
+      // Get touch position relative to the container
+      const rect = pdfContainer.value.getBoundingClientRect();
+      const focusX = ((event.touches ? event.touches[0].clientX : event.clientX) - rect.left) / rect.width * 100;
+      const focusY = ((event.touches ? event.touches[0].clientY : event.clientY) - rect.top) / rect.height * 100;
+
+      // Apply the new scale and set transform-origin based on user focus
       pdfContainer.value.style.transform = `scale(${scale.value})`;
-      pdfContainer.value.style.transformOrigin = 'center'; 
+      pdfContainer.value.style.transformOrigin = `${focusX}% ${focusY}%`;
     }
   }
 };
@@ -148,13 +155,20 @@ const startPan = (event) => {
   }
 };
 
+const PAN_SPEED = 0.5; // Adjust speed (lower = slower, higher = faster)
+
 const panMove = (event) => {
   if (isPanning && pdfContainer.value) {
-    currentX += (event.touches ? event.touches[0].clientX : event.clientX) - startX;
-    currentY += (event.touches ? event.touches[0].clientY : event.clientY) - startY;
+    let deltaX = (event.touches ? event.touches[0].clientX : event.clientX) - startX;
+    let deltaY = (event.touches ? event.touches[0].clientY : event.clientY) - startY;
+
+    // Apply PAN_SPEED multiplier
+    currentX += deltaX * PAN_SPEED;
+    currentY += deltaY * PAN_SPEED;
+
     startX = event.touches ? event.touches[0].clientX : event.clientX;
     startY = event.touches ? event.touches[0].clientY : event.clientY;
-    
+
     pdfContainer.value.style.transform = `scale(${scale.value}) translate(${currentX}px, ${currentY}px)`;
   }
 };
@@ -219,7 +233,7 @@ const throttledPanMove = (event) => {
 .pdf-container img,
 .pdf-container canvas {
   transform-origin: center;
-  transition: transform 2s ease-out;
+  transition: transform 0.5s ease-out;
 }
 
 .pdf-pagination {
