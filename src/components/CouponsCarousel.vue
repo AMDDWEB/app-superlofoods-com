@@ -20,7 +20,7 @@
       </swiper>
     </div>
     <div v-else>
-      <CouponsSkeleton :count="3" />
+      <CouponsSkeleton :count="1" />
     </div>
   </div>
 </template>
