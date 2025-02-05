@@ -27,6 +27,12 @@
                 <div class="loyalty-number">{{ formatPhone(loyaltyNumber) }}</div>
             </div>
 
+            <!-- Display card number only when Midax coupons are enabled -->
+            <div class="loyalty-card" v-if="hasMidaxCoupons">
+                <div class="loyalty-label">My Card Number</div>
+                <div class="loyalty-number">{{ cardNumber || 'Not Available' }}</div>
+            </div>
+
             <!-- Stats Grid -->
             <div class="stats-grid" v-if="hasAppCardCoupons && offerStats">
                 <div class="stat-card">
@@ -39,12 +45,11 @@
                 </div>
             </div>
 
-            <!-- Display card number if it exists -->
-            <div class="loyalty-card" v-if="hasAppCardCoupons && cardNumber">
-                <div class="loyalty-card-details"><!--{{ cardNumber }}-->Please present this card to the cashier to
-                    redeem your coupons.</div>
+            <!-- Display barcode if loyalty number exists -->
+            <div class="loyalty-card" v-if="loyaltyNumber">
+                <div class="loyalty-card-details">Please present this barcode to the cashier to redeem your coupons.</div>
                 <div class="barcode-container ion-margin-top">
-                    <vue-barcode :value="cardNumber" :options="{
+                    <vue-barcode :value="loyaltyNumber" :options="{
                         format: 'CODE128',
                         width: 2.5,
                         height: 50,
@@ -55,6 +60,10 @@
                     }" @render="onBarcodeRender"></vue-barcode>
                 </div>
             </div>
+
+            <!-- Auth0 Logout button, visible only when Midax coupons are enabled -->
+            <ion-button @click="handleAuth0Logout" expand="block" color="danger" class="close-account-button"
+                v-if="hasMidaxCoupons">Log Out</ion-button>
 
             <!-- Button to open the contact form, visible only if loyalty number exists -->
             <ion-button @click="openContactForm" expand="block" color="danger" class="close-account-button"
@@ -72,17 +81,22 @@ import { Browser } from '@capacitor/browser';
 import { useSignupModal } from '@/composables/useSignupModal';
 import UserProfileDetailsModal from '@/components/UserProfileDetailsModal.vue';
 import VueBarcode from '@chenfengyuan/vue-barcode';
-import CouponsApi from '@/axios/apiCoupons'; // Import CouponsApi
+import CouponsApi from '@/axios/apiCoupons';
+import CustomerApi from '@/axios/apiCustomer';
+import { useAuthModule } from '@/composables/useAuth0Modal';
 
 // Importing method to fetch loyalty number from a composable
-const { getLoyaltyNumber, getCardNumber } = useSignupModal();
+const { getLoyaltyNumber } = useSignupModal();
 const loyaltyNumber = ref('');
-const cardNumber = ref('');
+const cardNumber = ref(localStorage.getItem('cardNumber') || '');
 const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
 const showUserProfileModal = ref(false);
-const userName = ref(''); // Initialize as an empty string
+const userName = ref('');
 const offerStats = ref(null);
-const hasAppCardCoupons = ref(import.meta.env.VITE_HAS_APPCARD_COUPONS === "true");
+const hasAppCardCoupons = ref(true); 
+const hasMidaxCoupons = ref(import.meta.env.VITE_HAS_MIDAX_COUPONS === "true");
+
+const { signOut } = useAuthModule();
 
 const presentUserProfileModal = () => {
     showUserProfileModal.value = true;
@@ -91,17 +105,28 @@ const presentUserProfileModal = () => {
 // Set loyalty number on component mount and add event listener
 onMounted(async () => {
     loyaltyNumber.value = getLoyaltyNumber();
-    cardNumber.value = getCardNumber();
+    cardNumber.value = localStorage.getItem('cardNumber');
 
     // Fetch customer info and offer details
     try {
-        const [customerInfo, offerDetails] = await Promise.all([
-            CouponsApi.getCustomerInfo(),
-            CouponsApi.getOfferDetails()
-        ]);
-
-        userName.value = customerInfo.FirstName || '';
-        offerStats.value = offerDetails;
+        if (import.meta.env.VITE_HAS_MIDAX_COUPONS === "true") {
+            const currentToken = localStorage.getItem('access_token');
+            const storeId = localStorage.getItem('storeId');
+            
+            if (currentToken && storeId) {
+                const customerResponse = await CustomerApi.checkForExistingUser(currentToken, storeId);
+                if (customerResponse.data && customerResponse.data[0]) {
+                    userName.value = customerResponse.data[0].FirstName || '';
+                }
+            }
+        } else {
+            const [customerInfo, offerDetails] = await Promise.all([
+                CouponsApi.getCustomerInfo(),
+                CouponsApi.getOfferDetails()
+            ]);
+            userName.value = customerInfo.FirstName || '';
+            offerStats.value = offerDetails;
+        }
     } catch (error) {
         console.error('Failed to fetch data:', error);
     }
@@ -148,6 +173,11 @@ const closeBarcode = () => {
 
 const onBarcodeRender = () => {
     // Barcode render callback
+};
+
+// Function to handle Auth0 logout
+const handleAuth0Logout = async () => {
+    await signOut();
 };
 
 // Register the component

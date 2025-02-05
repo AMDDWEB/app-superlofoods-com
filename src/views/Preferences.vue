@@ -20,7 +20,7 @@
             Preferences
           </ion-label>
         </ion-list-header>
-        <ion-item button @click="$router.push('/my-account')" v-if="loyaltyNumber">
+        <ion-item button @click="$router.push('/my-account')" v-if="loyaltyNumber || cardNumber">
           <ion-icon color="primary" name="my-account-regular" slot="start"></ion-icon>
           <ion-label>
             My Account
@@ -139,6 +139,14 @@ const clickTimer = ref(null);
 const { getLoyaltyNumber } = useSignupModal();
 const loyaltyNumber = ref('');
 const showBarcodeModal = ref(false);
+const cardNumber = ref(localStorage.getItem('cardNumber') || '');
+
+// Watch for card number changes in localStorage
+window.addEventListener('storage', (e) => {
+  if (e.key === 'cardNumber') {
+    cardNumber.value = e.newValue;
+  }
+});
 
 const presentBarcodeModal = () => {
   showBarcodeModal.value = true;

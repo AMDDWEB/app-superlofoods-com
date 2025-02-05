@@ -9,6 +9,7 @@ export function useLocationDetails() {
 
     return {
       id: location.id.toString(),
+      coupon_id: location.coupon_id || null,
       name: location.title,
       address: location.address?.address || '',
       street_number: location.address?.street_number || '',

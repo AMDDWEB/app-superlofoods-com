@@ -8,6 +8,7 @@ declare global {
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router';
+import { createAuth0 } from '@auth0/auth0-vue';
 
 import { IonicVue } from '@ionic/vue';
 
@@ -52,7 +53,17 @@ import OneSignal from 'onesignal-cordova-plugin'; // Import OneSignal
 
 const app = createApp(App)
   .use(IonicVue)
-  .use(router);
+  .use(router)
+  .use(
+    createAuth0({
+      domain: import.meta.env.VITE_AUTH0_DOMAIN,
+      clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
+      authorizationParams: {
+        redirect_uri: window.location.origin,
+        audience: 'midax-api'
+      }
+    })
+  );
 
 // Provide the notification permission function
 const { requestNotificationPermission } = useNotifications();
@@ -61,15 +72,12 @@ app.provide('requestNotificationPermission', requestNotificationPermission);
 router.isReady().then(() => {
   app.mount('#app');
   
-  // Only initialize OneSignal in a Cordova environment
-  if (window.cordova) {
-    // Wait for the device to be ready before initializing OneSignal
-    document.addEventListener('deviceready', () => {
-      try {
-        // Initialize OneSignal with the environment variable
-        OneSignal.initialize(import.meta.env.VITE_ONESIGNAL_APP_ID);
-      } catch (error) {
-      }
+  // Initialize OneSignal with the environment variable
+  OneSignal.initialize(import.meta.env.VITE_ONESIGNAL_APP_ID); // Use the environment variable for the App ID
+  
+  // Request permission for notifications
+  OneSignal.Notifications.requestPermission()
+    .then((response) => {
+      console.log('Push notification permission response:', response);
     });
-  }
 });

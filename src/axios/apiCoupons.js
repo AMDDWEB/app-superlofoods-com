@@ -28,20 +28,35 @@ class CouponsApi {
   }
 
   async getCoupons({
-    limit = 1000,
+    limit = 60,
     offset = 0,
     category = null,
-    sortBy = 'newest'
+    sortBy = 'expires'
   } = {}) {
+    const hasMidaxCoupons = import.meta.env.VITE_HAS_MIDAX_COUPONS === "true";
     const params = {
-      merchant_id: import.meta.env.VITE_COUPONS_MERCHANT_ID,
-      limit: limit.toString(),
-      offset: offset.toString(),
-      sort_by: sortBy
+      limit: '60',
+      sort_by: 'expires'
     };
 
-    if (category) {
-      params.category_id = category;
+    if (hasMidaxCoupons) {
+      // For Midax system
+      params.location_id = localStorage.getItem('storeId');
+      
+      // Only add card number if authenticated
+      const cardNumber = localStorage.getItem('cardNumber');
+      if (cardNumber) {
+        params.card_number = cardNumber;
+      }
+    } else {
+      // For AppCard system
+      params.merchant_id = import.meta.env.VITE_COUPONS_MERCHANT_ID;
+      
+      // Only add refresh token if authenticated
+      const refreshToken = TokenStorage.getRefreshToken();
+      if (refreshToken) {
+        params.refresh_token = refreshToken;
+      }
     }
 
     const response = await couponsInstance({
@@ -79,21 +94,41 @@ class CouponsApi {
   }
 
   async clipCoupon(offerId) {
-    const refreshToken = TokenStorage.getRefreshToken();
+    const hasMidaxCoupons = import.meta.env.VITE_HAS_MIDAX_COUPONS === "true";
+    const params = { offer_id: offerId };
 
-    if (!refreshToken) {
-      throw new Error('No refresh token found');
-    }
-
-    return await couponsInstance({
-      url: '/clip-coupon',
-      method: 'PUT',
-      params: {
-        merchant_id: import.meta.env.VITE_COUPONS_MERCHANT_ID,
-        refresh_token: refreshToken,
-        offer_id: offerId
+    if (hasMidaxCoupons) {
+      const cardNumber = localStorage.getItem('cardNumber');
+      const storeId = localStorage.getItem('storeId');
+      
+      if (!cardNumber || !storeId) {
+        throw new Error('Missing required Midax parameters');
       }
-    });
+      
+      // For Midax, send data in the request body instead of params
+      return await couponsInstance({
+        url: '/clip-coupon',
+        method: 'PUT',
+        data: {
+          offer_id: offerId,
+          card_number: cardNumber,
+          location_id: storeId
+        },
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+    } else {
+      params.merchant_id = import.meta.env.VITE_COUPONS_MERCHANT_ID;
+      params.refresh_token = TokenStorage.getRefreshToken();
+      
+      return await couponsInstance({
+        url: '/clip-coupon',
+        method: 'PUT',
+        params
+      });
+    }
   }
 
   async getCouponById(id) {

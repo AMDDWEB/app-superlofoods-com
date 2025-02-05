@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-import { computed, watch } from 'vue';
+import { computed, watch, onMounted } from 'vue';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { useRouter } from 'vue-router';
 import { useCouponDetails } from '@/composables/useCouponDetails';
@@ -50,6 +50,13 @@ const { addClippedCoupon } = useClippedCoupons();
 
 // Only display up to the limit
 const displayCoupons = computed(() => coupons.value.slice(0, props.limit));
+
+// Watch for location changes
+watch(() => localStorage.getItem('selectedLocation'), async (newLocation) => {
+  if (newLocation) {
+    await fetchCoupons({ limit: props.limit, offset: 0 });
+  }
+});
 
 // Add a watch for authentication events
 watch(() => TokenStorage.hasTokens(), async (isAuthenticated) => {
@@ -82,8 +89,25 @@ const goToCouponsArchive = () => {
   router.push({ name: 'Coupons' });
 };
 
-// Fetch coupons when component is mounted
-fetchCoupons({ limit: props.limit, offset: 0 });
+onMounted(async () => {
+  const hasMidaxCoupons = import.meta.env.VITE_HAS_MIDAX_COUPONS === "true";
+  
+  if (hasMidaxCoupons) {
+    // Only check for location if using Midax system
+    const selectedLocation = localStorage.getItem('selectedLocation');
+    if (selectedLocation) {
+      await fetchCoupons({ limit: props.limit, offset: 0 });
+    }
+  } else {
+    // For AppCard, fetch coupons immediately
+    await fetchCoupons({ limit: props.limit, offset: 0 });
+  }
+  
+  // Listen for location change events
+  window.addEventListener('locationChanged', async () => {
+    await fetchCoupons({ limit: props.limit, offset: 0 });
+  });
+});
 </script>
 
 <style scoped>

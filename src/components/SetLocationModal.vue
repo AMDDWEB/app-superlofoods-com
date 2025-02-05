@@ -1,9 +1,9 @@
 <template>
-  <ion-modal :is-open="isOpen" @didDismiss="closeModal" :swipe-to-close="false" :backdropDismiss="false">
+  <ion-modal :is-open="isOpen" @didDismiss="hasMidaxCoupons ? null : closeModal" :swipe-to-close="!hasMidaxCoupons" :backdropDismiss="!hasMidaxCoupons">
     <ion-header>
       <ion-toolbar>
         <ion-title>Select My Store</ion-title>
-        <ion-buttons slot="end">
+        <ion-buttons slot="end" v-if="!hasMidaxCoupons">
           <ion-button @click="closeModal">Close</ion-button>
         </ion-buttons>
       </ion-toolbar>
@@ -29,6 +29,7 @@ import { ref, onMounted, watch } from 'vue';
 import { IonModal, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonToggle, IonButtons, IonButton } from '@ionic/vue';
 import apiLocations from '../axios/apiLocations';
 
+const hasMidaxCoupons = import.meta.env.VITE_HAS_MIDAX_COUPONS === 'true';
 const props = defineProps({
   isOpen: Boolean,
   currentLocation: Object
@@ -43,6 +44,10 @@ const selectedLocation = ref(null);
 onMounted(async () => {
   await fetchLocations();
   await initializeSelectedLocation();
+  
+  if (hasMidaxCoupons && !localStorage.getItem('selectedLocation')) {
+    emit('update:is-open', true);
+  }
 });
 
 // Watch for modal opening
@@ -103,6 +108,8 @@ async function toggleLocation(location) {
       // Update both the selected location and localStorage with fresh data
       selectedLocation.value = freshLocation;
       localStorage.setItem('selectedLocation', JSON.stringify(freshLocation));
+      // Store the store ID for coupons
+      localStorage.setItem('storeId', freshLocation.coupon_id || null);
       
       // Emit events with fresh location data
       emit('location-selected', freshLocation);
@@ -113,6 +120,7 @@ async function toggleLocation(location) {
       // Fallback to original location if fresh data fetch fails
       selectedLocation.value = location;
       localStorage.setItem('selectedLocation', JSON.stringify(location));
+      localStorage.setItem('storeId', location.coupon_id || null);
       emit('location-selected', location);
       window.dispatchEvent(new CustomEvent('locationChanged', {
         detail: location
@@ -122,6 +130,7 @@ async function toggleLocation(location) {
     // Fallback to original location if API call fails
     selectedLocation.value = location;
     localStorage.setItem('selectedLocation', JSON.stringify(location));
+    localStorage.setItem('storeId', location.coupon_id || null);
     emit('location-selected', location);
     window.dispatchEvent(new CustomEvent('locationChanged', {
       detail: location
@@ -135,11 +144,16 @@ async function toggleLocation(location) {
 }
 
 function closeModal() {
+  // Only prevent closing if Midax coupons is enabled AND no location is selected
+  if (hasMidaxCoupons && !localStorage.getItem('selectedLocation')) return;
+  
   // Ensure one final check of selected location before closing
   const storedLocation = localStorage.getItem('selectedLocation');
   if (storedLocation) {
     const parsedLocation = JSON.parse(storedLocation);
     selectedLocation.value = parsedLocation;
+    // Ensure storeId is set
+    localStorage.setItem('storeId', parsedLocation.coupon_id || null);
   }
   
   emit('update:is-open', false);

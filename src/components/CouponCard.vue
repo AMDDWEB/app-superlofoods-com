@@ -1,7 +1,7 @@
 <template>
   <ion-card @click="handleCardClick">
     <!-- Image Container -->
-    <ion-img v-if="coupon.encoded_img" class="coupon-image-container" :src="coupon.encoded_img"></ion-img>
+    <ion-img v-if="decodedImageSrc" class="coupon-image-container" :src="decodedImageSrc"></ion-img>
     <div v-else class="coupon-image-container">
       <ion-spinner name="lines"></ion-spinner>
     </div>
@@ -49,7 +49,7 @@
         <span class="coupon-details-label">{{ coupon.title }} on {{ coupon.subtitle }}</span><br>
         <span class="coupon-details-text">{{ coupon.description }}</span>
       </div>
-      <ion-img v-if="coupon.encoded_img, selectedSegment === 'details'" class="coupon-details-image" :src="coupon.encoded_img"></ion-img>
+      <ion-img v-if="decodedImageSrc && selectedSegment === 'details'" class="coupon-details-image" :src="decodedImageSrc"></ion-img>
 
       <div class="coupon-details-card" v-if="selectedSegment === 'terms'">
         <span class="coupon-details-label">Coupon Expires on {{ formatExpDate(coupon.to_date) }}</span><br>
@@ -58,17 +58,24 @@
     </ion-content>
   </ion-modal>
 
+<<<<<<< Updated upstream
   <!-- Signup Modal -->
   <SignupModal v-if="hasAppCardCoupons" />
+=======
+  <!-- Conditionally render modals based on environment variables -->
+  <SignupModal v-if="hasAppCardCoupons" />
+
+>>>>>>> Stashed changes
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { format } from 'date-fns';
 import { IonCard, IonImg, IonIcon, IonButton, IonText, IonSpinner, IonModal, IonHeader, IonToolbar, IonTitle, IonButtons, IonContent, IonSegment, IonSegmentButton, IonLabel } from '@ionic/vue';
 import { cut } from 'ionicons/icons';
 import { useRouter } from 'vue-router';
 import { useSignupModal } from '@/composables/useSignupModal';
+import { useAuthModule } from '@/composables/useAuth0Modal';
 import { useClippedCoupons } from '@/composables/useClippedCoupons';
 import CouponsApi from '@/axios/apiCoupons';
 import { TokenStorage } from '@/utils/tokenStorage';
@@ -81,9 +88,13 @@ const props = defineProps({
   }
 });
 
+const hasAppCardCoupons = ref(import.meta.env.VITE_HAS_APPCARD_COUPONS === "true");
+const hasMidaxCoupons = ref(import.meta.env.VITE_HAS_MIDAX_COUPONS === "true");
+
 //const presentingElement = ref(document.querySelector('ion-router-outlet'));
 const emit = defineEmits(['clip']);
 const { openSignupModal, SignupModal } = useSignupModal();
+const { signIn } = useAuthModule();
 const { isCouponClipped, addClippedCoupon } = useClippedCoupons();
 const isClipping = ref(false);
 const showCouponModal = ref(false);
@@ -91,6 +102,35 @@ const selectedSegment = ref('details');
 const hasAppCardCoupons = ref(import.meta.env.VITE_HAS_APPCARD_COUPONS === "true");
 
 const formatExpDate = (date) => format(new Date(date), 'MM/dd/yyyy');
+
+const decodedImageSrc = computed(() => {
+  if (!props.coupon?.encoded_img) return '';
+  
+  try {
+    // Check if it's already a data URL
+    if (props.coupon.encoded_img.startsWith('data:image')) {
+      return props.coupon.encoded_img;
+    }
+    
+    // Check if it's a URL
+    if (props.coupon.encoded_img.startsWith('http')) {
+      return props.coupon.encoded_img;
+    }
+    
+    // Try to decode base64
+    const cleanBase64 = props.coupon.encoded_img.replace(/[\n\r]/g, '').trim();
+    
+    // If it doesn't have a mime type, assume it's a JPEG
+    if (!cleanBase64.includes('data:image')) {
+      return `data:image/jpeg;base64,${cleanBase64}`;
+    }
+    
+    return cleanBase64;
+  } catch (error) {
+    console.error('Error decoding image:', error);
+    return '';
+  }
+});
 
 const handleCardClick = () => {
   showCouponModal.value = true;
@@ -103,18 +143,35 @@ const closeCouponModal = () => {
 const handleClipClick = async (event) => {
   event.stopPropagation(); // Prevent the card click event
 
-  if (!TokenStorage.hasTokens()) {
+  const hasMidaxCoupons = import.meta.env.VITE_HAS_MIDAX_COUPONS === "true";
+  const hasAppCardCoupons = !hasMidaxCoupons;
+
+  // For Midax, check access token directly
+  if (hasMidaxCoupons) {
+    const accessToken = TokenStorage.getAccessToken();
+    const cardNumber = localStorage.getItem('cardNumber');
+    const storeId = localStorage.getItem('storeId');
+    
+    if (!accessToken || !cardNumber || !storeId) {
+      await signIn();
+      return;
+    }
+  } else if (!TokenStorage.hasTokens()) {
+    // For AppCard system
     openSignupModal({ presentationStyle: 'popover' });
     return;
   }
 
+  // Don't proceed if already clipping or clipped
   if (isClipping.value || isCouponClipped(props.coupon.id)) return;
 
   isClipping.value = true;
   try {
-    await CouponsApi.clipCoupon(props.coupon.id);
-    addClippedCoupon(props.coupon.id);
-    emit('clip');
+    const response = await CouponsApi.clipCoupon(props.coupon.id);
+    if (response.status === 200) {
+      addClippedCoupon(props.coupon.id);
+      emit('clip');
+    }
   } catch (error) {
     console.error('Error clipping coupon:', error);
   } finally {
