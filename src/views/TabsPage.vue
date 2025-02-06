@@ -11,7 +11,7 @@
       <ion-icon name="locations-regular" />
       <ion-label>Locations</ion-label>
     </ion-tab-button>
-    <ion-tab-button tab="coupons" href="/tabs/coupons">
+    <ion-tab-button v-if="hasAppCardCoupons || hasMidaxCoupons" tab="coupons" href="/tabs/coupons">
       <ion-icon name="barcode-coupon-regular" />
       <ion-label>Coupons</ion-label>
     </ion-tab-button>
@@ -29,6 +29,7 @@
 </template>
 
 <script>
+import { ref } from 'vue';
 import { IonTabBar, IonTabButton, IonTabs, IonLabel, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
 
 export default {
@@ -40,6 +41,15 @@ export default {
     IonIcon,
     IonPage,
     IonRouterOutlet
+  },
+  setup() {
+    const hasAppCardCoupons = ref(import.meta.env.VITE_HAS_APPCARD_COUPONS === "true");
+    const hasMidaxCoupons = ref(import.meta.env.VITE_HAS_MIDAX_COUPONS === "true");
+
+    return {
+      hasAppCardCoupons,
+      hasMidaxCoupons
+    };
   }
 };
 </script>

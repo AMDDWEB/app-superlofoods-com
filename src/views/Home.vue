@@ -56,7 +56,7 @@
       <!-- Spotlights Carousel -->
       <SpotlightsCarousel :spotlights="spotlights" />
       <!-- Featured Coupons Carousel -->
-      <CouponsCarousel :coupons="coupons" />
+      <CouponsCarousel v-if="hasAppCardCoupons || hasMidaxCoupons" :coupons="coupons" />
 
       <!-- Featured Recipes Carousel -->
       <RecipeCarousel :recipes="recipes" />
@@ -114,6 +114,7 @@ const locations = ref([]);
 const loading = ref(true);
 const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
 const hasAppCardCoupons = ref(import.meta.env.VITE_HAS_APPCARD_COUPONS === "true");
+const hasMidaxCoupons = ref(import.meta.env.VITE_HAS_MIDAX_COUPONS === "true");
 const { transformAllSliders } = useSliderDetails();
 const notificationsAvailable = ref(false);
 

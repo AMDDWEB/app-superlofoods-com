@@ -10,8 +10,8 @@
                 </ion-buttons>
 
                 <ion-buttons slot="end">
-                    <!-- Back button to navigate back one page -->
-                    <ion-button @click="presentUserProfileModal" v-if="loyaltyNumber">
+                    <!-- Profile button - show if either Midax is enabled or loyalty number exists -->
+                    <ion-button @click="presentUserProfileModal" v-if="hasMidaxCoupons || loyaltyNumber">
                         <ion-icon color="primary" name="my-account-regular" size="small"></ion-icon>
                     </ion-button>
                 </ion-buttons>
@@ -22,16 +22,17 @@
         <ion-content :fullscreen="true">
             <h1 class="user-welcome-heading ion-padding">Hi, {{ userName || "Shopper" }}!</h1>
             <!-- Display loyalty number if it exists -->
-            <div class="loyalty-card" v-if="loyaltyNumber">
+            <div class="loyalty-card">
                 <div class="loyalty-label">My Loyalty Number</div>
-                <div class="loyalty-number">{{ formatPhone(loyaltyNumber) }}</div>
+                <div class="loyalty-number" v-if="hasMidaxCoupons" >{{ cardNumber  || 'Not Available' }}</div>
+                <div class="loyalty-number" v-if="loyaltyNumber">{{ formatPhone(loyaltyNumber) }}</div>
             </div>
 
-            <!-- Display card number only when Midax coupons are enabled -->
+            <!-- Display card number only when Midax coupons are enabled
             <div class="loyalty-card" v-if="hasMidaxCoupons">
                 <div class="loyalty-label">My Card Number</div>
-                <div class="loyalty-number">{{ cardNumber || 'Not Available' }}</div>
-            </div>
+                <div class="loyalty-number" v-if="hasMidaxCoupons" >{{ cardNumber  || 'Not Available' }}</div>
+            </div> -->
 
             <!-- Stats Grid -->
             <div class="stats-grid" v-if="hasAppCardCoupons && offerStats">
@@ -69,7 +70,7 @@
             <ion-button @click="openContactForm" expand="block" color="danger" class="close-account-button"
                 v-if="loyaltyNumber">Close My Account</ion-button>
 
-            <UserProfileDetailsModal :isOpen="showUserProfileModal" @update:isOpen="showUserProfileModal = $event" />
+            <UserProfileDetailsModal :is-open="showUserProfileModal" @update:is-open="showUserProfileModal = $event" />
         </ion-content>
     </ion-page>
 </template>
@@ -98,8 +99,19 @@ const hasMidaxCoupons = ref(import.meta.env.VITE_HAS_MIDAX_COUPONS === "true");
 
 const { signOut } = useAuthModule();
 
+// Computed property to check if user is authenticated
+const isAuthenticated = computed(() => {
+    if (hasMidaxCoupons.value) {
+        return !!localStorage.getItem('access_token') && !!localStorage.getItem('storeId');
+    }
+    return !!loyaltyNumber.value;
+});
+
+// Update presentUserProfileModal to check authentication
 const presentUserProfileModal = () => {
-    showUserProfileModal.value = true;
+    if (hasMidaxCoupons.value || loyaltyNumber.value) {
+        showUserProfileModal.value = true;
+    }
 };
 
 // Set loyalty number on component mount and add event listener

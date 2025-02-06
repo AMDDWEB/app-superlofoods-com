@@ -23,14 +23,16 @@
           <ion-label position="stacked" color="medium">Last Name</ion-label>
           <ion-input class="profile-input" type="text" v-model="userProfile.lastName" required></ion-input>
         </ion-item>
-        <ion-item lines="none">
-          <ion-label position="stacked" color="medium">Birthday</ion-label>
-          <ion-input class="profile-input" type="date" v-model="userProfile.birthday"></ion-input>
-        </ion-item>
-        <ion-item lines="none">
-          <ion-label position="stacked" color="medium">Email</ion-label>
-          <ion-input class="profile-input" type="email" v-model="userProfile.email" required></ion-input>
-        </ion-item>
+        <template v-if="!hasMidaxCoupons">
+          <ion-item lines="none">
+            <ion-label position="stacked" color="medium">Birthday</ion-label>
+            <ion-input class="profile-input" type="date" v-model="userProfile.birthday"></ion-input>
+          </ion-item>
+          <ion-item lines="none">
+            <ion-label position="stacked" color="medium">Email</ion-label>
+            <ion-input class="profile-input" type="email" v-model="userProfile.email" required></ion-input>
+          </ion-item>
+        </template>
         <ion-item lines="none">
           <ion-label position="stacked" color="medium">Zip Code</ion-label>
           <ion-input class="profile-input" type="number" v-model="userProfile.zipCode" maxlength="5"
@@ -51,10 +53,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, watch } from 'vue';
 import { IonContent, IonModal, IonItem, IonLabel, IonInput, IonButton, IonSpinner, IonIcon, IonCard } from '@ionic/vue';
 import { alertCircleOutline } from 'ionicons/icons';
 import CouponsApi from '@/axios/apiCoupons';
+import CustomerApi from '@/axios/apiCustomer';
 import { TokenStorage } from '@/utils/tokenStorage';
 
 // Props and Events
@@ -74,6 +77,8 @@ const userProfile = ref({
 
 const isLoading = ref(false);
 const errorMessage = ref('');
+const hasMidaxCoupons = ref(import.meta.env.VITE_HAS_MIDAX_COUPONS === "true");
+const midaxProfileData = ref(null);
 
 // Function to format date for input
 const formatDateForInput = (dateString) => {
@@ -83,20 +88,40 @@ const formatDateForInput = (dateString) => {
 
 const fetchUserProfile = async () => {
   try {
-    const data = await CouponsApi.getCustomerInfo();
-    if (!data) {
-      throw new Error('No customer data found.');
+    if (hasMidaxCoupons.value) {
+      const currentToken = localStorage.getItem('access_token');
+      const storeId = localStorage.getItem('storeId');
+      
+      if (!currentToken || !storeId) {
+        throw new Error('Missing authentication data');
+      }
+
+      const response = await CustomerApi.checkForExistingUser(currentToken, storeId);
+
+      if (response.data && response.data[0]) {
+        midaxProfileData.value = response.data[0];
+        userProfile.value = {
+          firstName: response.data[0].FirstName || '',
+          lastName: response.data[0].LastName || '',
+          zipCode: response.data[0].Zip || ''
+        };
+      }
+    } else {
+      const data = await CouponsApi.getCustomerInfo();
+      if (!data) {
+        throw new Error('No customer data found.');
+      }
+
+      userProfile.value = {
+        firstName: data.FirstName || '',
+        lastName: data.LastName || '',
+        birthday: formatDateForInput(data.Birthday) || '',
+        email: data.Email || '',
+        zipCode: data.Zip || ''
+      };
+
+      console.log('Mapped user profile:', userProfile.value); // Debugging line
     }
-
-    userProfile.value = {
-      firstName: data.FirstName || '',
-      lastName: data.LastName || '',
-      birthday: formatDateForInput(data.Birthday) || '',
-      email: data.Email || '',
-      zipCode: data.Zip || ''
-    };
-
-    console.log('Mapped user profile:', userProfile.value); // Debugging line
   } catch (error) {
     console.error('Failed to fetch user profile:', error);
     errorMessage.value = 'Failed to retrieve customer information.';
@@ -106,11 +131,27 @@ const fetchUserProfile = async () => {
 const submitUserProfile = async () => {
   isLoading.value = true;
   try {
-    const refreshToken = TokenStorage.getRefreshToken();
-    if (!refreshToken) {
-      throw new Error('No refresh token found');
+    if (hasMidaxCoupons.value) {
+      if (!midaxProfileData.value) {
+        throw new Error('No profile data found');
+      }
+
+      const updatedProfile = {
+        ...midaxProfileData.value,
+        FirstName: userProfile.value.firstName,
+        LastName: userProfile.value.lastName,
+        Zip: userProfile.value.zipCode
+      };
+
+      await CustomerApi.updateProfile(updatedProfile);
+      midaxProfileData.value = updatedProfile;
+    } else {
+      const refreshToken = TokenStorage.getRefreshToken();
+      if (!refreshToken) {
+        throw new Error('No refresh token found');
+      }
+      await CouponsApi.updateUserProfile(userProfile.value, refreshToken);
     }
-    await CouponsApi.updateUserProfile(userProfile.value, refreshToken);
     alert('Your profile has been updated successfully.');
   } catch (error) {
     console.error('Failed to update profile:', error);
@@ -120,7 +161,12 @@ const submitUserProfile = async () => {
   }
 };
 
-onMounted(fetchUserProfile);
+// Watch for modal open to fetch profile
+watch(() => props.isOpen, (newValue) => {
+  if (newValue) {
+    fetchUserProfile();
+  }
+}, { immediate: true });
 </script>
 
 <style scoped>
