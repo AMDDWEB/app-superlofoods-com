@@ -6,53 +6,60 @@ const loading = ref(false);
 const categories = ref([]);
 const selectedSort = ref('newest');
 const allCoupons = ref([]);
+const isMidax = ref(import.meta.env.VITE_HAS_MIDAX_COUPONS === "true");
 
 export function useCouponDetails() {
-  // Helper function to load all coupons
-  const loadAllCoupons = async () => {
+  const fetchCoupons = async ({
+    limit = isMidax.value ? 20 : 1000,
+    offset = 0,
+    category = null
+  } = {}) => {
     try {
-      loading.value = true;
-      let allLoaded = false;
-      let currentOffset = 0;
-      const batchSize = 100;
-      const tempCoupons = [];
-
-      while (!allLoaded) {
-        const response = await CouponsApi.getCoupons({
-          limit: batchSize,
-          offset: currentOffset,
-          sortBy: selectedSort.value
-        });
-
-        tempCoupons.push(...response.items);
-
-        if (response.items.length < batchSize) {
-          allLoaded = true;
-        } else {
-          currentOffset += batchSize;
-        }
+      if (offset === 0) {
+        loading.value = true;
       }
 
-      return tempCoupons;
+      const response = await CouponsApi.getCoupons({
+        limit,
+        offset,
+        category,
+        sortBy: selectedSort.value
+      });
+
+      if (offset === 0) {
+        // Reset coupons if this is the first batch
+        coupons.value = response.items || [];
+      } else if (isMidax.value) {
+        // Append new coupons only for Midax
+        coupons.value = [...coupons.value, ...(response.items || [])];
+      }
+
+      return response;
     } catch (error) {
-      return [];
+      console.error('Error fetching coupons:', error);
+      return { items: [] };
     } finally {
-      loading.value = false;
+      if (offset === 0) {
+        loading.value = false;
+      }
     }
   };
 
   const fetchCategories = async () => {
     try {
-      // Load all coupons first
-      const allLoadedCoupons = await loadAllCoupons();
+      // Load initial batch of coupons
+      const initialCoupons = await CouponsApi.getCoupons({
+        limit: isMidax.value ? 20 : 1000,
+        offset: 0
+      });
 
-      // Store all coupons for filtering
-      allCoupons.value = allLoadedCoupons.map(coupon => ({
+      // Store initial coupons
+      allCoupons.value = (initialCoupons.items || []).map(coupon => ({
         ...coupon,
         category: coupon.category || 'Uncategorized'
       }));
 
-      // Extract unique categories from coupons that have at least one coupon
+      // Extract categories from initial batch
       const categoryCounts = allCoupons.value.reduce((acc, coupon) => {
         const category = coupon.category || 'Uncategorized';
         acc[category] = (acc[category] || 0) + 1;
@@ -67,46 +74,11 @@ export function useCouponDetails() {
 
       categories.value = ['All Coupons', ...uniqueCategories];
 
-      // Initialize coupons with all available coupons
+      // Initialize coupons with initial batch
       coupons.value = allCoupons.value;
     } catch (error) {
       console.error('Error in fetchCategories:', error);
       categories.value = ['All Coupons'];
-    }
-  };
-
-  const fetchCoupons = async ({
-    limit = 1000,
-    offset = 0,
-    category = null
-  } = {}) => {
-    loading.value = true;
-    try {
-      // Get all coupons at once if they haven't been loaded yet
-      if (allCoupons.value.length === 0) {
-        const loadedCoupons = await loadAllCoupons();
-        allCoupons.value = loadedCoupons.map(coupon => ({
-          ...coupon,
-          category: coupon.category || 'Uncategorized'
-        }));
-      }
-
-      if (category && category !== 'All Coupons') {
-        // Filter from allCoupons if category is selected
-        const filteredCoupons = allCoupons.value.filter(
-          coupon => coupon.category === category
-        );
-        coupons.value = filteredCoupons;
-        return filteredCoupons.length;
-      } else {
-        // Use all coupons for 'All Coupons'
-        coupons.value = allCoupons.value;
-        return allCoupons.value.length;
-      }
-    } catch (error) {
-      return 0;
-    } finally {
-      loading.value = false;
     }
   };
 
@@ -117,6 +89,7 @@ export function useCouponDetails() {
     loading,
     fetchCoupons,
     fetchCategories,
-    availableCategories
+    availableCategories,
+    isMidax
   };
 } 

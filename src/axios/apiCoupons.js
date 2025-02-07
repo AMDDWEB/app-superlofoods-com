@@ -28,20 +28,21 @@ class CouponsApi {
   }
 
   async getCoupons({
-    limit = 60,
+    limit = 1000,
     offset = 0,
     category = null,
     sortBy = 'expires'
   } = {}) {
     const hasMidaxCoupons = import.meta.env.VITE_HAS_MIDAX_COUPONS === "true";
     const params = {
-      limit: '60',
       sort_by: 'expires'
     };
 
     if (hasMidaxCoupons) {
-      // For Midax system
+      // For Midax system - always use batch loading with fixed limit
       params.location_id = localStorage.getItem('storeId');
+      params.limit = '20'; // Fixed limit for Midax
+      params.offset = offset.toString();
       
       // Only add card number if authenticated
       const cardNumber = localStorage.getItem('cardNumber');
@@ -49,8 +50,9 @@ class CouponsApi {
         params.card_number = cardNumber;
       }
     } else {
-      // For AppCard system
+      // For AppCard system - load all at once
       params.merchant_id = import.meta.env.VITE_COUPONS_MERCHANT_ID;
+      params.limit = limit.toString();
       
       // Only add refresh token if authenticated
       const refreshToken = TokenStorage.getRefreshToken();
@@ -65,7 +67,10 @@ class CouponsApi {
       params
     });
 
-    return response.data;
+    return {
+      ...response.data,
+      hasMidaxCoupons // Add this flag to response to handle pagination appropriately
+    };
   }
 
   async startCouponSignup(phoneNumber) {

@@ -35,7 +35,7 @@
 
     <ion-content :fullscreen="true">
       <div class="coupon-grid">
-        <div v-if="loading" class="loading-container">
+        <div v-if="loading && !isLoadingMore" class="loading-container">
           <ion-spinner name="crescent" class="app-loading-spinner"></ion-spinner>
         </div>
         
@@ -55,8 +55,10 @@
       </div>
 
       <ion-infinite-scroll
+        v-if="isMidax"
         @ionInfinite="loadMore"
-        :disabled="true"
+        :disabled="!hasMoreCoupons || selectedView === 'clipped'"
+        threshold="100px"
       >
         <ion-infinite-scroll-content></ion-infinite-scroll-content>
       </ion-infinite-scroll>
@@ -77,15 +79,16 @@ import { IonPage, IonHeader, IonToolbar, IonContent, IonSegment, IonSegmentButto
          IonLabel, IonSpinner, IonInfiniteScroll, IonInfiniteScrollContent } from '@ionic/vue';
 
 const router = useRouter();
-const { coupons, loading, fetchCoupons, availableCategories, fetchCategories } = useCouponDetails();
+const { coupons, loading, fetchCoupons, availableCategories, fetchCategories, isMidax } = useCouponDetails();
 const { isAuthenticated, openSignupModal, SignupModal } = useSignupModal();
 const { clippedCoupons, isCouponClipped } = useClippedCoupons();
 
 const offset = ref(0);
-const limit = 100;
+const limit = ref(isMidax.value ? 20 : 1000);
 const hasMoreCoupons = ref(true);
 const selectedView = ref('all');
 const selectedCategory = ref('All Coupons');
+const isLoadingMore = ref(false);
 
 const sortedCategories = computed(() => {
   const filteredCategories = availableCategories.value
@@ -114,21 +117,34 @@ const displayedCoupons = computed(() => {
 const setCategory = async (category) => {
   selectedCategory.value = category;
   offset.value = 0;
-  await fetchCoupons({ limit, offset: 0 });
+  coupons.value = []; // Clear existing coupons
+  hasMoreCoupons.value = true;
+  await fetchCoupons({ limit: limit.value, offset: 0 });
 };
 
 const loadMore = async (event) => {
-  if (selectedView.value === 'clipped') {
+  if (!isMidax.value || selectedView.value === 'clipped' || !hasMoreCoupons.value || isLoadingMore.value) {
     event.target.complete();
     return;
   }
   
-  offset.value += limit;
-  await fetchCoupons({ limit, offset: offset.value });
-  event.target.complete();
-  
-  if (coupons.value.length < offset.value + limit) {
+  try {
+    isLoadingMore.value = true;
+    offset.value += limit.value;
+    const previousLength = coupons.value.length;
+    
+    const response = await fetchCoupons({ limit: limit.value, offset: offset.value });
+    
+    // Check if we got fewer items than the limit or no new items
+    if (!response?.items || response.items.length < limit.value || coupons.value.length === previousLength) {
+      hasMoreCoupons.value = false;
+    }
+  } catch (error) {
+    console.error('Error loading more coupons:', error);
     hasMoreCoupons.value = false;
+  } finally {
+    isLoadingMore.value = false;
+    event.target.complete();
   }
 };
 
@@ -138,12 +154,19 @@ const goToCouponDetails = (couponId) => {
 
 onMounted(async () => {
   await fetchCategories();
-  await fetchCoupons({ limit, offset: offset.value });
-  window.addEventListener('userSignedUp', () => fetchCoupons({ limit, offset: 0 }));
+  offset.value = 0;
+  coupons.value = []; // Clear existing coupons
+  await fetchCoupons({ limit: limit.value, offset: 0 });
+  window.addEventListener('userSignedUp', () => {
+    offset.value = 0;
+    coupons.value = [];
+    hasMoreCoupons.value = true;
+    fetchCoupons({ limit: limit.value, offset: 0 });
+  });
 });
 
 onUnmounted(() => {
-  window.removeEventListener('userSignedUp', () => fetchCoupons({ limit, offset: 0 }));
+  window.removeEventListener('userSignedUp', () => fetchCoupons({ limit: limit.value, offset: 0 }));
 });
 </script>
 

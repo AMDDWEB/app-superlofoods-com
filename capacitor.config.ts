@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.iproweb.app',
+  appId: 'com.allianceharshaadvertising.marketplacedev',
   appName: 'Market Place',
   webDir: 'dist',
   plugins: { 
