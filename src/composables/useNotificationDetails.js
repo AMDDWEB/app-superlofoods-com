@@ -3,6 +3,7 @@ export function useNotificationDetails() {
         return {
             notification_title: notification.title,
             notification_details: notification.details,
+            notification_end_date: notification.end_date,
         };
     };
 

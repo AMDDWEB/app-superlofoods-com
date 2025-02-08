@@ -24,32 +24,21 @@
 
       <!-- Notification List -->
       <ion-list v-if="notifications.length > 0" lines="full">
-        <ion-item 
-          v-for="notification in notifications" 
-          :key="notification.id" 
-          @click="presentAlert(notification)"
-        >
+        <ion-item v-for="notification in notifications" :key="notification.id" @click="presentAlert(notification)">
           <!-- Icon Changes Based on isRead -->
-          <ion-icon 
-            :color="notification.isRead ? 'medium' : 'danger'" 
-            name="notifications-regular" 
-            slot="start"
-          ></ion-icon>
+          <ion-icon color="secondary" name="notifications-regular" slot="start"></ion-icon>
 
           <!-- Title and Details Change Based on isRead -->
           <ion-label>
-            <h2 
-              class="notification-heading" 
-              :style="{ color: notification.isRead ? 'var(--ion-color-medium)' : 'var(--ion-color-primary)' }"
-            >
+            <h2 class="notification-heading" color="primary">
               {{ notification.notification_title }}
             </h2>
-            <p 
-              class="app-text-overflow" 
-              :style="{ color: notification.isRead ? 'var(--ion-color-medium)' : 'var(--ion-color-dark)' }"
-            >
+            <p class="app-text-overflow" color="medium">
               {{ notification.notification_details }}
             </p>
+            <ion-badge class="notification-badge" color="danger">
+              <ion-icon name="trash-notifications-regular" class="badge-icon"></ion-icon> {{ formattedEndDate }}
+            </ion-badge>
           </ion-label>
         </ion-item>
       </ion-list>
@@ -64,80 +53,100 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import apiNotifications from '../axios/apiNotifications';
-import { IonPage, IonHeader, IonToolbar, IonContent, IonList, IonItem, IonLabel, IonIcon, IonSpinner, IonRefresher, IonRefresherContent, alertController } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonContent, IonList, IonItem, IonLabel, IonIcon, IonSpinner, IonRefresher, IonRefresherContent, alertController, IonBadge } from '@ionic/vue';
 import { useNotificationDetails } from '@/composables/useNotificationDetails';
 
 const loading = ref(true);
 const notifications = ref([]);
 const { transformNotificationData } = useNotificationDetails();
 
+// Fetch notifications logic
 const fetchNotifications = async (isRefreshing = false) => {
-    if (!isRefreshing) loading.value = true;
+  if (!isRefreshing) loading.value = true;
 
-    try {
-        const response = await apiNotifications.getNotifications();
-        const readNotifications = JSON.parse(localStorage.getItem('readNotifications')) || [];
+  try {
+    const response = await apiNotifications.getNotifications();
+    const readNotifications = JSON.parse(localStorage.getItem('readNotifications')) || [];
 
-        const updatedNotifications = response.data.map(notification => {
-            const alreadyRead = readNotifications.includes(notification.id);
-            const existingNotification = notifications.value.find(n => n.id === notification.id);
-            return {
-                ...transformNotificationData(notification),
-                isRead: alreadyRead || existingNotification?.isRead || false
-            };
-        });
-
-        if (isRefreshing) {
-            notifications.value = [...updatedNotifications];
-        } else {
-            notifications.value = updatedNotifications;
-        }
-
-    } catch (error) {
-        // Handle error silently or show user feedback
-    } finally {
-        loading.value = false;
-    }
-};
-
-/**
- * ✅ Pull-to-Refresh Handler (Now Works Correctly)
- */
-const doRefresh = async (event) => {
-    await fetchNotifications(true);  // ✅ Preserves read state during refresh
-    event.target.complete();
-};
-
-/**
- * ✅ Present Alert and Mark as Read
- */
-const presentAlert = async (notification) => {
-    let readNotifications = JSON.parse(localStorage.getItem('readNotifications')) || [];
-
-    if (!readNotifications.includes(notification.id)) {
-        readNotifications.push(notification.id);
-        localStorage.setItem('readNotifications', JSON.stringify(readNotifications));
-
-        // ✅ Directly update the reactive array for both pull-to-refresh and reload
-        const notificationToUpdate = notifications.value.find(n => n.id === notification.id);
-        if (notificationToUpdate) {
-            notificationToUpdate.isRead = true;
-        }
-    }
-
-    const alert = await alertController.create({
-        header: notification.notification_title,
-        message: notification.notification_details,
-        buttons: ['Mark as Read']
+    const updatedNotifications = response.data.map(notification => {
+      const alreadyRead = readNotifications.includes(notification.id);
+      const existingNotification = notifications.value.find(n => n.id === notification.id);
+      return {
+        ...transformNotificationData(notification),
+        isRead: alreadyRead || existingNotification?.isRead || false
+      };
     });
-    await alert.present();
+
+    if (isRefreshing) {
+      notifications.value = [...updatedNotifications];
+    } else {
+      notifications.value = updatedNotifications;
+    }
+
+  } catch (error) {
+    // Handle error silently or show user feedback
+  } finally {
+    loading.value = false;
+  }
 };
 
-// ✅ Trigger Notifications on Page Load
+// Pull-to-refresh logic
+const doRefresh = async (event) => {
+  await fetchNotifications(true); // Preserves read state during refresh
+  event.target.complete();
+};
+
+// Alert presentation and handling
+const presentAlert = async (notification) => {
+  let readNotifications = JSON.parse(localStorage.getItem('readNotifications')) || [];
+
+  // if (!readNotifications.includes(notification.id)) {
+  //   readNotifications.push(notification.id);
+  //   localStorage.setItem('readNotifications', JSON.stringify(readNotifications));
+  // }
+
+  const alert = await alertController.create({
+    header: notification.notification_title,
+    message: notification.notification_details,
+    buttons: ['OK'] // Only an OK button
+  });
+  await alert.present();
+};
+
+// Computed property for formatted end date
+const formattedEndDate = computed(() => {
+  if (!notifications.value || notifications.value.length === 0) return ''; // Avoid errors if notifications is empty
+  const notification = notifications.value[0]; // Assuming you want to format the first notification's end date
+  const endDate = new Date(notification.notification_end_date);
+
+  if (isNaN(endDate)) return ''; // Handle invalid dates
+
+  // Format month name (e.g., "Feb")
+  const month = new Intl.DateTimeFormat('en-US', { month: 'short' }).format(endDate);
+
+  // Get the day and add ordinal suffix (st, nd, rd, th)
+  const day = endDate.getDate();
+  const dayWithSuffix = addOrdinalSuffix(day);
+
+  return `${month} ${dayWithSuffix}`;
+});
+
+// Function to add ordinal suffix
+const addOrdinalSuffix = (day) => {
+  if (day >= 11 && day <= 13) return `${day}th`; // Special case for 11-13
+  switch (day % 10) {
+    case 1: return `${day}st`;
+    case 2: return `${day}nd`;
+    case 3: return `${day}rd`;
+    default: return `${day}th`;
+  }
+};
+
+// Trigger Notifications on Page Load
 onMounted(() => {
-    fetchNotifications();  // Works for both page reload and revisit
+  fetchNotifications(); // Works for both page reload and revisit
 });
 </script>
 
@@ -157,14 +166,21 @@ onMounted(() => {
   color: var(--ion-color-primary);
 }
 
-.location-badge {
+.notification-badge {
   font-size: 12px;
   color: var(--ion-color-light);
   position: absolute;
-  right: 32px;
+  right: 4px;
   top: 0px;
   padding-top: 4px;
   padding-bottom: 4px;
+  display: flex;
+  align-items: center; /* Ensures both icon and text are vertically centered */
+}
+
+.badge-icon {
+  margin-right: 4px; /* Adds a small right margin */
+  vertical-align: middle; /* Aligns the icon with the text */
 }
 
 .ion-item {

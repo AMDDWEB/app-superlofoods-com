@@ -56,6 +56,7 @@ import recipePrepTimeRegularIcon from '../icons/regular/clock-regular.svg';
 import recipeCookTimeRegularIcon from '../icons/regular/temperature-three-quarters-regular.svg';
 import recipeTotalTimeRegularIcon from '../icons/regular/regular-plate-utensils-clock.svg';
 import myBarcodeRegularIcon from '../icons/regular/regular-barcode-read-circle-user.svg';
+import trashNotificationsRegularIcon from '../icons/regular/trash-can-clock-regular.svg';
 
 //Duotone icons
 import handwaveDuotoneIcon from '../icons/duotone/hand-wave-duotone-regular.svg';
@@ -114,6 +115,7 @@ const customIcons = {
   'recipe-cook-time-regular': recipeCookTimeRegularIcon,
   'recipe-total-time-regular': recipeTotalTimeRegularIcon,
   'my-barcode-regular': myBarcodeRegularIcon,
+  'trash-notifications-regular': trashNotificationsRegularIcon,
 
   // Duotone icons are below 
   'hand-wave-duotone': handwaveDuotoneIcon,

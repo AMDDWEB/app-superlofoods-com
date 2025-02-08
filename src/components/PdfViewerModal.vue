@@ -70,12 +70,40 @@ const {
   previousPage
 } = usePdfViewer();
 
-// Update the date formatting to MM/DD format
+// // Update the date formatting to MM/DD format
+// const formattedStartDate = computed(() => {
+//   if (!props.startDate) return '';
+//   const date = new Date(props.startDate);
+//   return `${date.getMonth() + 1}/${date.getDate()}`; // This will show format like "1/1" or "12/31"
+// });
+
+// Computed property for formatted start date
 const formattedStartDate = computed(() => {
-  if (!props.startDate) return '';
-  const date = new Date(props.startDate);
-  return `${date.getMonth() + 1}/${date.getDate()}`; // This will show format like "1/1" or "12/31"
+  if (!props.startDate) return ''; // Avoid errors if startDate is empty
+
+  const startDate = new Date(props.startDate);
+  if (isNaN(startDate)) return ''; // Handle invalid dates
+
+  // Format month name (e.g., "Feb")
+  const month = new Intl.DateTimeFormat('en-US', { month: 'short' }).format(startDate);
+
+  // Get the day and add ordinal suffix (st, nd, rd, th)
+  const day = startDate.getDate();
+  const dayWithSuffix = addOrdinalSuffix(day);
+
+  return `${month} ${dayWithSuffix}`;
 });
+
+// Function to add ordinal suffix
+const addOrdinalSuffix = (day) => {
+  if (day >= 11 && day <= 13) return `${day}th`; // Special case for 11-13
+  switch (day % 10) {
+    case 1: return `${day}st`;
+    case 2: return `${day}nd`;
+    case 3: return `${day}rd`;
+    default: return `${day}th`;
+  }
+};
 
 const closeModal = () => {
   emit('update:isOpen', false);
