@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-import { computed, watch, onMounted } from 'vue';
+import { computed, watch, onMounted, ref } from 'vue';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { useRouter } from 'vue-router';
 import { useCouponDetails } from '@/composables/useCouponDetails';
@@ -74,10 +74,16 @@ const handleClipCoupon = async (couponId) => {
 
   try {
     await CouponsApi.clipCoupon(couponId);
-    addClippedCoupon(couponId); // Add to clipped coupons
-    // Refresh coupons after successful clip
-    await fetchCoupons({ limit: props.limit, offset: 0 });
+    addClippedCoupon(couponId);
+
+    // Find and update the coupon directly without creating a new array
+    const coupon = coupons.value.find(coupon => coupon.id === couponId);
+    if (coupon) {
+      // Use direct property assignment to maintain reactivity
+      coupon.clipped = true;
+    }
   } catch (error) {
+    console.error('Error clipping coupon:', error);
   }
 };
 
