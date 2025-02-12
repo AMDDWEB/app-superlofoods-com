@@ -77,7 +77,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
-import { IonPage, IonHeader, IonToolbar, IonContent, IonButtons, IonButton, IonIcon, IonImg } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonContent, IonButtons, IonButton, IonIcon, IonImg, alertController } from '@ionic/vue';
 import { Browser } from '@capacitor/browser';
 import { useSignupModal } from '@/composables/useSignupModal';
 import UserProfileDetailsModal from '@/components/UserProfileDetailsModal.vue';
@@ -85,9 +85,14 @@ import VueBarcode from '@chenfengyuan/vue-barcode';
 import CouponsApi from '@/axios/apiCoupons';
 import CustomerApi from '@/axios/apiCustomer';
 import { useAuthModule } from '@/composables/useAuth0Modal';
+import { useRouter } from 'vue-router';
+import { isPlatform } from '@ionic/vue';
+import { callbackUri } from '@/main';
+import { useAuth0 } from '@auth0/auth0-vue';
 
 // Importing method to fetch loyalty number from a composable
 const { getLoyaltyNumber } = useSignupModal();
+const { signOut } = useAuthModule();
 const loyaltyNumber = ref('');
 const cardNumber = ref(localStorage.getItem('cardNumber') || '');
 const logoUrl = ref(import.meta.env.VITE_PRIMARY_LOGO);
@@ -97,7 +102,8 @@ const offerStats = ref(null);
 const hasAppCardCoupons = ref(true); 
 const hasMidaxCoupons = ref(import.meta.env.VITE_HAS_MIDAX_COUPONS === "true");
 
-const { signOut } = useAuthModule();
+const router = useRouter();
+const { logout } = useAuth0();
 
 // Computed property to check if user is authenticated
 const isAuthenticated = computed(() => {
@@ -118,6 +124,7 @@ const presentUserProfileModal = () => {
 onMounted(async () => {
     loyaltyNumber.value = getLoyaltyNumber();
     cardNumber.value = localStorage.getItem('cardNumber');
+    userName.value = localStorage.getItem('firstName') || '';
 
     // Fetch customer info and offer details
     try {
@@ -189,7 +196,27 @@ const onBarcodeRender = () => {
 
 // Function to handle Auth0 logout
 const handleAuth0Logout = async () => {
-    await signOut();
+    try {
+        // Clear specific auth-related localStorage items
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('cardNumber');
+        localStorage.removeItem('firstName');
+        localStorage.removeItem('clippedCoupons');
+        
+        // Auth0 specific logout using the callbackUri
+        await logout({
+            logoutParams: {
+                returnTo: callbackUri
+            },
+            openUrl: url =>
+                Browser.open({
+                    url,
+                    windowName: '_self'
+                })
+        });
+    } catch (error) {
+        console.error('Logout error:', error);
+    }
 };
 
 // Register the component

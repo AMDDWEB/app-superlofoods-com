@@ -1,10 +1,13 @@
-import type { CapacitorConfig } from '@capacitor/cli';
+import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.allianceharshaadvertising.marketplacedev',
   appName: 'Market Place',
   webDir: 'dist',
-  plugins: { 
+  server: {
+    androidScheme: 'https'
+  },
+  plugins: {
     SplashScreen: {
       launchShowDuration: 3000,
       launchAutoHide: true,
@@ -14,9 +17,6 @@ const config: CapacitorConfig = {
       showSpinner: false,
       splashFullScreen: true,
       splashImmersive: true
-    },
-    App: {
-      enabled: true
     }
   }
 };

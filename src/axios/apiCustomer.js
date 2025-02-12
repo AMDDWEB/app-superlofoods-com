@@ -41,12 +41,17 @@ class Customer {
     customer = base;
   }
 
-  async checkForExistingUser(accessToken, storeId) {
+  async checkForExistingUser(storeId) {
+    const token = localStorage.getItem('accessToken');
     return customer({
       url: '/check-user',
       method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
       params: {
-        location_id: storeId
+        location_id: storeId,
+        app_id: import.meta.env.VITE_APP_ID
       }
     });
   }

@@ -9,7 +9,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router';
 import { createAuth0 } from '@auth0/auth0-vue';
-
+import { isPlatform } from '@ionic/vue'
 import { IonicVue } from '@ionic/vue';
 
 /* Core CSS required for Ionic components to work properly */
@@ -46,22 +46,33 @@ import './theme/variables.css';
 import { registerCustomIcons } from './composables/useCustomIcons';
 import { useNotifications } from './composables/useNotifications';
 
-registerCustomIcons(); // Call the registerCustomIcons function earlier
+registerCustomIcons();
 
 /* One Signal push notification integration  */
-import OneSignal from 'onesignal-cordova-plugin'; // Import OneSignal
+import OneSignal from 'onesignal-cordova-plugin';
+
+// Auth0 Configuration
+const auth0Domain = import.meta.env.VITE_AUTH0_DOMAIN
+const auth0ClientId = import.meta.env.VITE_AUTH0_CLIENT_ID
+const appId = import.meta.env.VITE_APP_ID
+
+export const callbackUri = isPlatform('hybrid')
+  ? `${appId}://${auth0Domain}/capacitor/${appId}/callback`
+  : 'http://localhost:8100'
 
 const app = createApp(App)
   .use(IonicVue)
   .use(router)
   .use(
     createAuth0({
-      domain: import.meta.env.VITE_AUTH0_DOMAIN,
-      clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
+      domain: auth0Domain,
+      clientId: auth0ClientId,
       authorizationParams: {
-        redirect_uri: window.location.origin,
+        redirect_uri: callbackUri,
         audience: 'midax-api'
-      }
+      },
+      useRefreshTokens: true,
+      useRefreshTokensFallback: false
     })
   );
 
@@ -73,7 +84,7 @@ router.isReady().then(() => {
   app.mount('#app');
   
   // Initialize OneSignal with the environment variable
-  OneSignal.initialize(import.meta.env.VITE_ONESIGNAL_APP_ID); // Use the environment variable for the App ID
+  OneSignal.initialize(import.meta.env.VITE_ONESIGNAL_APP_ID);
   
   // Request permission for notifications
   OneSignal.Notifications.requestPermission()

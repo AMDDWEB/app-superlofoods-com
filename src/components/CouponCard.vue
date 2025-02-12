@@ -136,34 +136,44 @@ const closeCouponModal = () => {
 const handleClipClick = async (event) => {
   event.stopPropagation(); // Prevent the card click event
 
-  const hasMidaxCoupons = import.meta.env.VITE_HAS_MIDAX_COUPONS === "true";
-  const hasAppCardCoupons = !hasMidaxCoupons;
-
-  // For Midax, check access token directly
-  if (hasMidaxCoupons) {
-    const accessToken = TokenStorage.getAccessToken();
-    const cardNumber = localStorage.getItem('cardNumber');
-    const storeId = localStorage.getItem('storeId');
-    
-    if (!accessToken || !cardNumber || !storeId) {
-      await signIn();
-      return;
-    }
-  } else if (!TokenStorage.hasTokens()) {
-    // For AppCard system
-    openSignupModal({ presentationStyle: 'popover' });
-    return;
-  }
-
   // Don't proceed if already clipping or clipped
   if (isClipping.value || isCouponClipped(props.coupon.id)) return;
 
   isClipping.value = true;
   try {
-    const response = await CouponsApi.clipCoupon(props.coupon.id);
-    if (response.status === 200) {
-      addClippedCoupon(props.coupon.id);
-      emit('clip');
+    if (hasMidaxCoupons.value) {
+      // For Midax, check card number directly
+      const cardNumber = localStorage.getItem('cardNumber');
+      const storeId = localStorage.getItem('storeId');
+      
+      if (!cardNumber || !storeId) {
+        // Only redirect to sign in if we don't have card number
+        await signIn();
+        return;
+      }
+
+      // We have card number, proceed with clipping
+      const response = await CouponsApi.clipCoupon(props.coupon.id);
+      if (response) {
+        addClippedCoupon(props.coupon.id);
+        emit('clip');
+      }
+    } else {
+      // For AppCard system
+      if (!TokenStorage.hasTokens()) {
+        openSignupModal();
+        return;
+      }
+
+      try {
+        const response = await CouponsApi.clipCoupon(props.coupon.id);
+        // For AppCard, if we get here without an error, the clip was successful
+        addClippedCoupon(props.coupon.id);
+        emit('clip');
+      } catch (error) {
+        console.error('Error clipping AppCard coupon:', error);
+        throw error; // Re-throw to be caught by outer catch
+      }
     }
   } catch (error) {
     console.error('Error clipping coupon:', error);

@@ -88,26 +88,34 @@ const formatDateForInput = (dateString) => {
 
 const fetchUserProfile = async () => {
   try {
+    console.log('Starting fetchUserProfile, hasMidaxCoupons:', hasMidaxCoupons.value);
     if (hasMidaxCoupons.value) {
-      const currentToken = localStorage.getItem('access_token');
       const storeId = localStorage.getItem('storeId');
+      console.log('StoreId from localStorage:', storeId);
       
-      if (!currentToken || !storeId) {
-        throw new Error('Missing authentication data');
+      if (!storeId) {
+        throw new Error('Missing store ID');
       }
 
-      const response = await CustomerApi.checkForExistingUser(currentToken, storeId);
+      const response = await CustomerApi.checkForExistingUser(storeId);
+      console.log('API Response:', response);
 
       if (response.data && response.data[0]) {
+        console.log('User data received:', response.data[0]);
         midaxProfileData.value = response.data[0];
         userProfile.value = {
           firstName: response.data[0].FirstName || '',
           lastName: response.data[0].LastName || '',
           zipCode: response.data[0].Zip || ''
         };
+        console.log('Updated userProfile:', userProfile.value);
+      } else {
+        console.log('No user data in response');
       }
     } else {
+      console.log('Using CouponsApi to fetch data');
       const data = await CouponsApi.getCustomerInfo();
+      console.log('CouponsApi data:', data);
       if (!data) {
         throw new Error('No customer data found.');
       }
@@ -120,7 +128,7 @@ const fetchUserProfile = async () => {
         zipCode: data.Zip || ''
       };
 
-      console.log('Mapped user profile:', userProfile.value); // Debugging line
+      console.log('Mapped user profile:', userProfile.value);
     }
   } catch (error) {
     console.error('Failed to fetch user profile:', error);

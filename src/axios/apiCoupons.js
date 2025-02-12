@@ -45,9 +45,9 @@ class CouponsApi {
       params.offset = offset.toString();
       
       // Only add card number if authenticated
-      const cardNumber = localStorage.getItem('cardNumber');
-      if (cardNumber) {
-        params.card_number = cardNumber;
+      const CardNumber = localStorage.getItem('CardNumber');
+      if (CardNumber) {
+        params.Card_number = CardNumber;
       }
     } else {
       // For AppCard system - load all at once
@@ -98,55 +98,87 @@ class CouponsApi {
     });
   }
 
-  async clipCoupon(offerId) {
+  async clipCoupon(offerId, cardNumber) {
     const hasMidaxCoupons = import.meta.env.VITE_HAS_MIDAX_COUPONS === "true";
-    const params = { offer_id: offerId };
+    const hasAppCardCoupons = import.meta.env.VITE_HAS_APPCARD_COUPONS === "true";
 
     if (hasMidaxCoupons) {
-      const cardNumber = localStorage.getItem('cardNumber');
+      const CardNumber = localStorage.getItem('cardNumber');
       const storeId = localStorage.getItem('storeId');
       
-      if (!cardNumber || !storeId) {
+      if (!CardNumber || !storeId) {
         throw new Error('Missing required Midax parameters');
       }
       
-      // For Midax, send data in the request body instead of params
-      return await couponsInstance({
-        url: '/clip-coupon',
+      // For Midax, use the provided call structure
+      const options = {
         method: 'PUT',
+        url: '/clip-coupon',
         data: {
-          offer_id: offerId,
-          card_number: cardNumber,
-          location_id: storeId
-        },
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          offer_id: offerId.toString(),
+          store_id: storeId.toString(),
+          card_number: CardNumber.toString(),
+          app_id: import.meta.env.VITE_APP_ID,
+          provider: 'QUOT'
         }
-      });
+      };
+
+      console.log('Clipping coupon with data:', options.data);
+
+      try {
+        const response = await couponsInstance.request(options);
+        return response.data;
+      } catch (error) {
+        console.error('Clip coupon error details:', error.response?.data);
+        throw error;
+      }
+    } else if (hasAppCardCoupons) {
+      // For AppCard system
+      const params = {
+        offer_id: offerId,
+        merchant_id: import.meta.env.VITE_COUPONS_MERCHANT_ID,
+        refresh_token: TokenStorage.getRefreshToken()
+      };
+
+      try {
+        const response = await couponsInstance({
+          url: '/clip-coupon',
+          method: 'PUT',
+          params
+        });
+        return response.data;
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
     } else {
-      params.merchant_id = import.meta.env.VITE_COUPONS_MERCHANT_ID;
-      params.refresh_token = TokenStorage.getRefreshToken();
-      
-      return await couponsInstance({
-        url: '/clip-coupon',
-        method: 'PUT',
-        params
-      });
+      throw new Error('No valid coupon system configuration found');
     }
   }
 
   async getCouponById(id) {
-    const refreshToken = TokenStorage.getRefreshToken();
+    const hasMidaxCoupons = import.meta.env.VITE_HAS_MIDAX_COUPONS === "true";
+
+    const params = {
+      offer_id: id
+    };
+
+    if (hasMidaxCoupons) {
+      // Use store_id for Midax system
+      const storeId = localStorage.getItem('storeId');
+      if (!storeId) {
+        throw new Error('Missing store ID for Midax system');
+      }
+      params.location_id = storeId;
+    } else {
+      // Use merchant_id for App Card system
+      params.merchant_id = import.meta.env.VITE_COUPONS_MERCHANT_ID;
+    }
 
     return await couponsInstance({
       url: '/get-offer-by-id',
       method: 'GET',
-      params: {
-        merchant_id: import.meta.env.VITE_COUPONS_MERCHANT_ID,
-        refresh_token: refreshToken,
-        offer_id: id
-      }
+      params
     });
   }
 

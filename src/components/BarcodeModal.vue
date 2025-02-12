@@ -48,7 +48,6 @@ watch(() => props.isOpen, (newValue) => {
     const number = getCardNumber();
     if (number) {
       cardNumber.value = number;
-      console.log('Card number refreshed on modal open:', number);
     }
   }
 });
@@ -64,14 +63,8 @@ watchEffect(() => {
   const number = getCardNumber();
   if (number) {
     cardNumber.value = number;
-    console.log('Card number updated:', number);
   }
 });
-
-// Debugging Output
-const onBarcodeRender = () => {
-  console.log('Barcode rendered successfully with value:', cardNumber.value);
-};
 </script>
 
 <style scoped>

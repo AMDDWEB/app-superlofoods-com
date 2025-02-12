@@ -114,7 +114,7 @@ const coupon = ref(null);
 const isClipping = ref(false);
 
 const { openSignupModal, SignupModal } = useSignupModal();
-const { isCouponClipped, addClippedCoupon } = useClippedCoupons();
+const { isCouponClipped, addClippedCoupon, syncClippedCoupons } = useClippedCoupons();
 
 const formatExpDate = (date) => format(new Date(date), 'MM/dd/yyyy');
 
@@ -124,10 +124,17 @@ const fetchCouponDetails = async () => {
     const response = await CouponsApi.getCouponById(props.id);
     
     // Fix: The API returns an array, so we need to get the first item
+    let couponData = null;
     if (response.data && Array.isArray(response.data)) {
-      coupon.value = response.data[0];  // Get first item from array
+      couponData = response.data[0];  // Get first item from array
     } else if (response.data?.data && Array.isArray(response.data.data)) {
-      coupon.value = response.data.data[0];  // Get first item from nested array
+      couponData = response.data.data[0];  // Get first item from nested array
+    }
+    
+    if (couponData) {
+      coupon.value = couponData;
+      // Sync this coupon with clipped coupons to ensure it's still valid
+      syncClippedCoupons([couponData]);
     }
   } catch (error) {
     // Handle error silently
@@ -146,10 +153,11 @@ const handleClipClick = async () => {
 
   isClipping.value = true;
   try {
-    await CouponsApi.clipCoupon(props.id);
+    const response = await CouponsApi.clipCoupon(props.id);
+    // If we get here without an error, the clip was successful
     addClippedCoupon(props.id);
   } catch (error) {
-    // Handle error silently
+    console.error('Error clipping coupon:', error);
   } finally {
     isClipping.value = false;
   }

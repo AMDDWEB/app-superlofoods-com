@@ -4,36 +4,85 @@
   </ion-app>
 </template>
 
-<script setup lang="ts">
-import { IonApp, IonRouterOutlet } from '@ionic/vue';
-import { onMounted } from 'vue';
-import { useAuth0 } from '@auth0/auth0-vue';
-import { TokenStorage } from './utils/tokenStorage';
-import CustomerApi from './axios/apiCustomer';
+<script setup>
+import { IonApp, IonRouterOutlet, isPlatform } from '@ionic/vue'
+import { Browser } from '@capacitor/browser'
+import { App as CapApp } from '@capacitor/app'
+import { watch } from 'vue'
+import CustomerApi from './axios/apiCustomer'
+import { useAuthModule } from './composables/useAuth0Modal'
+import { useRouter } from 'vue-router'
+import Customer from './axios/apiCustomer'
 
-const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+const router = useRouter()
 
-// Check and refresh authentication on app start
-onMounted(async () => {
-  const hasMidaxCoupons = import.meta.env.VITE_HAS_MIDAX_COUPONS === "true";
-  
-  if (hasMidaxCoupons && isAuthenticated.value) {
+const {
+  getAccessTokenSilently,
+  handleRedirectCallback,
+  isAuthenticated
+} = useAuthModule()
+
+async function getAccessToken() {
+  return await getAccessTokenSilently()
+}
+
+watch(isAuthenticated, async (newValue) => {
+  if (newValue) {
+    const accessToken = await getAccessToken()
+    localStorage.setItem('accessToken', accessToken)
+    
+    const storeId = localStorage.getItem('storeId')
+
     try {
-      // Get fresh access token
-      const accessToken = await getAccessTokenSilently();
-      TokenStorage.setTokens(accessToken, ''); // Store access token, no refresh token for Auth0
+      const response = await Customer.checkForExistingUser(storeId)
+      const userDetailsArray = response.data
       
-      // Check for existing user and store card number
-      const storeId = localStorage.getItem('storeId');
-      if (storeId) {
-        const response = await CustomerApi.checkForExistingUser(accessToken, storeId);
-        if (response.data && response.data.card_number) {
-          localStorage.setItem('cardNumber', response.data.card_number);
+      if (Array.isArray(userDetailsArray) && userDetailsArray.length > 0) {
+        const userDetails = userDetailsArray[0]
+        if (userDetails.CardNumber) {
+          localStorage.setItem('cardNumber', userDetails.CardNumber)
+        }
+        if (userDetails.FirstName) {
+          localStorage.setItem('firstName', userDetails.FirstName)
         }
       }
     } catch (error) {
-      console.error('Error refreshing authentication:', error);
+      console.error('Error checking user details:', error)
     }
   }
-});
+})
+
+async function checkForExistingUser() {
+  const accessToken = await getAccessToken()
+  try {
+    const response = await CustomerApi.checkForExistingUser(
+      accessToken, 
+      localStorage.getItem('storeId'),
+      import.meta.env.VITE_APP_ID
+    )
+    if (response.data) {
+      localStorage.setItem('userData', JSON.stringify(response.data))
+      if (import.meta.env.VITE_HAS_MIDAX_COUPONS === "true") {
+        if (response.data.card_number) {
+          localStorage.setItem('CardNumber', response.data.card_number)
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error checking for existing user:', error)
+  }
+}
+
+CapApp.addListener('appUrlOpen', async ({ url }) => {
+  console.log('URL opened:', url)
+  if (url.includes('state') && (url.includes('code') || url.includes('error'))) {
+    await handleRedirectCallback(url)
+  }
+  
+  await Browser.close()
+  
+  if (isAuthenticated.value) {
+    checkForExistingUser()
+  }
+})
 </script>

@@ -141,11 +141,27 @@ const loyaltyNumber = ref('');
 const showBarcodeModal = ref(false);
 const cardNumber = ref(localStorage.getItem('cardNumber') || '');
 
-// Watch for card number changes in localStorage
+// Add ionViewWillEnter lifecycle hook
+const ionViewWillEnter = () => {
+    // Check for authentication each time the page is entered
+    loyaltyNumber.value = getLoyaltyNumber();
+    cardNumber.value = localStorage.getItem('cardNumber') || '';
+};
+
+// Expose the ionViewWillEnter hook
+defineExpose({ ionViewWillEnter });
+
+// Watch for userSignedUp event
+window.addEventListener('userSignedUp', (event) => {
+    loyaltyNumber.value = event.detail.loyaltyNumber;
+    cardNumber.value = event.detail.cardNumber;
+});
+
+// Watch for storage changes
 window.addEventListener('storage', (e) => {
-  if (e.key === 'cardNumber') {
-    cardNumber.value = e.newValue;
-  }
+    if (e.key === 'cardNumber') {
+        cardNumber.value = e.newValue || '';
+    }
 });
 
 const presentBarcodeModal = () => {
@@ -342,15 +358,23 @@ const handleVersionClick = () => {
   }
 };
 
-// Add cleanup
+// Update cleanup to remove all event listeners
 onUnmounted(() => {
-  if (clickTimer.value) {
-    clearTimeout(clickTimer.value);
-  }
-  // Remove event listener
-  window.removeEventListener('userSignedUp', (event) => {
-    loyaltyNumber.value = event.detail.loyaltyNumber;
-  });
+    if (clickTimer.value) {
+        clearTimeout(clickTimer.value);
+    }
+    
+    // Remove event listeners
+    window.removeEventListener('userSignedUp', (event) => {
+        loyaltyNumber.value = event.detail.loyaltyNumber;
+        cardNumber.value = event.detail.cardNumber;
+    });
+    
+    window.removeEventListener('storage', (e) => {
+        if (e.key === 'cardNumber') {
+            cardNumber.value = e.newValue || '';
+        }
+    });
 });
 
 const formatPhone = (phone) => {

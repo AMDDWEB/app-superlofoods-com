@@ -69,7 +69,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useCouponDetails } from '@/composables/useCouponDetails';
 import { useSignupModal } from '@/composables/useSignupModal';
 import { useClippedCoupons } from '@/composables/useClippedCoupons';
@@ -81,7 +81,7 @@ import { IonPage, IonHeader, IonToolbar, IonContent, IonSegment, IonSegmentButto
 const router = useRouter();
 const { coupons, loading, fetchCoupons, availableCategories, fetchCategories, isMidax } = useCouponDetails();
 const { isAuthenticated, openSignupModal, SignupModal } = useSignupModal();
-const { clippedCoupons, isCouponClipped } = useClippedCoupons();
+const { clippedCoupons, isCouponClipped, addClippedCoupon, syncClippedCoupons, cleanupExpiredCoupons } = useClippedCoupons();
 
 const offset = ref(0);
 const limit = ref(isMidax.value ? 20 : 1000);
@@ -96,6 +96,20 @@ const sortedCategories = computed(() => {
     .sort((a, b) => a.localeCompare(b));
   
   return ['All Coupons', ...filteredCategories];
+});
+
+// Watch for changes in the coupons array to sync clipped coupons
+watch(coupons, (newCoupons) => {
+  if (newCoupons && Array.isArray(newCoupons)) {
+    syncClippedCoupons(newCoupons);
+  }
+});
+
+// Watch for changes to selectedView to cleanup expired coupons when viewing clipped
+watch(selectedView, async (newView) => {
+  if (newView === 'clipped') {
+    await cleanupExpiredCoupons();
+  }
 });
 
 const displayedCoupons = computed(() => {
