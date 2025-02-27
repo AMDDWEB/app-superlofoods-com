@@ -193,7 +193,7 @@ http://ionicframework.com/docs/theming/ */
 	overflow: hidden;
 	text-overflow: ellipsis;
 	-webkit-line-clamp: 1;
-	max-width: 18ch;
+	max-width: 16ch;
   }
 
   .truncate-characters {
@@ -201,7 +201,7 @@ http://ionicframework.com/docs/theming/ */
     white-space: nowrap;            /* Prevents wrapping */
     overflow: hidden;               /* Hides overflow content */
     text-overflow: ellipsis;        /* Adds ellipsis (...) when content overflows */
-    max-width: 20ch;                /* Limits to approximately 20 characters */
+    max-width: 16ch;                /* Limits to approximately 20 characters */
 }
   
   .truncate-multiline {
