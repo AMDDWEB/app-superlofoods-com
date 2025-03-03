@@ -13,11 +13,24 @@
     </ion-list>
 
     <div v-if="!loading">
-      <swiper @swiper="onSwiper" :slides-per-view="2.5" :space-between="1" loop>
+      <swiper 
+        v-if="(!hasMidaxCoupons || hasStoreId) && displayCoupons.length > 0" 
+        @swiper="onSwiper" 
+        :slides-per-view="2.5" 
+        :space-between="1" 
+        loop
+      >
         <swiper-slide v-for="coupon in displayCoupons" :key="coupon.id">
           <CouponCard :coupon="coupon" @click="goToCouponDetails(coupon.id)" @clip="handleClipCoupon(coupon.id)" />
         </swiper-slide>
       </swiper>
+      <div v-else class="no-store-container">
+        <div class="no-store-card">
+          <div class="overlay"></div>
+          <h3>No Coupons Available</h3>
+          <p>Check back later for new deals.</p>
+        </div>
+      </div>
     </div>
     <div v-else>
       <CouponsSkeleton :count="1" />
@@ -47,6 +60,8 @@ const props = defineProps({
 const router = useRouter();
 const { coupons, loading, fetchCoupons } = useCouponDetails();
 const { addClippedCoupon } = useClippedCoupons();
+const hasMidaxCoupons = ref(import.meta.env.VITE_HAS_MIDAX_COUPONS === "true");
+const hasStoreId = computed(() => !!localStorage.getItem('storeId'));
 
 // Only display up to the limit
 const displayCoupons = computed(() => coupons.value.slice(0, props.limit));
@@ -153,5 +168,46 @@ ion-note {
   ion-text {
     font-size: 12px;
   }
+}
+
+.no-store-container {
+  padding: 0 4px 0 16px;
+}
+
+.no-store-card {
+  text-align: center;
+  height: 125px;
+  position: relative;
+  padding: 12px;
+  margin-right: 10px;
+}
+
+.no-store-card h3 {
+  color: var(--ion-color-danger);
+  font-size: 20px;
+  font-weight: bold;
+  z-index: 10;
+  position: relative;
+  margin-top: 20px;
+}
+
+.no-store-card p {
+  color: var(--ion-color-medium);
+  font-size: 16px;
+  z-index: 10;
+  position: relative;
+  margin-top: 0px;
+}
+
+.no-store-card .overlay {
+  background: #f7f7f7;
+  border: 1px #eaeaea solid;
+  vertical-align: middle;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
 }
 </style>
