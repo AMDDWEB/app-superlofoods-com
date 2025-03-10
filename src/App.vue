@@ -8,6 +8,7 @@
 import { IonApp, IonRouterOutlet, isPlatform } from '@ionic/vue'
 import { Browser } from '@capacitor/browser'
 import { App as CapApp } from '@capacitor/app'
+import { AppTrackingTransparency } from 'capacitor-plugin-app-tracking-transparency'
 import { watch } from 'vue'
 import CustomerApi from './axios/apiCustomer'
 import { useAuthModule } from './composables/useAuth0Modal'
@@ -71,6 +72,24 @@ async function checkForExistingUser() {
   } catch (error) {
     console.error('Error checking for existing user:', error)
   }
+}
+
+// Initialize App Tracking Transparency
+async function initAppTracking() {
+  try {
+    const status = await AppTrackingTransparency.getStatus()
+    
+    if (status.status === 'notDetermined') {
+      await AppTrackingTransparency.requestPermission()
+    }
+  } catch (error) {
+    console.error('Error requesting tracking permission:', error)
+  }
+}
+
+// Call the initialization function
+if (isPlatform('ios')) {
+  initAppTracking()
 }
 
 CapApp.addListener('appUrlOpen', async ({ url }) => {

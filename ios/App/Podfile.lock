@@ -14,6 +14,8 @@ PODS:
     - Capacitor
   - CapacitorNativeSettings (6.0.2):
     - Capacitor
+  - CapacitorPluginAppTrackingTransparency (2.0.5):
+    - Capacitor
   - CapacitorShare (6.0.3):
     - Capacitor
   - CapacitorSplashScreen (6.0.3):
@@ -79,6 +81,7 @@ DEPENDENCIES:
   - "CapacitorHaptics (from `../../node_modules/@capacitor/haptics`)"
   - "CapacitorKeyboard (from `../../node_modules/@capacitor/keyboard`)"
   - CapacitorNativeSettings (from `../../node_modules/capacitor-native-settings`)
+  - CapacitorPluginAppTrackingTransparency (from `../../node_modules/capacitor-plugin-app-tracking-transparency`)
   - "CapacitorShare (from `../../node_modules/@capacitor/share`)"
   - "CapacitorSplashScreen (from `../../node_modules/@capacitor/splash-screen`)"
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
@@ -106,6 +109,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/keyboard"
   CapacitorNativeSettings:
     :path: "../../node_modules/capacitor-native-settings"
+  CapacitorPluginAppTrackingTransparency:
+    :path: "../../node_modules/capacitor-plugin-app-tracking-transparency"
   CapacitorShare:
     :path: "../../node_modules/@capacitor/share"
   CapacitorSplashScreen:
@@ -124,12 +129,13 @@ SPEC CHECKSUMS:
   CapacitorHaptics: b53409aaca1203f79c6d0eb3ed5de40556339518
   CapacitorKeyboard: 460c6f9ec5e52c84f2742d5ce2e67bbc7ab0ebb0
   CapacitorNativeSettings: 9afe075b1ab9ae0ce44c0fd717670383e0796046
+  CapacitorPluginAppTrackingTransparency: 2a2792623a5a72795f2e8f9ab3f1147573732fd8
   CapacitorShare: 7af6ca761ce62030e8e9fbd2eb82416f5ceced38
   CapacitorSplashScreen: 68893659d77b5f82d753b3a70475082845e3039c
   CapacitorStatusBar: 3b9ac7d0684770522c532d1158a1434512ab1477
   CordovaPluginsStatic: bcc2e1e0e290e0e6f7103595ba2b19e9e0edc6c8
   OneSignalXCFramework: f5b2a3c4f130e4c910ead7bb25bed7455e976fbf
 
-PODFILE CHECKSUM: 1e548b358505881a96bb8afe5e9d0ee8baae6de8
+PODFILE CHECKSUM: 8a929d009496783d5f6b06bf23e65c86b0e55887
 
 COCOAPODS: 1.16.2
