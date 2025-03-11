@@ -225,6 +225,8 @@ ion-card {
   margin: 0 10px;
   text-align: center;
   overflow: hidden;
+  min-height: 42px;
+  max-height: 42px;
 }
 
 .coupon-expiration {

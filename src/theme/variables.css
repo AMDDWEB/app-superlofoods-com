@@ -185,7 +185,7 @@ http://ionicframework.com/docs/theming/ */
 	height: 24px;
 	fill: darkgray;
 	vertical-align: middle;
-	margin-left: 15px;
+	margin-left: 16px;
   }
 
   .truncate {
@@ -193,7 +193,7 @@ http://ionicframework.com/docs/theming/ */
 	overflow: hidden;
 	text-overflow: ellipsis;
 	-webkit-line-clamp: 1;
-	max-width: 16ch;
+	max-width: 13ch;
   }
 
   .truncate-characters {
