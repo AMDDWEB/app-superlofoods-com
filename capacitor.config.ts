@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.allianceharshaadvertising.marketplacedev',
-  appName: 'Market Place',
+  appId: 'com.a2adv.superlofoods',
+  appName: 'SuperLo Foods TN',
   webDir: 'dist',
   server: {
     androidScheme: 'https'
@@ -16,7 +16,8 @@ const config: CapacitorConfig = {
       androidSplashResourceName: 'splash',
       showSpinner: false,
       splashFullScreen: true,
-      splashImmersive: true
+      splashImmersive: true,
+      useLightMode: true
     }
   }
 };

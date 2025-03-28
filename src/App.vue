@@ -74,23 +74,23 @@ async function checkForExistingUser() {
   }
 }
 
-// Initialize App Tracking Transparency
-async function initAppTracking() {
-  try {
-    const status = await AppTrackingTransparency.getStatus()
-    
-    if (status.status === 'notDetermined') {
-      await AppTrackingTransparency.requestPermission()
-    }
-  } catch (error) {
-    console.error('Error requesting tracking permission:', error)
-  }
-}
+// // Initialize App Tracking Transparency
+// async function initAppTracking() {
+//   try {
+//     const status = await AppTrackingTransparency.getStatus()
+//     
+//     if (status.status === 'notDetermined') {
+//       await AppTrackingTransparency.requestPermission()
+//     }
+//   } catch (error) {
+//     console.error('Error requesting tracking permission:', error)
+//   }
+// }
 
-// Call the initialization function
-if (isPlatform('ios')) {
-  initAppTracking()
-}
+// // Call the initialization function
+// if (isPlatform('ios')) {
+//   initAppTracking()
+// }
 
 CapApp.addListener('appUrlOpen', async ({ url }) => {
   console.log('URL opened:', url)

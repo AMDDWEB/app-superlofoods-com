@@ -42,7 +42,7 @@
         <!-- Get Directions, Call Store, and Set as My Store buttons -->
         <ion-grid :fixed="true" class="ion-margin-top">
           <ion-row>
-            <ion-col>
+            <!-- <ion-col>
               <ion-button expand="block" size="small" @click="gotoStore">
                 <ion-icon slot="start" name="get-directions-regular"></ion-icon>
                 Directions
@@ -52,6 +52,11 @@
               <ion-button expand="block" size="small" @click="callStore">
                 <ion-icon slot="start" name="call-store-regular"></ion-icon>
                 Call Store
+              </ion-button> -->
+              <ion-col v-if="hasWeeklyAd">
+              <ion-button expand="block" size="small" @click="openWeeklyAd">
+                <ion-icon slot="start" name="ads-regular"></ion-icon>
+                Weekly Ad
               </ion-button>
             </ion-col>
             <ion-col>
@@ -88,13 +93,25 @@
         <!-- Weekly Ads and Rewards -->
         <ion-grid :fixed="true" class="ion-margin-top-large">
           <ion-row>
-            <ion-col v-if="hasWeeklyAd">
+            <!-- <ion-col v-if="hasWeeklyAd">
               <ion-button expand="block" size="small" @click="openWeeklyAd">
                 <ion-icon slot="start" name="ads-regular"></ion-icon>
                 Weekly Ad
               </ion-button>
+            </ion-col> -->
+            <ion-col>
+            <ion-button expand="block" size="small" @click="gotoStore">
+                <ion-icon slot="start" name="get-directions-regular"></ion-icon>
+                Directions
+              </ion-button>
             </ion-col>
-            <ion-col v-if="hasRewards">
+            <ion-col>
+              <ion-button expand="block" size="small" @click="callStore">
+                <ion-icon slot="start" name="call-store-regular"></ion-icon>
+                Call Store
+              </ion-button>
+            </ion-col>
+            <!-- <ion-col v-if="hasRewards">
               <ion-button expand="block" size="small" @click="openRewardsURL">
                 <ion-icon slot="start" name="rewards-regular"></ion-icon>
                 Rewards
@@ -104,8 +121,8 @@
               <ion-button expand="block" size="small" @click="openSale">
                 <ion-icon slot="start" name="sales-regular"></ion-icon>
                 Sale
-              </ion-button>
-            </ion-col>
+              </ion-button> 
+            </ion-col>-->
           </ion-row>
         </ion-grid>
       </div>
