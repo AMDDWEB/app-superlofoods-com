@@ -11,10 +11,14 @@
       <ion-icon name="locations-regular" />
       <ion-label>Locations</ion-label>
     </ion-tab-button>
-    <ion-tab-button v-if="hasAppCardCoupons || hasMidaxCoupons" tab="coupons" href="/tabs/coupons">
+    <ion-tab-button tab="shop" @click="openShop">
+      <ion-icon name="cart-shopping-regular" />
+      <ion-label>Shop</ion-label>
+    </ion-tab-button>
+    <!-- <ion-tab-button v-if="hasAppCardCoupons || hasMidaxCoupons" tab="coupons" href="/tabs/coupons">
       <ion-icon name="barcode-coupon-regular" />
       <ion-label>Coupons</ion-label>
-    </ion-tab-button>
+    </ion-tab-button> -->
     <ion-tab-button tab="recipes" href="/tabs/recipes">
       <ion-icon name="recipes-regular" />
       <ion-label>Recipes</ion-label>
@@ -31,6 +35,7 @@
 <script>
 import { ref } from 'vue';
 import { IonTabBar, IonTabButton, IonTabs, IonLabel, IonIcon, IonPage, IonRouterOutlet } from '@ionic/vue';
+import { Browser } from '@capacitor/browser';
 
 export default {
   components: {
@@ -46,9 +51,17 @@ export default {
     const hasAppCardCoupons = ref(import.meta.env.VITE_HAS_APPCARD_COUPONS === "true");
     const hasMidaxCoupons = ref(import.meta.env.VITE_HAS_MIDAX_COUPONS === "true");
 
+    const openShop = async () => {
+      await Browser.open({
+        url: 'https://shop.superlofoods.com',
+        presentationStyle: 'popover'
+      });
+    };
+
     return {
       hasAppCardCoupons,
-      hasMidaxCoupons
+      hasMidaxCoupons,
+      openShop
     };
   }
 };
